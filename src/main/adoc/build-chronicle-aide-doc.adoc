@@ -1,0 +1,239 @@
+[#build-chronicle-aide-dc]
+= Detailed Requirements for `build.chronicle.aide.dc`
+:doctype: requirements
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+This AsciiDoc document describes all classes under the package `build.chronicle.aide.dc` and the relationships between them.
+It provides enough details for an AI (or a developer) to recreate the Java source code files entirely.
+
+== Overview
+
+The `build.chronicle.aide.dc` package orchestrates the scanning and processing of AsciiDoc or text-based files, computes statistics (lines, blank lines, tokens), and merges contents into one or more AsciiDoc outputs.
+
+It supports:
+
+1. **Full Context Mode** – Produce a new `context.asciidoc` if one doesn't exist.
+2. **Incremental Mode** – If `context.asciidoc` already exists, only new or updated files are appended to `increment.asciidoc`, drastically reducing redundant processing. This speeds up iterative development, as older files are not reprocessed unless modified.
+3. **Filtering** – Excludes certain files (hidden, images, overshadowed by `.ad`, etc.) and optionally excludes large files.
+4. **Token Counting** – Uses a GPT-like encoder (`com.knuddels.jtokkit`, with `O200K_BASE`) to count tokens.
+
+The following classes each serve a distinct responsibility:
+
+== 1. `AdocDocumentApp`
+
+Java main entry point for the command-line application:
+
+1. **Purpose**:
+- Reads system properties:
+- `context` (default: `"context.asciidoc"`)
+- `increment` (default: `"increment.asciidoc"`)
+- `removeCopyrightMessage` (default: `"true"`)
+- Accepts command-line arguments as paths to scan; if none provided, uses `"."`.
+- Creates and configures the `AdocDocumentEngine` along with `AdocFileFilter`, `AdocDocumentStats`, and `AdocDocumentWriter`.
+- Executes the engine, prints a final summary, and closes resources.
+
+2. **Behavior**:
+- Invokes `engine.execute()`, `engine.printSummary()`, then `engine.close()`.
+- System properties can override default file names.
+
+3. **Key Method**:
+- `public static void main(String[] args) throws IOException`
+
+== 2. `AdocDocumentEngine`
+
+Central orchestrator for scanning, filtering, processing, and writing:
+
+1. **Implements**: `AutoCloseable`
+2. **Fields**:
+- `AdocFileFilter fileFilter`
+- `AdocDocumentWriter writer`
+- `AdocDocumentStats stats`
+- `List<Path> inputPaths` – Directories or files to process.
+- `String contextAsciidoc` – The main output file (or path).
+- `String incrementalAsciidoc` – The incremental output file (or path).
+- `boolean removeCopyright`
+- `long contextFileLastModified` – Timestamp for `context.asciidoc` if it exists.
+- `List<String> skippedFiles` – Tracks files that could not be processed.
+- `boolean incrementalMode` – Decided by existence of `contextAsciidoc`.
+- `boolean engineExecuted` – Prevents multiple consecutive `execute()` calls.
+- `AdocFileProcessor fileProcessor`
+
+3. **Responsibilities**:
+- Detect if `contextAsciidoc` already exists → set incremental mode if so.
+- Open `context.asciidoc` (full mode) or `increment.asciidoc` (incremental mode).
+- Recursively walk each `inputPaths`, check file inclusion with `fileFilter`.
+- In incremental mode, only process files with timestamps newer than `contextFileLastModified`.
+- For each included file, calls `processFile(path)`.
+- Provides a summary (`printSummary`) of lines, blanks, tokens, and skipped files.
+- Closes its writer in `close()`.
+
+4. **Key Methods**:
+- `public void addInputPath(String pathStr)`
+- `public void setContextAsciidoc(String contextFileName)`
+- `public void setIncrementalAsciidoc(String incrementalFileName)`
+- `public void setRemoveCopyright(boolean remove)`
+- `public void execute() throws IOException`
+- `public void printSummary()`
+- `@Override public void close()`
+
+5. **`processFile(Path path)`**:
+- Reads lines via `AdocFileProcessor.readFileLines()`.
+- Optionally removes copyright lines/blocks.
+- Writes a heading: `== File: <relativePath>`.
+- Calls `writer.snapshotStats()` **before** writing the file’s content to track per-file deltas properly.
+- Writes content in a listing block: `.... ... ....`
+- After writing lines, calculates deltas for lines, blanks, and tokens, then prints a short stats line:
+`Lines X, Blanks Y, Tokens Z`.
+
+NOTE: Changes to requirements or tests should be reflected in `.adoc` documentation immediately. This ensures the engine processes an accurate “single source of truth” and avoids sync drift between code, tests, and docs.
+
+== 3. `AdocDocumentStats`
+
+Maintains counters for lines, blank lines, total tokens, and supports per-file deltas:
+
+1. **Uses**: `com.knuddels.jtokkit.Encodings` and `O200K_BASE` for GPT-like token counting.
+2. **Fields**:
+- `long totalLines`
+- `long totalBlanks`
+- `long totalTokens`
+- Snapshot fields:
+- `long previousLines`
+- `long previousBlanks`
+- `long previousTokens`
+3. **Behavior**:
+- `updateStats(String line)`: Increments line or blank count, then uses the GPT-like encoder to count tokens for that line.
+- `snapshotTotals()`: Captures current totals into `previousLines`, `previousBlanks`, `previousTokens`.
+- `getDeltaLines()`, `getDeltaBlanks()`, `getDeltaTokens()`: Return the difference (current - previous).
+4. **Methods**:
+- `public void updateStats(String line)`
+- `public void snapshotTotals()`
+- `public long getDeltaLines()`
+- `public long getDeltaBlanks()`
+- `public long getDeltaTokens()`
+- `public long getTotalLines()`
+- `public long getTotalBlanks()`
+- `public long getTotalTokens()`
+
+== 4. `AdocDocumentWriter`
+
+Writes text to the current output file and updates statistics line-by-line:
+
+1. **Fields**:
+- `AdocDocumentStats stats`
+- `PrintWriter currentWriter` – Open output stream.
+
+2. **Behavior**:
+- `open(String outputFile, boolean append)`: Opens a file for writing/appending.
+- `write(String text)`: Appends `text` to the current file, calls `stats.updateStats(text)`.
+- `snapshotStats()`: Saves current stats to track future deltas.
+- `close()`: Closes the writer if open.
+
+3. **Usage**:
+- Called by `AdocDocumentEngine` for both `context.asciidoc` (full mode) and `increment.asciidoc` (incremental mode).
+- Throws `IllegalStateException` if `write` is called while no file is open.
+
+== 5. `AdocFileFilter`
+
+Encapsulates the rules for including/excluding files:
+
+1. **Method**: `public boolean include(Path path)`
+2. **Logic**:
+- Excludes overshadowed `.ad` files.
+- Excludes `.asciidoc` files.
+- Skips large files over 64 KB.
+- Excludes hidden files or directories as per `GitignoreFilter` see <<gitignore-filter>> using the `.gitignore` file in the root directory.
+- `isUnderTargetDir(Path path)`: checks for directory structure
+
+== 6. `AdocFileProcessor`
+
+Handles reading file lines (UTF-8) and optionally removing a leading multi-line or single-line copyright block:
+
+1. **Methods**:
+- `public List<String> readFileLines(Path file) throws IOException`: Reads all lines in UTF-8.
+- `public List<String> maybeRemoveCopyright(List<String> lines)`
+- If “Copyright ” is within the first 20 lines, tries to detect a block with `////`.
+- Otherwise, removes only the single line that contains it.
+
+== 7. Relationships and Flow
+
+1. **`AdocDocumentApp`**:
+- Instantiates `AdocDocumentEngine` and related classes.
+- Sets properties (context, increment, removeCopyright).
+- Calls `engine.execute()`, `engine.printSummary()`, `engine.close()`.
+2. **`AdocDocumentEngine`**:
+- Manages scanning, incremental detection, and calls `processFile(path)` as needed.
+- Uses `AdocFileProcessor` to read lines and remove optional blocks.
+- Delegates writing to `AdocDocumentWriter`.
+- Summarizes lines, blanks, tokens, and logs skipped files.
+3. **`AdocFileFilter`**:
+- Called to determine if a file is included/excluded by path or extension.
+4. **`AdocDocumentWriter`**:
+- Receives text from the engine, writes it to file, and updates `AdocDocumentStats`.
+5. **`AdocDocumentStats`**:
+- Tracks global counters for lines, blanks, tokens (via GPT-like encoding).
+- Deltas are used for per-file or partial file stats.
+6. **`AdocFileProcessor`**:
+- Abstracts file I/O reading and comment-block removal.
+
+== Gitignore Handling
+
+With the latest iteration, `.gitignore` logic returns a `MatchResult`:
+
+- **IGNORED**: `.gitignore` explicitly excludes a file.
+- **NOT_IGNORED**: `.gitignore` explicitly reincludes a file via `!pattern`.
+- **DEFAULT**: If no rule applies, other filters can finalize the decision.
+
+This helps us chain `.gitignore` with additional custom filters (e.g., overshadow logic, large-file skips).
+
+== 8. Prompt: Recreate All Classes in `build.chronicle.aide.dc`
+
+Add the following AsciiDoc block to request the AI to generate all Java files:
+
+----
+You are an advanced AI capable of generating Java source code.
+Using the specification in this AsciiDoc (the preceding sections),
+**recreate** the following classes under package `build.chronicle.aide.dc`:
+
+1. `AdocDocumentApp.java`
+2. `AdocDocumentEngine.java`
+3. `AdocDocumentStats.java`
+4. `AdocDocumentWriter.java`
+5. `AdocFileFilter.java`
+6. `AdocFileProcessor.java`
+
+Constraints:
+
+- Each class must be fully self-contained (imports, package declarations, etc.).
+- *Include minimal in-code references to the relevant sections of this AsciiDoc* (e.g., `// See AdocDocumentEngine, Section 2.2 for details`)
+- Code must compile under Java 11 or higher.
+- Ensure the logic matches the stated responsibilities, fields, and methods.
+- Provide JavaDocs for the main classes and methods.
+
+Please provide the **entire** source code for all classes in one response.
+----
+
+Use this exact block as a starting prompt for your AI-based code generation.
+Ensure the final classes compile and fulfill the requirements above.
+
+=== Best Practices for Re-Generating Code
+
+When you modify class responsibilities or rename methods:
+
+- **Update this `.adoc` file** first, to reflect new or changed requirements.
+- Use the prompt block below to request the AI to regenerate any or all classes that have changed significantly.
+- Always review generated code before committing to ensure domain-specific logic remains correct.
+
+== Appendix: Example Usage
+
+1. **Full Run**
+`java -cp aide-1.0-SNAPSHOT.jar build.chronicle.aide.dc.AdocDocumentApp .`
+
+2. **Incremental Update**
+- Make changes to `.adoc` or code, ensuring `context.asciidoc` is present.
+- Run again with your updated paths:
+`java -cp aide-1.0-SNAPSHOT.jar build.chronicle.aide.dc.AdocDocumentApp .`
+
+3. **Review**
+Inspect `increment.asciidoc` for newly added content.

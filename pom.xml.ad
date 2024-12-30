@@ -1,0 +1,36 @@
+= Summary of pom.xml
+
+This Maven `pom.xml` configures a Java 11 project named `aide` under the `build.chronicle` group.
+It defines dependencies for token counting (`jtokkit`), Git interaction (`org.eclipse.jgit`), and JUnit 5 testing,
+along with a basic build plugin setup for running tests.
+
+== Project Coordinates
+- **Group ID**: `build.chronicle`
+- **Artifact ID**: `aide`
+- **Version**: `1.0-SNAPSHOT`
+- **Java Version**: 11 (source and target)
+
+== Dependencies
+1. **com.knuddels:jtokkit** (version `1.1.0`)
+- GPT-like token counting library for measuring line/token usage.
+
+2. **org.eclipse.jgit:org.eclipse.jgit** (version `6.9.0.202403050737-r`)
+- Library that provides Git functionality (cloning repos, reading `.gitignore`, etc.).
+
+3. **org.junit.jupiter:junit-jupiter** (version `5.10.3`)
+- JUnit 5 test framework, scoped to `test`.
+
+== Build Plugins
+- **Maven Surefire Plugin** (`maven-surefire-plugin` version `3.0.0-M7`)
+Configures JUnit 5 test execution.
+Uses `<useModulePath>false</useModulePath>` to ensure proper test classpath resolution.
+
+== Notable Properties
+- **`maven.compiler.source`**: 11
+- **`maven.compiler.target`**: 11
+- **`project.build.sourceEncoding`**: UTF-8
+
+The overall configuration ensures that:
+- The project compiles at Java 11 level.
+- JUnit 5 tests are run via the Surefire plugin.
+- Token counting, Git features, and unit tests are readily available to the codebase.

@@ -1,0 +1,98 @@
+= Contributing to AIDE Tools
+:toc:
+:toclevels: 2
+
+Thank you for your interest in contributing to My AI Tools! This document outlines how you can get involved, the standards we follow, and how to submit changes effectively.
+
+toc::[]
+
+== Code of Conduct
+
+We expect contributors to follow a simple, respectful code of conduct, maintaining a positive environment for everyone. Please be kind, constructive, and inclusive.
+
+== How to Contribute
+
+=== 1. Reporting Issues
+
+* Check the existing issues to see if your problem or request has already been logged.
+* If not, create a new issue. Please provide clear steps to reproduce (for bugs) or a rationale (for feature requests).
+
+=== 2. Suggesting Enhancements
+
+We welcome new ideas or improvements:
+* Propose them via a GitHub issue labeled with `enhancement`.
+* Provide as much context as possible (use cases, examples, or references).
+
+=== 3. Contributing Code
+
+==== 3.1 Fork and Clone
+
+----
+git clone https://github.com/YourOrg/my-ai-tools.git
+cd my-ai-tools
+----
+
+==== 3.2 Build and Test
+
+Depending on your build tool:
+
+*Maven Example*:
+----
+mvn clean package
+mvn test
+----
+
+*Gradle Example*:
+----
+gradle clean build
+gradle test
+----
+
+Ensure all tests pass before submitting your PR.
+
+==== 3.3 Branching Strategy
+
+* Create a new branch for each feature or fix:
+----
+git checkout -b feature/my-new-feature
+----
+* Keep commits atomic and well-described.
+
+==== 3.4 Code Style & Guidelines
+
+* We use the style guidelines described in `docs/style-guides/coding-style.adoc`.
+* All new Java classes must include Javadoc on public methods, plus unit tests in `src/test/`.
+* If your change affects usage or architecture, update or add AsciiDoc files in `docs/`.
+
+NOTE: If your work touches `AdocDocumentContext` (or any scanning/summary logic), please confirm or update references to line, blank line, token, and tokens/line counting so the documentation stays consistent.
+
+==== 3.5 Submitting a Pull Request
+
+* Push your branch to your fork:
+----
+git push origin feature/my-new-feature
+----
+* Open a PR in GitHub against the `main` (or `dev`) branch of this repository.
+* Fill out the PR template, linking issues if relevant, and provide an overview of changes.
+* Wait for review. Please address reviewer feedback promptly.
+
+== Test Coverage
+
+* Write unit tests for new or changed logic.
+* If you’re adding new features, create matching integration tests.
+* Aim for coverage that ensures critical logic is well-tested.
+
+== Documentation Updates
+
+If your contribution changes how the library is used or modifies major functionality, **update** the relevant AsciiDoc files in `docs/`:
+* For major changes to requirements, see `docs/requirements/`.
+* For usage instructions, see `docs/usage-templates/`.
+* For prompt-related updates, see `docs/prompts/`.
+
+== Contact
+
+For any questions before creating a PR, feel free to open a draft PR or start a discussion. We look forward to your contributions!
+
+== License
+
+By contributing, you agree that your contributions will be licensed under the same license as the project.

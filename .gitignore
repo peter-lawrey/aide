@@ -1,3 +1,13 @@
+# Build/test dirs
+target/
+temp/
+
+### IntelliJ IDEA ###
+.idea/*
+*.iws
+*.iml
+*.ipr
+
 # Compiled class file
 *.class
 

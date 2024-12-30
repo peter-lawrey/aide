@@ -1,0 +1,134 @@
+[#gitignore-filter]
+= Requirements for Gitignore-Parsing Component
+:doctype: requirements
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+The following requirements specify how the component should parse and interpret a `.gitignore` file to determine which files and folders are excluded from processing in the broader AIDE (Artificial Intelligence Development Environment) context. This ensures that any irrelevant, auto-generated, or user-specific files do not clutter the AI or code generation workflows.
+
+== 1. Overview
+
+1. The component, referred to as `GitignoreFilter`, must read, parse, and apply the patterns from a `.gitignore` file.
+2. The `.gitignore` file may contain standard Gitignore patterns (wildcards, negations, and directory/file-specific rules).
+3. The `.gitignore` file can have sections of commented lines (starting with `#`) and blank lines which should be ignored.
+
+== 2. Functional Requirements
+
+. **FR-GIT-1**: Parse `.gitignore`
+  * The component MUST open and read the contents of the specified `.gitignore` file.
+  * The component MUST handle any size of file that is practical under memory constraints (at least up to several hundred lines).
+
+. **FR-GIT-2**: Interpret Gitignore Patterns
+  * The component MUST support:
+    ** Leading and trailing wildcards (e.g., `*.log`, `*.tmp`).
+    ** Directory-specific rules (e.g., `target/`, `.idea/`, `bin/`).
+    ** Relative path patterns (e.g., `/.emacs.desktop`).
+    ** Negation patterns (e.g., `!important_file.txt`), if present.
+  * Patterns from the `.gitignore` file MUST be respected in the same manner Git does (i.e., glob patterns, partial matches, etc.).
+
+. **FR-GIT-3**: Ignore Comments and Blank Lines
+  * Any line starting with `#` or containing only whitespace SHOULD be skipped.
+  * The component SHOULD preserve any necessary context about the line (e.g., for debugging) but MUST NOT treat these lines as filters.
+
+. **FR-GIT-4**: Apply Exclusion Logic
+  * The component MUST provide a method, e.g. `MatchResult isExcluded(Path file)`, that returns one of:
+   ** `IGNORED` if the file or directory is explicitly matched by an exclude pattern.
+   ** `NOT_IGNORED` if the file or directory is explicitly negated (e.g., `!myFile.log`).
+   ** `DEFAULT` if no explicit rule applies.
+  * If multiple rules match a file, the LAST matching rule in the `.gitignore` MUST take precedence (consistent with Git’s behaviour).
+  * The method SHOULD account for directory checks (e.g., `isIgnored(relFile, isDirectory = true)`) so that directory patterns (`target/`) properly exclude sub-files.
+  * If a path is not explicitly included or excluded, the filter returns `DEFAULT`, indicating that other project filters may make the final decision.
+
+. **FR-GIT-5**: Integration with Existing Filters
+  * The component MUST allow integration or composition with other filtering rules (for instance, if you already have an `AdocFileFilter`, the new filter can be chained or combined).
+  * The final “include” or “exclude” decision MAY be the intersection or union of `.gitignore`-based rules and other in-project rules (depending on project requirements).
+
+. **FR-GIT-6**: Respect Additional Project-Specific Exclusions
+  * If the project imposes extra exclusions beyond `.gitignore` (e.g., overshadowed-by-`.ad` logic or skipping large binary files), the `GitignoreFilter` MUST work alongside those rules without conflict.
+  * In particular, if the project excludes a file for reasons other than `.gitignore` (e.g., overshadow logic in `AdocFileFilter`), that exclusion remains valid even if `.gitignore` allows the file.
+  * Conversely, `.gitignore` exclusions always apply unless specifically overridden by other project rules (e.g., a negation pattern or forced inclusion).
+
+== 3. Detailed Behaviour
+
+=== 3.1 Lines and Patterns
+1. **Comment Lines**: The component MUST skip lines that begin with `#`. Example:
+
+   # This is a comment
+
+2. **Blank Lines**: The component MUST treat blank lines as “no-op” lines (do nothing).
+3. **Literal Paths**: For lines without wildcards (e.g., `/bin/`), the component MUST interpret them as specific directories/files.
+4. **Wildcards**: For lines with `*` or `?`, use standard glob-like expansion to match files.
+5. **Negation**: If a pattern starts with `!`, it MUST override previous matching patterns for the same paths. Example:
+
+   *.log
+   !keepthis.log
+
+6. **Relative Paths**: Lines beginning with `/` refer to paths relative to the root directory in which the `.gitignore` resides. Otherwise, they are relative to any subdirectory.
+
+=== 3.2 Precedence and Ordering
+1. **Last Match Wins**: If a file matches multiple patterns, the component MUST apply the last matching rule in the `.gitignore`.
+2. **Directory vs. File Patterns**: A trailing slash indicates a directory rule (e.g., `target/`), so all subfiles in `target/` are excluded unless overridden.
+
+=== 3.3 Integration Points
+The component’s main function (`MatchResult isExcluded(Path file)`) can be called wherever the project iterates over file paths (e.g., in `AdocDocumentEngine`). Typical usage might be:
+
+[source,java]
+----
+for (Path file : allFiles) {
+    if (!gitignoreFilter.isExcluded(file)) {
+        // process the file
+    }
+}
+----
+
+This ensures that any path matching `.gitignore` patterns is skipped.
+
+== 4. Non-Functional Requirements
+
+. **NFR-GIT-1**: Performance
+  * The component SHOULD parse the `.gitignore` only once at startup.
+  * Subsequent checks (`isExcluded`) MUST be efficient (preferably in O(patterns), or better if caching is used).
+
+. **NFR-GIT-2**: Memory Usage
+  * The component SHOULD store patterns in memory in a manner that is optimal for repeated calls (e.g., using compiled or preprocessed patterns).
+  * Large `.gitignore` files (hundreds to thousands of lines) SHOULD be handled gracefully.
+
+. **NFR-GIT-3**: Maintainability
+  * Code MUST be clear, well-documented, and follow the <<aide-style-guide,AIDE Style Guide>> for naming and structure.
+  * If new advanced features (like nested `.gitignore` files) are required, the component SHOULD allow easy extension.
+
+. **NFR-GIT-4**: Logging/Debugging
+  * The component SHOULD optionally provide debug output or logging that lists which patterns matched a given file (for advanced troubleshooting).
+
+== 5. Edge Cases & Examples
+
+1. **Negation Pattern Example**:
+   ```
+   *.bak
+   !important.bak
+   ```
+   - All `.bak` files except `important.bak` are IGNORED; `important.bak` is NOT_IGNORED (explicitly included).
+2. **Directory Example**:
+   ```
+   .idea/
+   target/
+   ```
+   - Both the `.idea` and `target` folders (and all their contents) are IGNORED.
+3. **Inline Comments**:
+   ```
+   *.tmp  # skip all temp files
+   ```
+   - Anything after `#` in the same line SHOULD be ignored. The pattern remains `*.tmp`.
+
+== 6. Possible Future Enhancements
+
+1. **Multiple Gitignore Files**: Support local `.gitignore` plus a global or user-level `.gitignore`.
+2. **Conditional Patterns**: Hooks for environment-specific excludes (e.g., OS-based).
+3. **Live Reload**: Automatically re-parse `.gitignore` if it changes, for real-time filtering.
+4. **Configurable Overlapping**: A user might want `.gitignore` to override overshadow logic, or vice versa. This could be a project-level setting.
+
+== 7. References
+
+* link:https://git-scm.com/docs/gitignore[Git Official .gitignore Documentation]
+* link:https://www.atlassian.com/git/tutorials/saving-changes/gitignore[Atlassian Gitignore Tutorial]

@@ -1,0 +1,60 @@
+= Summary of CONTRIBUTING.adoc
+
+Below is a concise summary of the main sections and recommendations in the `CONTRIBUTING.adoc` file.
+
+== 1. Code of Conduct
+* **Positive Environment**: Be kind, constructive, and inclusive in all interactions.
+* **Respect**: Maintain a respectful tone toward others—no harassment or discrimination.
+
+== 2. How to Contribute
+
+=== 2.1 Reporting Issues
+* Check existing issues before creating a new one.
+* For bugs, provide clear reproduction steps; for features, include rationale or use cases.
+
+=== 2.2 Suggesting Enhancements
+* Create a GitHub issue labeled `enhancement`.
+* Offer detailed context or examples to clarify the proposed improvement.
+
+=== 2.3 Contributing Code
+
+==== Fork and Clone
+----
+git clone https://github.com/YourOrg/my-ai-tools.git
+cd my-ai-tools
+----
+* Work from your own fork; always keep the original repo clean for pull requests.
+
+==== Build and Test
+* Run `mvn clean package` and `mvn test` (or equivalent for other build tools).
+* Ensure all tests pass before committing.
+
+==== Branching Strategy
+* Create feature-specific branches (e.g., `feature/my-new-feature`).
+* Keep commits atomic with clear messages.
+
+==== Code Style & Guidelines
+* Follow the style guide in `docs/style-guides/coding-style.adoc`.
+* Provide Javadoc on public classes/methods, and add corresponding tests in `src/test/`.
+* Update AsciiDoc if your changes affect usage or architecture.
+
+==== Submitting a Pull Request
+* Push your feature branch to your fork.
+* Open a PR to `main` or `dev` in the original repository.
+* Complete the PR template with issue references if applicable.
+
+== 3. Test Coverage
+* Write (or update) unit tests to validate new or changed functionality.
+* Create integration tests for new features when appropriate.
+* Aim for thorough coverage of critical logic.
+
+== 4. Documentation Updates
+* Update AsciiDoc files in `docs/` for major functionality or usage changes.
+* Keep any style or requirements docs (e.g., `adoc-document-context.adoc`) in sync with code changes.
+
+== 5. Contact
+* For queries or clarifications, open a draft PR or start a discussion.
+
+== 6. License
+* By contributing, you agree to have your work licensed under the project’s Apache 2.0 license.
+

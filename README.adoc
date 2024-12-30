@@ -1,0 +1,133 @@
+= AIDE Template and Tools
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+toc::[]
+
+== Introduction
+
+AIDE (Artificial Intelligence Development Environment) pairs AI-driven code generation with a documentation-driven workflow. It uses AsciiDoc as a single source of truth so requirements, tests, and code stay in sync. AI handles repetitive tasks, while humans add domain insight and validate correctness.
+
+For details on iterative development principles and AI-human collaboration, see the <<aide-workflow,AIDE Workflow>>.
+
+== Project Overview
+
+This repository is a “Chronicle Build” sandbox for AI-based tools in Java. Key features include:
+
+- **GPT-like Token Counting** via the `com.knuddels.jtokkit` library (using `O200K_BASE`) to measure line and token usage more accurately than naive whitespace splitting.
+- **AutoCloseable Engine**: Our `AdocDocumentEngine` implements `AutoCloseable`, allowing safer resource cleanup and improved reliability.
+- **Template Management** to handle AI prompt templates and text blocks.
+- **Documentation-Driven Development** to keep the code in sync with AsciiDoc requirements.
+- **Project Statistics** summarising text density and automatically substituting “full” `.adoc` with `.ad` versions when available.
+
+Additional guidelines for coding conventions and commit messages can be found in the <<aide-style-guide,AIDE Style Guide>>. Definitions of AI and domain terms appear in the <<aide-glossary,AIDE Glossary>>.
+
+=== Highlight This Project as an Example
+This project itself demonstrates a real application of AI-enhanced, documentation-driven workflows. Each `.adoc` file outlines the architecture and best practices, and the incremental build approach <<aide-workflow>> lets you see how newly added or changed requirements become part of the final `increment.asciidoc`.
+
+This makes it easier to:
+
+- Understand how the “document-first” approach is used in practice.
+- See concrete code and tests aligning with updated `.adoc` specs.
+
+== Getting Started
+
+=== Prerequisites
+
+* Java 11 or higher (recommended)
+* Maven for building and testing
+
+=== Installation
+
+==== Clone the Repository
+----
+git clone https://github.com/OpenHFT/AIDE.git
+cd DeveloperAI
+----
+
+==== Build the Project
+----
+mvn clean package
+----
+
+=== Basic Usage
+
+* **AsciidocDocumentContext Utility**
+  Recursively scans directories, applying filters to list `.adoc`, `pom.xml`, or `src/` files. It calculates line counts, blank lines, total tokens, and tokens/line. Results are summarised at the end.
+
+I run `AdocDocumentApp` with a directory path as an argument in my IDE. However you can run it from the command line with the following command:
+
+  Example:
+  ----
+  java -cp target/aide-1.0-SNAPSHOT.jar;jtokkit-1.1.0.jar;org.eclipse.jgit-6.9.0.202403050737-r.jar \
+  com.example.tools.dc.AsciidocDocumentApp ./some-directory
+  ----
+
+  - Replaces “full” files with `.ad` summaries when available.
+  - Excludes hidden files, `build/` directories, PDFs, and images.
+  - Aggregates stats (including GPT-like token counts) at the end.
+
+== Example AI Prompts
+Below are sample prompts you can give to a Chat App for `context.asciidoc` including AIDE, along with the kind of response you might expect. In each case paste the `context.asciidoc` into the Chat App and see what it generates.
+
+[source]
+----
+Consider the following and reply Got it
+
+<<Paste the context.asciidoc here>>
+----
+
+Expected Response: "Got it"
+
+'''
+
+[source]
+----
+Prompt: "Please generate a Java class `MyService` that reads user data from a file, logs results, and returns a status code."
+----
+
+Expected (Summary of AI Response):
+
+- The AI might produce a fully fleshed-out `MyService.java` with `readUserData`, `logResults`, and `getStatusCode` methods.
+- It should use camelCase for methods, a short 4-space indentation, and document each public method with Javadoc.
+- If the AI omits certain details (like exception handling), the developer should refine the prompt or manually enhance the code.
+
+'''
+
+[source]
+----
+Prompt: "Summarise the file `HugeFeatureClass.java` as `.ad` so we reduce token usage. Provide only method signatures and a high-level overview of each method’s role."
+----
+
+Expected (Summary of AI Response):
+
+- The AI returns a minimal `.ad` document with headings for each method signature and bullet points for key functionalities.
+- The total text is significantly smaller than the full `.java` content.
+
+'''
+
+.images/vanilla-java.jpg
+[source]
+----
+Describe this image as asciidoc
+
+<<Paste the image here>>
+----
+
+Expected (Summary of AI Response):
+
+This is a close-up photo of dark-brown vanilla pods and roasted coffee beans on a warm, rustic wooden surface. Some beans are cracked to show their lighter interiors, and the wood’s natural grain and knots create a cozy backdrop. Overall, it highlights the rich, earthy tones of the vanilla and coffee, evoking their combined aromatic appeal.
+
+== Contributing
+
+Contributions are welcome. See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for coding style, branching, and pull-request guidelines. Bug reports and feature suggestions help the project grow.
+
+== License
+
+This project is licensed under the Apache 2.0 License. By submitting patches or pull requests, you agree to license your contributions under Apache 2.0.
+
+== Contact / Support
+
+Open a GitHub issue to report bugs, ask questions, or request features.
+Feel free to share roadmap ideas or suggest improvements.
