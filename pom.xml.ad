@@ -1,4 +1,6 @@
 = Summary of pom.xml
+:lang: en-GB
+:toc:
 
 This Maven `pom.xml` configures a Java 11 project named `aide` under the `build.chronicle` group.
 It defines dependencies for token counting (`jtokkit`), Git interaction (`org.eclipse.jgit`), and JUnit 5 testing,

@@ -1,9 +1,8 @@
 = Next Level: Practical Artificial Intelligence Development Environment (AIDE)
-:revdate: 2024-12-26
+:doctype: article
 :author: Peter Lawrey
-:toc:
-:toclevels: 2
 :lang: en-GB
+:toc:
 
 If it’s worth doing by hand, it’s worth automating.
 

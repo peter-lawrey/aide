@@ -1,9 +1,9 @@
 [#build-chronicle-aide-dc]
 = Detailed Requirements for `build.chronicle.aide.dc`
 :doctype: requirements
-:toc:
-:toclevels: 2
+:author: Peter Lawrey
 :lang: en-GB
+:toc:
 
 This AsciiDoc document describes all classes under the package `build.chronicle.aide.dc` and the relationships between them.
 It provides enough details for an AI (or a developer) to recreate the Java source code files entirely.
@@ -34,7 +34,7 @@ Java main entry point for the command-line application:
 - Creates and configures the `AdocDocumentEngine` along with `AdocFileFilter`, `AdocDocumentStats`, and `AdocDocumentWriter`.
 - Executes the engine, prints a final summary, and closes resources.
 
-2. **Behavior**:
+2. **Behaviour**:
 - Invokes `engine.execute()`, `engine.printSummary()`, then `engine.close()`.
 - System properties can override default file names.
 
@@ -76,7 +76,7 @@ Central orchestrator for scanning, filtering, processing, and writing:
 - `public void setRemoveCopyright(boolean remove)`
 - `public void execute() throws IOException`
 - `public void printSummary()`
-- `@Override public void close()`
+- `public void close()`
 
 5. **`processFile(Path path)`**:
 - Reads lines via `AdocFileProcessor.readFileLines()`.
@@ -153,8 +153,8 @@ Handles reading file lines (UTF-8) and optionally removing a leading multi-line 
 1. **Methods**:
 - `public List<String> readFileLines(Path file) throws IOException`: Reads all lines in UTF-8.
 - `public List<String> maybeRemoveCopyright(List<String> lines)`
-- If “Copyright ” is within the first 20 lines, tries to detect a block with `////`.
-- Otherwise, removes only the single line that contains it.
+- If “Copyright ” is within the first 20 lines, tries to detect a block with `/*` to `*/, '#', '//', or  `////`.
+- Removes the block and returns the modified lines.
 
 == 7. Relationships and Flow
 

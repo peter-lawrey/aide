@@ -1,6 +1,5 @@
 = Contributing to AIDE Tools
 :toc:
-:toclevels: 2
 
 Thank you for your interest in contributing to My AI Tools! This document outlines how you can get involved, the standards we follow, and how to submit changes effectively.
 
