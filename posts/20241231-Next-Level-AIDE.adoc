@@ -6,9 +6,9 @@
 
 If it's worth doing by hand, it's worth automating.
 
-Just because not everyone is (yet) a world-class developer, that doesn't mean we can't step closer to that expert-level space.
-In this post, we'll introduce AIDE (Artifical Intelligence Development Environment), a powerful workflow that merges AI-driven code generation with a sharp focus on documentation-driven development.
-With AIDE, we tap into the best of artificial intelligence (AI) while respecting the real human insight needed for domain-specific logic.
+Just because not everyone is (yet) a world-class developer; that doesn't mean we can't step closer to that expert-level space.
+In this post, I will introduce AIDE (Artifical Intelligence Development Environment), a powerful workflow that merges AI-driven code generation with a sharp focus on documentation-driven development.
+With AIDE, I tap into the best of artificial intelligence (AI) while respecting the real human insight needed for domain-specific logic.
 
 The result? An environment that streamlines repetitive coding, synchronises requirements, code, and tests, and elevates your engineering game.
 

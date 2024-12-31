@@ -12,7 +12,7 @@ AIDE (Artificial Intelligence Development Environment) pairs AI-driven code gene
 It uses AsciiDoc as a single source of truth so requirements, tests, and code stay in sync.
 AI handles repetitive tasks, while humans add domain insight and validate correctness.
 
-See the <<aide-workflow,AIDE Workflow>> for details on iterative development principles and AI-human collaboration.
+See the link:aide/aide-workflow.adoc[AIDE Workflow] for details on iterative development principles and AI-human collaboration.
 
 == Project Overview
 
@@ -23,13 +23,13 @@ Key features include:
 - **Documentation-Driven Development** to keep the code in sync with AsciiDoc requirements.
 - **Project Statistics** summarising text density and automatically substituting "full" `.adoc` with `.ad` versions when available.
 
-Additional guidelines for coding conventions and commit messages can be found in the <<aide-style-guide,AIDE Style Guide>>.
-Definitions of AI and domain terms appear in the <<aide-glossary,AIDE Glossary>>.
+Additional guidelines for coding conventions and commit messages can be found in the link:aide/aide-style-guide.adoc[AIDE Style Guide].
+Definitions of AI and domain terms appear in the link:aide/aide-glossary[AIDE Glossary].
 
 === Highlight This Project as an Example
 
 This project itself demonstrates an actual application of AI-enhanced, documentation-driven workflows.
-Each `.adoc` file outlines the architecture and best practices, and the incremental build approach <<aide-workflow>> lets you see how newly added or changed requirements become part of the final `increment.asciidoc`.
+Each `.adoc` file outlines the architecture and best practices, and the incremental build approach link:aide/aide-workflow.adoc[AIDE Workflow] lets you see how newly added or changed requirements become part of the final `increment.asciidoc`.
 
 This makes it easier to:
 
@@ -144,7 +144,7 @@ Expected (Summary of AI Response):
 - The AI generates a Java program using Chronicle Map for a high-performance key-value store.
 - It includes a Maven dependency and a brief description of the Chronicle Map.
 
-See <<aide-examples,AIDE Examples>> for more examples.
+See link:aide/examples.adoc[Examples with AIDE] for more examples.
 
 '''
 

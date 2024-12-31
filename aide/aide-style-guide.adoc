@@ -11,7 +11,7 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 
 1. Use **British English** spelling (e.g., `colour`, `initialise`) in code comments, documentation, and commit messages.
 2. Maintain a **professional, concise** tone; avoid slang or overly informal expressions.
-3. Define all project-specific or domain-specific terms in a <<aide-glossary>>.
+3. Define all project-specific or domain-specific terms in a link:aide-glossary.adoc[AIDE Glossary].
 4. Use straight apostrophes and single and double quotes in code and documentation.
 5. Code identifiers may use British or American spellings as needed; consistency within a project is key.
 6. When adding suggested improvements to `.adoc` files, use comment syntax like `// consider:`
