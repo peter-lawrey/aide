@@ -4,10 +4,10 @@
 :lang: en-GB
 :toc:
 
-If it’s worth doing by hand, it’s worth automating.
+If it's worth doing by hand, it's worth automating.
 
-Just because not everyone is (yet) a world-class developer, that doesn’t mean we can’t step closer to that expert-level space.
-In this post, we’ll introduce AIDE—a powerful workflow merging AI-driven code generation with a sharp focus on documentation-driven development.
+Just because not everyone is (yet) a world-class developer, that doesn't mean we can't step closer to that expert-level space.
+In this post, we'll introduce AIDE, a powerful workflow that merges AI-driven code generation with a sharp focus on documentation-driven development.
 With AIDE, we tap into the best of artificial intelligence (AI) while respecting the real human insight needed for domain-specific logic.
 
 In particular, AIDE combines:
@@ -16,32 +16,32 @@ In particular, AIDE combines:
 - Documentation-driven development
 - Test-driven development
 
-At times, you can feel more of a code curator than a developer, but the results can be impressive.
+Sometimes, you can feel more like a code curator than a developer, but the results can be impressive.
 
-== Why AIDE Makes You Feel Like a “Next Level” Developer
+== Why AIDE Makes You Feel Like a "Next Level" Developer
 
 === Confidence in Documentation
 
 With AIDE:
 
-- **Single Source of Truth**: You keep your AsciiDoc, code, and unit tests in lockstep with each other, ensuring miscommunications don’t derail real-world outcomes.
-- **Real-Time Updates**: AIDE’s incremental approach flags new changes and reminds you to incorporate them into docs.
-- **Better Onboarding**: New team members can quickly grasp the system’s design and requirements, thanks to the living documentation.
-- **Better Outcomes**: Generative AI can suggest improvements with more dteailed specification, and it’s your domain expertise that ensures the final product is correct and performant.
-- **Escape the Rewrite Loop**: Instead of repeatedly coding common patterns, let AIDE scaffold it for you, so your mental energy stays on genuine innovation.
+- **Single Source of Truth**: You keep your AsciiDoc, code, and unit tests in lockstep with each other, ensuring miscommunications don't derail real-world outcomes.
+- **Real-Time Updates**: AIDE's incremental approach flags new changes and reminds you to incorporate them into docs.
+- **Better Onboarding**: Thanks to the living documentation, new team members can quickly grasp the system's design and requirements.
+- **Better Outcomes**: Generative AI can suggest improvements with more detailed specifications, and your domain expertise ensures the final product is correct and performant.
+- **Escape the Rewrite Loop**: Instead of repeatedly coding common patterns, let AIDE scaffold it for you so your mental energy stays on genuine innovation.
 
 == Your Artificial Intelligence Development Environment (AIDE) Workflow
 
 AIDE harnesses AI to handle repetitive coding tasks while using AsciiDoc as a single source of truth, keeping requirements, tests, and code in sync.
-It’s a simple premise:
+It's a simple premise:
 
 - **AsciiDoc & Sync**: You write (or update) your requirements in `.adoc`.
-Tests and code follow, with AIDE acting as a helpful assistant—suggesting skeletons for you to refine.
+Tests and code follow, with AIDE as a helpful assistant—suggesting skeletons for you to refine.
 - **Human Oversight**: While AI excels at pattern recognition and code generation, final domain insight and correctness are always left to human developers—ensuring no AI slip-ups pass unvetted.
 
 === AI <-> Human Collaboration
 
-You can update either the requirements, tests, or code, and the other two will can be updated to match.
+You can update the requirements, tests, or code, and the other two will be updated to match.
 This is a simple loop which can be repeated as often as needed.
 
 [mermaid]
@@ -53,62 +53,62 @@ flowchart LR
 ----
 
 - **AI**: Proposes repetitive code, test stubs, or refactors.
-- **Human**: Reviews correctness, ensures domain fit, finalises decisions.
+- **Human**: Reviews correctness, ensures domain fit, and finalises decisions.
 - **Outcome**: Software that matches documented requirements and passes tests.
 
-It’s worth repeating: AIDE doesn’t replace the human mind.
+It's worth repeating: AIDE doesn't replace the human mind.
 Instead, it elevates it.
-The AI handles repetitive tasks, you refine the domain-specific logic.
+The AI handles repetitive tasks; you refine the domain-specific logic.
 Together, you get a polished final product—fast.
 
 == Documentation-Driven Development
 
 === Single Source of Truth
 
-With AIDE, your `.adoc` documents stay in perfect alignment with both tests and code.
-Even if you’re used to “average line-of-business” tasks, you’ll appreciate the clarity.
-And if you’re on a sub-millisecond latency mission, robust documentation is still vital to help cross-functional teams navigate the complexity.
+With AIDE, your `.adoc` documents perfectly align with tests and code.
+You'll appreciate the clarity even if you're used to "average line-of-business" tasks.
+And if you're on a mission with a sub-millisecond latency, robust documentation is still vital to help cross-functional teams ensure your application does no more work than needed.
 
 == Caveats, Challenges, and Considerations
 
 === Learning Curve
 
-- **Workflow Shifts**: Documentation-first or doc-in-parallel can be an adjustment, but it’s a hallmark of top-tier development practices.
-- **AI Integration**: Although AIDE’s AI capabilities are powerful, you must understand its limitations and how to guide it effectively.
+- **Workflow Shifts**: Documentation-first or doc-in-parallel can be an adjustment, but it's a hallmark of top-tier development practices.
+- **AI Integration**: Although AIDE's AI capabilities are powerful, you must understand its limitations and how to guide it effectively.
 
 === AI Limitations
 
 - **Boilerplate vs.
-Expert-Level Logic**: While AI does routine tasks well, human insight remains essential for advanced optimizations or concurrency.
-AI can’t auto-magically solve your sub-microsecond latency puzzle or elegantly handle domain-specific concurrency states.
+Expert-Level Logic**: While AI does routine tasks well, human insight remains essential for advanced optimisations or concurrency.
+AI can't auto-magically solve your sub-microsecond latency puzzle or elegantly handle domain-specific concurrency states.
 - **Token Limits**: Even GPT-like models have limits.
 If your file is non-trivial, consider `.ad` summaries to keep the pipeline from choking.
 
 === Diminishing returns
 
-At some point you are likely to feel that it's better to finish off the project yourself, or discard sections and rewite them.
+At some point, you are likely to feel that it's better to finish the project yourself or discard sections and rewrite them.
 This is a natural part of the process.
 
-- In the first phase, you might have requirements, code, and tests all generated by the AI, and around 30% complete. It can feel almost too easy, do you really have 90% of the work done? More likely you have 70% missing from each and between them you might have 0.7 * 0.7 * 0.7 = 34% missing once you get them all in sync.
-- In the second phase, they are mostly in sync and all your tests pass.
+- In the first phase, you might have requirements, code, and tests all generated by the AI, and around 30% complete. It can feel almost too easy. Do you really have 90% of the work done? More likely you have 70% missing from each and between them you might have 0.7 * 0.7 * 0.7 = 34% missing once you get them all in sync.
+- In the second phase, they are mostly in sync, and all your tests pass.
 - In the third phase, you might feel the project is about 60% complete.
-You are getting into increasingly selective changes and are more aware of the limitation of the AI. You can feel there are diminishing returns, and you might decide to finish off the project yourself.
-- In the fourth phase, you are likely to need to refactor the requirements, code, and/or tests to make them easier for the AI to work with and understand. You might consider using a library to replace code the AI generated.
-- By the fifth phase, the project is likely to be more maintainable and more complete than if you had written it all yourself.
+You are getting into increasingly selective changes and are more aware of the limitations of AI. You can feel there are diminishing returns, and you might decide to finish the project yourself.
+- In the fourth phase, you will likely need to refactor the requirements, code, and/or tests to make them easier for the AI to work with and understand. You might consider using a library to replace code the AI generated.
+- By the fifth phase, the project will likely be more maintainable and complete than if you had written it all yourself.
 
-However, as you ask for more suggestions from the AI for things you probably wouldn't have thought of, you have to question if you need to do any of those things otherwise you might feel you are further from completion than you were before.
+However, as you ask for more suggestions from the AI for things you probably wouldn't have thought of, you have to question if you need to do any of those things; otherwise, you might feel you are further from completion than you were before.
 
 == Incremental Changes
 
-AIDE supports a mode where it only processes files changed since the last full context build.
-For highly specialized, massive codebases, this saves time and avoids rehashing every piece of documentation when passing this to the AI.
+AIDE supports a mode that only processes files that have been changed since the last full context build.
+For highly specialised, massive codebases, this saves time and avoids rehashing every piece of documentation when passing this to the AI.
 
 == Final Thoughts
 
-A common mistake is using AI for things that it hasn't been demonstrated had value.
-Using AI for to automate best practices, like documentation-driven development, is a great way to get started.
+A common mistake is using AI for things that haven't been demonstrated to have value.
+Using AI to automate best practices, like documentation-driven development, is a great way to get started.
 AIDE is a practical example of how AI can be used to improve the development process.
 
-Whether you’re building a sophisticated high-frequency trading system or a regular business application, AIDE offers a path to fewer repetitive tasks and more clarity.
+Whether you're building a sophisticated high-frequency trading system or a regular business application, AIDE offers a path to fewer repetitive tasks and more clarity.
 
 Most importantly, AIDE lets you **level up** your development experience, focusing on what truly matters: performance, scalability, architecture, and domain expertise.

@@ -5,7 +5,7 @@
 :lang: en-GB
 :toc:
 
-This is a list of key terms used in the project, along with their definitions.
+This glossary is a list of key terms used in the project, along with their definitions.
 
 == Terms in this Project
 
@@ -14,14 +14,15 @@ This is a list of key terms used in the project, along with their definitions.
 * **Context Mode**: The process of generating a `context.asciidoc` file that captures the entire project’s documentation, requirements, and code.
 * **Incremental Mode**: The process of generating an `increment.asciidoc` which captures only the newly or recently updated files since the last full `context.asciidoc` build, as described in the “Next Level AIDE” post.
 * **Token**: Underlying words or subword units used by AI.
-* **Tokens/Line**: A ratio indicating how many tokens appear per non-blank line of text (calculated as total tokens / total lines). Used as a quick measure of text “density”.
+* **Tokens/Line**: A ratio indicating how many tokens appear per non-blank line of text (calculated as total tokens / total lines).
+Used as a quick measure of text “density”.
 * **Blank Line**: A line containing only whitespace characters (spaces, tabs, etc.).
 
 == Different Asciidoctor extensions
 
-Below is a simple table clarifying when to create a shorter `.ad` summary, or use an `.asciidoc` file for larger documents.
+Below is a simple table clarifying when to create a shorter `.ad` summary or use a `.asciidoc` file for larger documents.
 
-[cols="1,1,4", options="header"]
+[cols="1,1,4",options="header"]
 |===
 | File Type
 | Typical Size/Usage
@@ -33,13 +34,13 @@ Below is a simple table clarifying when to create a shorter `.ad` summary, or us
 
 | `.ad`
 | Alt Text for Binary Files
-| A description of an image or bianry file can be stored in a `.ad` file for inclusion in the `context.asciidoc` file.
+| A description of an image or binary file can be stored in a `.ad` file for inclusion in the `context.asciidoc` file.
 
 | `.adoc`
 | Medium
-| Full documentation files that change relatively often, or are critical references. Useful when your readers or your AI need complete details.
+| Full documentation files that change relatively often or are critical references. It is useful when your readers or your AI need complete details.
 
 | `.asciidoc`
 | Large
-| A long form extension for AsciiDoc files for larger documents that will be ignored by the tools as too large.
+| A long-form extension for AsciiDoc files for larger documents that the tools will ignore as too large.
 |===

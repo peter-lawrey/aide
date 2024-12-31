@@ -5,27 +5,27 @@
 :lang: en-GB
 :toc:
 
-This guide outlines the core conventions for naming, coding, and documentation. By following these practices, the team maintains clarity, consistency, and an overall high-quality codebase.
+This guide outlines the core conventions for naming, coding, and documentation. By following these practices, the team maintains clarity, consistency, and a high-quality codebase overall.
 
 == 1. Language and Wording
 
 1. Use **British English** spelling (e.g., `colour`, `initialise`) in code comments, documentation, and commit messages.
 2. Maintain a **professional, concise** tone; avoid slang or overly informal expressions.
 3. Define all project-specific or domain-specific terms in a <<aide-glossary>>.
-4. Use straight apostrophes, single and double quotes in code and documentation.
-5. Code identifiers may use either British or American spellings as needed; consistency within a project is key.
+4. Use straight apostrophes and single and double quotes in code and documentation.
+5. Code identifiers may use British or American spellings as needed; consistency within a project is key.
 6. When adding suggested improvements to `.adoc` files, use comment syntax like `// consider:`
 7. **Document-First Approach**:
-* As recommended in the “Next Level AIDE” post, write or update `.adoc` content as early as possible, either in parallel with feature development or even before coding (similar to TDD).
-* This ensures the single source of truth is always current and that AI-driven code suggestions align with the actual requirements.
+* As recommended in the "Next Level AIDE" post, write or update `.adoc` content as early as possible, either in parallel with feature development or before coding (similar to TDD).
+* This ensures that the single source of truth is always current and that AI-driven code suggestions align with the actual requirements.
 
 == 2. Directory and Package Structure
 
 1. **Directory Names**: all lowercase; use hyphens or underscores if necessary (e.g., `my-project-utils/`).
 2. **File Names**:
-   * Java: match the class name (e.g., `MyService.java`).
-   * Documentation: use `.adoc` (e.g., `project-overview.adoc`), with lower-case, hyphenated file names.
-   * Configuration: `.yaml` or `.properties`, describing purpose (e.g., `app-config.yaml`).
+* Java: match the class name (e.g., `MyService.java`).
+* Documentation: use `.adoc` (e.g., `project-overview.adoc`) with lowercase, hyphenated file names.
+* Configuration: `.yaml` or `.properties`, describing purpose (e.g., `app-config.yaml`).
 3. **Packages**: all lowercase, reflecting the maven `groupId` and `artifactId` and subsystem (e.g., `groupId.artifactId.service`).
 
 == 3. Java Code Style
@@ -34,8 +34,8 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 1. **Indentation**: 4 spaces; no tabs.
 2. **Line Length**: Keep to 128 characters or fewer if possible.
 3. **Braces**:
-   * Open brace on same line (e.g., `if (condition) {`).
-   * Close brace on new line.
+* Open brace on the same line (e.g., `if (condition) {`).
+* Close brace on a new line.
 4. **Blank Lines**: Separate method definitions with one blank line; group related lines logically.
 
 === 3.2 Naming Conventions
@@ -45,7 +45,7 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 
 === 3.3 Comments and Documentation
 1. Use Javadoc for **public** classes and methods, explaining purpose, parameters, and returns.
-2. Only add inline comments (`//`) if the logic isn’t obvious.
+2. Only add inline comments (`//`) if the logic isn't apparent.
 3. Maintain descriptive commit messages in the present tense (e.g., "Add new caching layer").
 
 == 4. Testing
@@ -58,15 +58,15 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 1. Start each `.adoc` file with a title line (`= Title`) and optional metadata.
 2. Organise content under headings: `==`, `===`, `====`.
 3. Use `[source,java]` blocks (or similar) for code highlighting.
-4. Keep lines concise, and highlight key points in bullet lists or admonitions (e.g., `NOTE:`).
+4. Keep lines concise, highlighting key points in bullet lists or admonitions (e.g., `NOTE:`).
 
 == 6. Version Control and Commit Messages
 1. Write short, clear commit messages in the **present tense** (e.g., "Fix login bug in UserService").
 2. Reference issue IDs if applicable (e.g., "Fix #42: Add advanced search feature").
 
 == 7. Additional Best Practices
-1. **AutoCloseable Usage**: Where possible consider implementing `AutoCloseable` so it can be used in a try-with-resources block, ensuring deterministic cleanup.
+1. **AutoCloseable Usage**: Where possible, consider implementing `AutoCloseable` to be used in a try-with-resources block, ensuring deterministic cleanup.
 2. **Template Management**: Use templates for AI prompts and text blocks to ensure consistency and reduce duplication.
 
 == 8. Summary
-By following these concise guidelines—especially consistent clear Java formatting, and straightforward documentation practices—teams ensure a streamlined, maintainable codebase. Remember to evolve this guide as the project grows and needs change.
+By following these concise guidelines—especially consistent, clear Java formatting and straightforward documentation practices—teams ensure a streamlined, maintainable codebase. Remember to evolve this guide as the project grows and needs change.

@@ -12,31 +12,29 @@ AIDE (Artificial Intelligence Development Environment) pairs AI-driven code gene
 It uses AsciiDoc as a single source of truth so requirements, tests, and code stay in sync.
 AI handles repetitive tasks, while humans add domain insight and validate correctness.
 
-For details on iterative development principles and AI-human collaboration, see the <<aide-workflow,AIDE Workflow>>.
+See the <<aide-workflow,AIDE Workflow>> for details on iterative development principles and AI-human collaboration.
 
 == Project Overview
 
-This repository is a “Chronicle Build” sandbox for AI-based tools in Java.
+This repository is a "Chronicle Build" sandbox for AI-based tools in Java.
 Key features include:
 
-- **GPT-like Token Counting** via the `com.knuddels.jtokkit` library (using `O200K_BASE`) to measure line and token usage more accurately than naive whitespace splitting.
-- **AutoCloseable Engine**: Our `AdocDocumentEngine` implements `AutoCloseable`, allowing safer resource cleanup and improved reliability.
 - **Template Management** to handle AI prompt templates and text blocks.
 - **Documentation-Driven Development** to keep the code in sync with AsciiDoc requirements.
-- **Project Statistics** summarising text density and automatically substituting “full” `.adoc` with `.ad` versions when available.
+- **Project Statistics** summarising text density and automatically substituting "full" `.adoc` with `.ad` versions when available.
 
 Additional guidelines for coding conventions and commit messages can be found in the <<aide-style-guide,AIDE Style Guide>>.
 Definitions of AI and domain terms appear in the <<aide-glossary,AIDE Glossary>>.
 
 === Highlight This Project as an Example
 
-This project itself demonstrates a real application of AI-enhanced, documentation-driven workflows.
+This project itself demonstrates an actual application of AI-enhanced, documentation-driven workflows.
 Each `.adoc` file outlines the architecture and best practices, and the incremental build approach <<aide-workflow>> lets you see how newly added or changed requirements become part of the final `increment.asciidoc`.
 
 This makes it easier to:
 
-- Understand how the “document-first” approach is used in practice.
-- See concrete code and tests aligning with updated `.adoc` specs.
+- Understand how the "document-first" approach is used in practice.
+- See the concrete code and tests that align with the updated `.adoc` specs.
 
 == Getting Started
 
@@ -53,7 +51,7 @@ This makes it easier to:
 git clone https://github.com/peter-lawrey/aide.git
 cp aide
 cp -r aide {your-project-directory}
-mvn install exec:java -Dexec.mainClass="com.example.tools.dc.AsciidocDocumentApp" -Dexec.args="{your-project-directory}"
+mvn install exec: Java -Dexec.mainClass=" com.example.tools.dc.AsciidocDocumentApp" -Dexec.args="{your-project-directory}"
 ----
 
 Post to your chat App the following command:
@@ -64,7 +62,7 @@ Consider the following project directory and reply Got it
 <<Paste the project directory here>>
 ----
 
-Expected Response: "Got it"
+Expected response: "Got it"
 
 or to get started
 
@@ -84,21 +82,21 @@ mvn clean package
 
 * **AdocDocumentApp** Utility
 Recursively scans directories, applying filters to list `.adoc`, `pom.xml`, or `src/` files.
-It calculates line counts, blank lines, total tokens, and tokens/line.
+It calculates line counts, blank lines, total tokens, and tokens/lines.
 Results are summarised at the end.
 
 I run `AdocDocumentApp` with a directory path as an argument in my IDE.
-However, you can run it from maven or on the command line.
+However, you can run it from Maven or on the command line.
 
-- Replaces “full” files with `.ad` summaries when available.
+- Replaces "full" files with `.ad` summaries when available.
 - Excludes files and directories from `.gitignore`
 - Excludes `.asciidoc`, hidden files, PDFs, and images.
 - Aggregates stats (including GPT-like token counts) at the end.
 
 == Example AI Prompts
 
-Below are sample prompts you can give to a Chat App for `context.asciidoc` including AIDE, along with the kind of response you might expect.
-In each case paste the `context.asciidoc` into the Chat App and see what it generates.
+Below are sample prompts you can give to a Chat App for `context.asciidoc`, including AIDE, along with the kind of response you might expect.
+In each case, paste the `context.asciidoc` into the Chat App to see what it generates.
 
 [source]
 ----
@@ -107,7 +105,7 @@ Consider the following project and reply Got it
 <<Paste the context.asciidoc here>>
 ----
 
-Expected Response: "Got it"
+Expected response: "Got it"
 
 '''
 
@@ -122,32 +120,32 @@ Describe this image as asciidoc
 Expected (Summary of AI Response):
 
 This is a close-up photo of dark-brown vanilla pods and roasted coffee beans on a warm, rustic wooden surface.
-Some beans are cracked to show their lighter interiors, and the wood’s natural grain and knots create a cozy backdrop.
+Some beans are cracked to show lighter interiors, and the wood's natural grain and knots create a cosy backdrop.
 Overall, it highlights the rich, earthy tones of the vanilla and coffee, evoking their combined aromatic appeal.
 
 '''
 
 [source]
 ----
-Give a high performance sample program for event logging and event processing.
+Give a high-performance sample program for event logging and processing.
 ----
 
 Expected (Summary of AI Response):
 
 - The AI generates a Java program using Chronicle Queue for low-latency event logging and processing.
-- It includes a Maven dependency and a brief description of Chronicle Queue.
+- It includes a Maven dependency and a brief description of the Chronicle Queue.
 
 '''
 
 [source]
 ----
-Given a java example of a high performance key value store
+Give a Java example of a high-performance key-value store
 ----
 
 Expected (Summary of AI Response):
 
 - The AI generates a Java program using Chronicle Map for a high-performance key-value store.
-- It includes a Maven dependency and a brief description of Chronicle Map.
+- It includes a Maven dependency and a brief description of the Chronicle Map.
 
 '''
 
@@ -160,7 +158,7 @@ Bug reports and feature suggestions help the project grow.
 == License
 
 This project is licensed under the Apache 2.0 License.
-By submitting patches or pull requests, you agree to license your contributions under Apache 2.0.
+You agree to license your contributions under Apache 2.0 by submitting patches or pull requests.
 
 == Contact / Support
 
