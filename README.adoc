@@ -8,7 +8,7 @@ toc::[]
 
 == Introduction
 
-AIDE (Artificial Intelligence Development Environment) pairs AI-driven code generation with a documentation-driven workflow.
+AIDE (Artificial Intelligence Development Environment) pairs AI-driven code generation with a documentation-driven workflow. This approach can significantly reduce the conceptual load for developers and testers.
 It uses AsciiDoc as a single source of truth so requirements, tests, and code stay in sync.
 AI handles repetitive tasks, while humans add domain insight and validate correctness.
 
