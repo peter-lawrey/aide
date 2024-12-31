@@ -1,3 +1,6 @@
+[#aide-examples]
+= AIDE Examples
+
 == Prompt: Event Driven Example
 
 ----

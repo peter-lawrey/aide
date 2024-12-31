@@ -51,7 +51,8 @@ This makes it easier to:
 git clone https://github.com/peter-lawrey/aide.git
 cp aide
 cp -r aide {your-project-directory}
-mvn install exec: Java -Dexec.mainClass=" com.example.tools.dc.AsciidocDocumentApp" -Dexec.args="{your-project-directory}"
+mvn install exec:java -Dexec.mainClass=" com.example.tools.dc.AsciidocDocumentApp" \
+    -Dexec.args="{your-project-directory}"
 ----
 
 I prefer to run `AsciidocDocumentApp` from my IDE, but you can also run it from Maven or the command line. This generates a `context.asciidoc` file in your project directory allowing you to paste all the important information into your chat app to support queries and make sure your AI is up-to-date. Using a "Temporary Chat" means your query and results are not retained or used for training (Check the chat app's privacy policy).
@@ -72,12 +73,6 @@ or to get started
 Suggest improvements to this project
 
 <<Paste the project directory here>>
-----
-
-==== Build the Project
-
-----
-mvn clean package
 ----
 
 === Basic Usage
@@ -107,7 +102,7 @@ Consider the following project and reply Got it
 <<Paste the context.asciidoc here>>
 ----
 
-Expected response: "Got it"
+Expected response: _Got it_
 
 '''
 
@@ -116,14 +111,14 @@ Expected response: "Got it"
 ----
 Describe this image as asciidoc
 
-<<Paste the image here>>
+<<Paste the vannila-java.jpg image here>>
 ----
 
 Expected (Summary of AI Response):
 
-This is a close-up photo of dark-brown vanilla pods and roasted coffee beans on a warm, rustic wooden surface.
+_This is a close-up photo of dark-brown vanilla pods and roasted coffee beans on a warm, rustic wooden surface.
 Some beans are cracked to show lighter interiors, and the wood's natural grain and knots create a cosy backdrop.
-Overall, it highlights the rich, earthy tones of the vanilla and coffee, evoking their combined aromatic appeal.
+Overall, it highlights the rich, earthy tones of the vanilla and coffee, evoking their combined aromatic appeal._
 
 '''
 
@@ -148,6 +143,8 @@ Expected (Summary of AI Response):
 
 - The AI generates a Java program using Chronicle Map for a high-performance key-value store.
 - It includes a Maven dependency and a brief description of the Chronicle Map.
+
+See <<aide-examples,AIDE Examples>> for more examples.
 
 '''
 
