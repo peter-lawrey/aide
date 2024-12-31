@@ -48,6 +48,13 @@ AIDE fosters a cyclical workflow that keeps requirements, tests, and code in loc
 3. **Generate Code**: AI produces initial implementations, scaffolded from documentation and tests.
 4. **Review and Refine**: Validate AI outputs, ensuring domain-specific logic and correctness.
 
+++++
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({ startOnLoad: true });
+</script>
+++++
+
 [mermaid]
 ----
 flowchart LR
@@ -56,7 +63,7 @@ flowchart LR
   C --> A
 ----
 
-=== AI <-> Human Collaboration
+=== AI <--> Human Collaboration
 
 The AI is adept at generating patterns and templates but lacks the intuition for domain-specific intricacies. AIDE leverages this by:
 
@@ -101,15 +108,23 @@ Initially, AIDE accelerates development, generating requirements, tests, and cod
 
 The takeaway? Use AI for foundational tasks but expect manual effort for final polishing.
 
-== Incremental Development: Small, Manageable Changes
-
-AIDE supports incremental builds, processing only updated files. For massive codebases, this minimises overhead, keeping your workflow efficient.
-
 == Key Takeaways
 
 1. **Leverage AI for Boilerplate**: Delegate repetitive tasks to AI, preserving your mental energy for strategic decisions.
 2. **Synchronise Continuously**: Use AsciiDoc as the source of truth to align requirements, tests, and code.
 3. **Iterate Strategically**: Small, frequent updates reduce complexity and ensure alignment.
+
+== About the author
+
+As the CEO of https://chronicle.software/[Chronicle Software^,role=external],
+https://www.linkedin.com/in/peterlawrey/[Peter Lawrey^,role=external] leads the development of cutting-edge,
+low-latency solutions trusted by https://chronicle.software/8-out-of-11-investment-banks/[8 out of the top 11 global investment banks^,role=external].
+With decades of experience in the financial technology sector, he specialises in delivering ultra-efficient
+enabling technology which empowers businesses to handle massive volumes of data with unparalleled speed
+and reliability. Peter's deep technical expertise and passion for sharing knowledge have established him
+as a thought leader and mentor in the Java and FinTech communities. Follow Peter on
+https://bsky.app/profile/peterlawrey.bsky.social[BlueSky^,role=external] or
+https://mastodon.social/@PeterLawrey[Mastodon^,role=external].
 
 == Final Thoughts: Achieving "Next Level" Development
 
