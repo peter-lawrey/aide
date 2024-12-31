@@ -1,4 +1,4 @@
-= Next Level: Practical Artificial Intelligence Development Environment (AIDE)
+= Next-Level Development: Harnessing AI with AIDE
 :doctype: article
 :author: Peter Lawrey
 :lang: en-GB

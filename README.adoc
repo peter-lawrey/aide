@@ -111,31 +111,6 @@ Expected Response: "Got it"
 
 '''
 
-[source]
-----
-Prompt: "Please generate a Java class `MyService` that reads user data from a file, logs results, and returns a status code."
-----
-
-Expected (Summary of AI Response):
-
-- The AI might produce a fully fleshed-out `MyService.java` with `readUserData`, `logResults`, and `getStatusCode` methods.
-- It should use camelCase for methods, a short 4-space indentation, and document each public method with Javadoc.
-- If the AI omits certain details (like exception handling), the developer should refine the prompt or manually enhance the code.
-
-'''
-
-[source]
-----
-Prompt: "Summarise the file `HugeFeatureClass.java` as `.ad` so we reduce token usage. Provide only method signatures and a high-level overview of each method’s role."
-----
-
-Expected (Summary of AI Response):
-
-- The AI returns a minimal `.ad` document with headings for each method signature and bullet points for key functionalities.
-- The total text is significantly smaller than the full `.java` content.
-
-'''
-
 .images/vanilla-java.jpg
 [source]
 ----
@@ -149,6 +124,32 @@ Expected (Summary of AI Response):
 This is a close-up photo of dark-brown vanilla pods and roasted coffee beans on a warm, rustic wooden surface.
 Some beans are cracked to show their lighter interiors, and the wood’s natural grain and knots create a cozy backdrop.
 Overall, it highlights the rich, earthy tones of the vanilla and coffee, evoking their combined aromatic appeal.
+
+'''
+
+[source]
+----
+Give a high performance sample program for event logging and event processing.
+----
+
+Expected (Summary of AI Response):
+
+- The AI generates a Java program using Chronicle Queue for low-latency event logging and processing.
+- It includes a Maven dependency and a brief description of Chronicle Queue.
+
+'''
+
+[source]
+----
+Given a java example of a high performance key value store
+----
+
+Expected (Summary of AI Response):
+
+- The AI generates a Java program using Chronicle Map for a high-performance key-value store.
+- It includes a Maven dependency and a brief description of Chronicle Map.
+
+'''
 
 == Contributing
 
