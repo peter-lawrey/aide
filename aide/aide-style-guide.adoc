@@ -49,10 +49,36 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 3. Maintain descriptive commit messages in the present tense (e.g., "Add new caching layer").
 
 == 4. Testing
+
+=== 4.1 Test Naming Conventions
+1. Test classes should be named by appending `Test` to the class they test (e.g., `OrderServiceTest` for `OrderService`).
+2. Test method names should describe the test scenario and expected behavior, using camelCase (e.g., `shouldReturnOrderDetailsWhenOrderExists`).
+
+=== 4.2 Directory Structure
 1. Mirror the main package structure under `src/test/java/...`.
-2. Name test classes similarly to their corresponding classes (e.g., `OrderServiceTest`).
-3. Keep tests small, focusing on one scenario each.
-4. Prefer parameterised tests for repeated logic.
+2. Use a logical grouping of tests, such as:
+- Unit tests under `src/test/java`
+- Integration tests under `src/integrationTest/java` (if applicable).
+
+=== 4.3 Test Coverage
+1. Ensure at least **80% test coverage** for critical business logic.
+2. Focus on covering edge cases, particularly for methods with complex branching.
+3. Write integration tests for new features or significant architectural changes.
+
+=== 4.4 Writing Effective Tests
+1. Each test should focus on a single behavior or scenario.
+2. Use parameterized tests for scenarios with repetitive logic.
+3. Avoid hardcoding data when reusable fixtures or factories can be applied.
+
+=== 4.5 Mocking and Stubbing
+1. Use mocking frameworks (e.g., Mockito) to isolate the unit under test.
+2. Stub external dependencies to ensure consistent and repeatable test outcomes.
+3. Prefer fakes or in-memory implementations for lightweight data operations (e.g., an in-memory database for integration tests).
+
+=== 4.6 Test Documentation
+1. Include comments to clarify the intent of complex test cases.
+2. Document preconditions, inputs, and expected outputs within the test itself or in its name.
+3. Ensure test cases reference any associated requirements or bug IDs in the comments.
 
 == 5. Documentation (AsciiDoc)
 1. Start each `.adoc` file with a title line (`= Title`) and optional metadata.
