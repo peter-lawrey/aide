@@ -4,6 +4,8 @@
 :lang: en-GB
 :toc:
 
+Copied from https://github.com/peter-lawrey/aide[Peter Lawrey's AIDE Project]
+
 This folder contains supplemental AsciiDoc files that guide usage, workflows, or style conventions for AI-based projects.
 
 == Overview
