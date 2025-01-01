@@ -4,10 +4,10 @@
 :lang: en-GB
 :toc:
 
-toc::[]
-
 [quote, Oxford English Dictionary]
-aide (noun) an assistant to an important person, especially a political leader. Pronounced _ayd_.
+aide (noun) /ayd/ an assistant to an important person, especially a political leader.
+
+toc::[]
 
 == Introduction
 
