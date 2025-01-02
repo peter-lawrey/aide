@@ -21,10 +21,10 @@ aide/
 
 Refer to each `.adoc` for details:
 
-* link:aide-glossary.adoc[AIDE Glossary]: Definitions of key terms (tokens, AIDE, tokens/line, etc.).
-* link:aide-style-guide.adoc[AIDE Style Guide: Conventions for naming, coding, and documentation.
-* link:aide-workflow.adoc[AIDE Workflow]: The AIDE approach to iterative, documentation-driven engineering.
-* link:aide/notes-on-using-aide.adoc[Notes on Using AIDE]: Notes on previous revisions the AI can draw on for further suggestions.
-* link:examples.adoc[Examples using AIDE]: Sample AI queries using AIDE.
+* xref:aide-glossary.adoc[AIDE Glossary]: Definitions of key terms (tokens, AIDE, tokens/line, etc.).
+* xref:aide-style-guide.adoc[AIDE Style Guide]: Conventions for naming, coding, and documentation.
+* xref:aide-workflow.adoc[AIDE Workflow]: The AIDE approach to iterative, documentation-driven engineering.
+* xref:notes-on-using-aide.adoc[Notes on Using AIDE]: Notes on previous revisions the AI can draw on for further suggestions.
+* xref:examples.adoc[Examples using AIDE]: Sample AI queries using AIDE.
 
 These documents are stored in version control alongside the code, ensuring they evolve together.

@@ -16,17 +16,20 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 5. Code identifiers may use British or American spellings as needed; consistency within a project is key.
 6. When adding suggested improvements to `.adoc` files, use comment syntax like `// consider:`
 7. **Document-First Approach**:
-* As recommended in the "Next Level AIDE" post, write or update `.adoc` content as early as possible, either in parallel with feature development or before coding (similar to TDD).
-* This ensures that the single source of truth is always current and that AI-driven code suggestions align with the actual requirements.
+   * Write or update `.adoc` content as early as possible, in parallel with feature development or before coding (similar to TDD).
+   * This ensures that the single source of truth is always current and that AI-driven code suggestions align with actual requirements.
+
+NOTE:
+Where specialist or project-specific terminology is used, define it in a glossary or inline comment. Keep domain-specific jargon clear and consistent across modules.
 
 == 2. Directory and Package Structure
 
 1. **Directory Names**: all lowercase; use hyphens or underscores if necessary (e.g., `my-project-utils/`).
 2. **File Names**:
-* Java: match the class name (e.g., `MyService.java`).
-* Documentation: use `.adoc` (e.g., `project-overview.adoc`) with lowercase, hyphenated file names.
-* Configuration: `.yaml` or `.properties`, describing purpose (e.g., `app-config.yaml`).
-3. **Packages**: all lowercase, reflecting the maven `groupId` and `artifactId` and subsystem (e.g., `groupId.artifactId.service`).
+   * Java: match the class name (e.g., `MyService.java`).
+   * Documentation: use `.adoc` (e.g., `project-overview.adoc`) with lowercase, hyphenated file names.
+   * Configuration: `.yaml` or `.properties`, describing purpose (e.g., `app-config.yaml`).
+3. **Packages**: all lowercase, reflecting the Maven `groupId` and `artifactId`, plus subsystem (e.g., `groupId.artifactId.service`).
 
 == 3. Java Code Style
 
@@ -43,16 +46,35 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 2. **Methods and Variables**: camelCase (e.g., `processOrder`, `userName`).
 3. **Constants**: ALL_CAPS_WITH_UNDERSCORES (e.g., `MAX_BUFFER_SIZE`).
 
-=== 3.3 Comments and Documentation
+=== 3.3 General Principles
+* Aim for **readable, maintainable** code.
+* Write **self-documenting** methods and classes.
+* Use comments sparingly to explain *why*, not just *what* the code does.
+* Encourage single-responsibility classes to reduce complexity.
+
+=== 3.4 Comments and Documentation
 1. Use Javadoc for **public** classes and methods, explaining purpose, parameters, and returns.
 2. Only add inline comments (`//`) if the logic isn't apparent.
 3. Maintain descriptive commit messages in the present tense (e.g., "Add new caching layer").
+4. Write **meaningful** inline comments only if the code’s intent is not obvious.
+
+=== 3.5 Exception Handling
+1. Catch or propagate only when necessary; prefer custom messages that explain context.
+2. Use `IOException` or other standard exceptions for I/O boundaries; for internal logic, consider custom runtime exceptions or `IORuntimeException`.
+3. Avoid empty catch blocks or swallowing exceptions silently.
+4. Log exceptions using recommended logging methods (e.g., `Jvm.warn()` or `Jvm.error()`).
+
+=== 3.6 Testing
+* Follow the same style rules in test classes as in main source.
+* Test method names in camelCase or snake_case clarifying scenario (e.g., `shouldReturnNullIfFileMissing`).
+* Keep tests small and single-purpose.
+* Encourage parameterised tests for repeated logic.
 
 == 4. Testing
 
 === 4.1 Test Naming Conventions
 1. Test classes should be named by appending `Test` to the class they test (e.g., `OrderServiceTest` for `OrderService`).
-2. Test method names should describe the test scenario and expected behavior, using camelCase (e.g., `shouldReturnOrderDetailsWhenOrderExists`).
+2. Test method names should describe the test scenario and expected behaviour, using camelCase (e.g., `shouldReturnOrderDetailsWhenOrderExists`).
 
 === 4.2 Directory Structure
 1. Mirror the main package structure under `src/test/java/...`.
@@ -66,8 +88,8 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 3. Write integration tests for new features or significant architectural changes.
 
 === 4.4 Writing Effective Tests
-1. Each test should focus on a single behavior or scenario.
-2. Use parameterized tests for scenarios with repetitive logic.
+1. Each test should focus on a single behaviour or scenario.
+2. Use parameterised tests for scenarios with repetitive logic.
 3. Avoid hardcoding data when reusable fixtures or factories can be applied.
 
 === 4.5 Mocking and Stubbing
@@ -81,18 +103,39 @@ This guide outlines the core conventions for naming, coding, and documentation. 
 3. Ensure test cases reference any associated requirements or bug IDs in the comments.
 
 == 5. Documentation (AsciiDoc)
+
 1. Start each `.adoc` file with a title line (`= Title`) and optional metadata.
 2. Organise content under headings: `==`, `===`, `====`.
 3. Use `[source,java]` blocks (or similar) for code highlighting.
 4. Keep lines concise, highlighting key points in bullet lists or admonitions (e.g., `NOTE:`).
+5. Use AsciiDoc cross-references (`xref:`) or xrefs to link related sections.
+6. Use `NOTE:`, `TIP:`, `WARNING:`, or `IMPORTANT:` where appropriate.
 
 == 6. Version Control and Commit Messages
+
 1. Write short, clear commit messages in the **present tense** (e.g., "Fix login bug in UserService").
 2. Reference issue IDs if applicable (e.g., "Fix #42: Add advanced search feature").
 
 == 7. Additional Best Practices
 1. **AutoCloseable Usage**: Where possible, consider implementing `AutoCloseable` to be used in a try-with-resources block, ensuring deterministic cleanup.
 2. **Template Management**: Use templates for AI prompts and text blocks to ensure consistency and reduce duplication.
+3. **Continual Improvement**: Propose style guide changes via discussion and pull requests. Keep it aligned with any overarching organisational or community standards.
 
-== 8. Summary
+== 8. YAML and Configuration Files
+
+* **Indentation**: 2 spaces; no tabs.
+* **Naming**: Use `*.yaml` extension.
+* **Keys**: Lowercase with underscores or hyphens.
+* **Comments**: British English, concise, explaining any tricky or non-obvious config.
+
+== 9. Bash Scripts
+
+* **Shebang**: `#!/usr/bin/env bash` at the top.
+* **Indentation**: 2 spaces in shell scripts for clarity.
+* Use `set -euo pipefail` when appropriate to catch errors early.
+* Keep function names lowercase, underscore-delimited (e.g., `deploy_to_server()`).
+* Comment complex steps in British English.
+
+== 10. Summary
+
 By following these concise guidelines—especially consistent, clear Java formatting and straightforward documentation practices—teams ensure a streamlined, maintainable codebase. Remember to evolve this guide as the project grows and needs change.
