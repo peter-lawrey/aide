@@ -28,19 +28,21 @@ You verify its validity.
 4. **Continuous Review** – AI flags discrepancies; humans resolve them.
 5. **Repeat** – Each new or changed requirement triggers another loop.
 
-== AI <-> Human Collaboration
+== AI <--> Human Collaboration
 
 [mermaid]
 ----
 flowchart LR
-  A((Write/Update<br>Requirements)) <--> B((Write/Update<br>Tests))
-  B <--> C((Write/Refactor<br>Code))
-  C <--> A
+  A((Unit Tests<br>50% AI)) <==> B((Requirements<br>80% AI))
+  B <==> C((Source Code<br>80% AI))
+  C <-.-> A
 ----
 
-- **AI**: Proposes repetitive code, test stubs, or refactors.
+- **AI**: Fills in repetitive code, test stubs, or refactors.
 - **Human**: Reviews correctness, ensures domain fit, and finalises decisions.
 - **Outcome**: Software matches documented requirements and passes tests.
+
+The most precise way to define what is needed is in unit tests. The Source Code is about 20% human written as you can't be sure how to update the requirements to get it to do what you want. As you iterate, you can refine the requirements between updating the tests and code.
 
 == Elevating the Workflow with Real-Time Documentation
 

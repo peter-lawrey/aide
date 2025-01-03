@@ -58,12 +58,12 @@ AIDE fosters a cyclical workflow that keeps requirements, tests, and code in loc
 [mermaid]
 ----
 flowchart LR
-  A((Requirements<br>80% AI)) --> B((Unit Tests<br>80% AI))
-  B --> C((Source Code<br>50% AI))
-  C --> A
+  A((Unit Tests<br>50% AI)) <==> B((Requirements<br>80% AI))
+  B <==> C((Source Code<br>80% AI))
+  C <-.-> A
 ----
 
-The Source Code is 50% AI because it requires more domain-specific knowledge and refinement. e.g. a unit test can be implemented in a few ways, but the source code needs to be correct *and* efficient.
+The most precise way to define what is needed is in unit tests. The Source Code is about 20% human written as you can't be sure how to update the requirements to get it to do what you want. As you iterate, you can refine the requirements between updating the tests and code.
 
 === AI <--> Human Collaboration
 

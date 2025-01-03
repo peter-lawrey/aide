@@ -1,26 +1,109 @@
-== 3. `AdocDocumentStats`
+== 3. `AdocDocumentStats` Class
 
-Maintains counters for lines, blank lines, total tokens, and supports per-file deltas:
+Maintains counters for:
 
-1. **Uses**: `com.knuddels.jtokkit.Encodings` and `O200K_BASE` for GPT-like token counting.
-2. **Fields**:
-- `long totalLines`
-- `long totalBlanks`
-- `long totalTokens`
-- Snapshot fields:
-- `long previousLines`
-- `long previousBlanks`
-- `long previousTokens`
-3. **Behavior**:
-- `updateStats(String line)`: Increments line or blank count, then uses the GPT-like encoder to count tokens for that line.
-- `snapshotTotals()`: Captures current totals into `previousLines`, `previousBlanks`, `previousTokens`.
-- `getDeltaLines()`, `getDeltaBlanks()`, `getDeltaTokens()`: Return the difference (current - previous).
-4. **Methods**:
-- `public void updateStats(String line)`
-- `public void snapshotTotals()`
-- `public long getDeltaLines()`
-- `public long getDeltaBlanks()`
-- `public long getDeltaTokens()`
-- `public long getTotalLines()`
-- `public long getTotalBlanks()`
-- `public long getTotalTokens()`
+- **non-blank lines**,
+- **blank lines**, and
+- **total tokens** (GPT-like, via an O200K_BASE encoder),
+
+while supporting snapshot-based *delta* calculations. The updated logic uses **partial-line buffering** to wait for a newline before finalizing counts for lines and tokens.
+
+=== 3.1 Partial Line Accumulation
+
+- **Buffering Approach**: The class stores any incoming text in a `StringBuilder lineBuffer`.
+- **Calls to `updateStats(String text)`**:
+1. Appends the provided `text` (which may contain zero, one, or multiple `\n` characters) to `lineBuffer`.
+2. Checks if the newly appended `text` contains at least one `'\n'`.
+- If **no** newline is present, the system does **not** finalize line counts; it waits for subsequent calls.
+- If **yes** newline(s) are present, the entire content of `lineBuffer` is processed as one chunk via `processChunk(...)`, after which `lineBuffer` is cleared.
+
+=== 3.2 Line Identification and Counting
+
+- **Character-by-Character Scan**:
+Within `processChunk(...)`, a loop inspects each character:
+1. Track a boolean `nonBlankLine` whenever a non-whitespace character is found.
+2. On encountering a newline (`'\n'`), finalize the line:
+- If `nonBlankLine == true`, increment `totalLines`.
+- Otherwise, increment `totalBlanks`.
+- Reset `nonBlankLine` to `false` for the next line.
+
+=== 3.3 GPT-Like Token Counting
+
+- **O200K_BASE Encoder**:
+This implementation obtains the encoder using:
+
+[source,java]
+----
+private static final Encoding ENCODER =
+Encodings.newDefaultEncodingRegistry().getEncoding(EncodingType.O200K_BASE);
+----
+After counting lines/blanks, the entire chunk (which may contain multiple lines) is passed to:
+
+[source,java]
+----
+long chunkTokens = ENCODER.countTokens(chunk);
+totalTokens += chunkTokens;
+----
+This performs *one token count* per chunk, rather than per individual line.
+
+=== 3.4 Blank vs. Non-Blank Lines
+
+- A line is **blank** if no non-whitespace character was detected before `'\n'`.
+- Otherwise, that line is **non-blank**.
+
+[NOTE]
+====
+Because we finalize lines only when a newline occurs, content not followed by `'\n'` remains in the `lineBuffer` and is counted only once a future call introduces a newline.
+====
+
+=== 3.5 Snapshot and Delta
+
+- **`snapshotTotals()`**: Copies current totals for lines, blanks, and tokens into *previous* fields.
+- **Delta Methods**:
+- `getDeltaLines() = totalLines - previousLines`
+- `getDeltaBlanks() = totalBlanks - previousBlanks`
+- `getDeltaTokens() = totalTokens - previousTokens`
+- This allows external consumers (e.g. an engine or writer) to measure how many new lines, blanks, or tokens have been added since the last snapshot call.
+
+=== 3.6 Edge Cases
+
+1. **Multiple Newlines in a Single `updateStats`**:
+If a call to `updateStats("Line A\nLine B\n")` arrives, the entire `lineBuffer` after concatenation includes two newlines. In one pass of `processChunk(...)`, the code will finalize both lines, then clear the buffer.
+2. **No Newline**:
+If no newline exists in a newly appended `text`, that text remains buffered. No line counting or token counting occurs until a future call provides `'\n'`.
+3. **Empty or `null` Input**:
+A `null` or empty string in `updateStats` is a no-op, as there is nothing to count.
+4. **Single Call with Many Lines**:
+A single call that includes multiple newlines triggers only one token-count operation for the entire chunk, making it more efficient than a line-by-line approach.
+5. **Thread-Safety**:
+This class is *not* designed for concurrent usage. Calls should be serialised externally, or you should use separate instances per thread.
+
+=== 3.7 Example Usage
+
+1. Create an `AdocDocumentStats` instance:
+
+   AdocDocumentStats stats = new AdocDocumentStats();
+
+2. Append lines/partial lines to `updateStats`:
+
+   stats.updateStats("Line A");
+   stats.updateStats(" plus partial text");
+   // No newline yet, so lines not finalized
+   stats.updateStats("\nLine B\nLine C\n");
+   // On this call, we see newlines => "Line A plus partial text"
+   // is counted, plus "Line B" and "Line C" lines
+
+3. After each file or segment, optionally call `snapshotTotals()`, this captures the current counters so you can measure deltas later.
+
+   stats.snapshotTotals();
+
+4. Retrieve totals or deltas as needed:
+
+   long totalNonBlank = stats.getTotalLines();
+   long totalBlank    = stats.getTotalBlanks();
+   long totalTokens   = stats.getTotalTokens();
+   long newLines      = stats.getDeltaLines();
+   long newBlanks     = stats.getDeltaBlanks();
+   long newTokens     = stats.getDeltaTokens();
+
+This updated design ensures partial lines are accumulated before counting, uses a single GPT-like token calculation per chunk, and preserves snapshot/delta functionality in line with the corrected implementation.
