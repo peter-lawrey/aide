@@ -297,7 +297,7 @@ user:1 -> null
 
 === Advanced Usage
 
-1. **Custom Key/Value Types**:
+==== Custom Key/Value Types
 Replace `String.class` with custom types for both keys and values.
 
 [source,java]
@@ -309,7 +309,7 @@ ChronicleMap.of(MyKey.class, MyValue.class)
             .createOrRecoverPersistedTo("custom-map.dat");
 ----
 
-2. **Concurrency**:
+==== Concurrency
 - Chronicle Map supports concurrent access across threads and processes.
 - It’s thread-safe without additional locking mechanisms.
 

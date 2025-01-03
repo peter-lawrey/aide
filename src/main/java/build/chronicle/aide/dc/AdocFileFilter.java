@@ -1,41 +1,48 @@
 package build.chronicle.aide.dc;
 
 import build.chronicle.aide.util.GitignoreFilter;
+import build.chronicle.aide.util.GitignoreFilter.MatchResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static build.chronicle.aide.util.GitignoreFilter.*;
 
 /**
- * Encapsulates the rules for including or excluding files in the AIDE scanning process.
- * <p>
- * Responsibilities:
- * <ul>
- *   <li>Optionally check a .gitignore file first (via {@link GitignoreFilter}).</li>
- *   <li>Exclude directories, hidden files, large files, overshadowed by .ad, etc.</li>
- *   <li>Skip certain extensions (.asciidoc, images, PDFs, etc.).</li>
- *   <li>Exclude paths under 'target/' or files starting with 'out-'.</li>
- *   <li>Include relevant files (e.g., pom.xml, .adoc, Java source, etc.).</li>
- * </ul>
+ * AdocFileFilter encapsulates the rules for including or excluding files in
+ * a scanning or merging process. It integrates with {@link GitignoreFilter}
+ * to respect .gitignore/aide.ignore patterns, and applies additional
+ * local checks (hidden files, overshadow by .ad, skip large files, etc.).
+ *
+ * <p>See the updated adoc-file-filter.adoc for further details.</p>
+ *
+ * <h2>Key Steps in {@link #include(Path)}</h2>
+ * <ol>
+ *   <li>Check if path is a directory (skip)</li>
+ *   <li>Check .gitignore/aide.ignore (via {@link GitignoreFilter})</li>
+ *   <li>Skip hidden or dot files</li>
+ *   <li>Skip if overshadowed by .ad</li>
+ *   <li>Skip known file extensions (e.g. .asciidoc, images, etc.)</li>
+ *   <li>Skip files beginning with "out-" prefix</li>
+ *   <li>Skip large files (>64 KB)</li>
+ * </ol>
  */
 public class AdocFileFilter {
 
-    private static final long MAX_SIZE_BYTES = 64L * 1024L;  // 64 KB
+    /** Max file size we allow (64 KB). */
+    private static final long MAX_SIZE_BYTES = 64L * 1024L;
 
+    /** Manages .gitignore / aide.ignore logic. Could be null if parsing failed or no file is provided. */
     private final GitignoreFilter gitignoreFilter;
 
-    // Some extensions or patterns we always skip
+    /**
+     * Common extensions or file types to skip, typically due to
+     * size, binary format, or irrelevance to text-based processing.
+     */
     private static final List<String> SKIP_EXTENSIONS = new ArrayList<>();
 
     static {
-        // Some typical non-text or extremely large / irrelevant formats
         SKIP_EXTENSIONS.add(".asciidoc");
         SKIP_EXTENSIONS.add(".png");
         SKIP_EXTENSIONS.add(".jpg");
@@ -46,103 +53,103 @@ public class AdocFileFilter {
     }
 
     /**
-     * Attempts to parse a .gitignore file for additional ignore rules.
+     * Constructs an AdocFileFilter, optionally parsing a .gitignore/aide.ignore file at the given path.
      *
-     * @param gitignorePath path to the .gitignore; may not exist
+     * @param ignoreFilePath path to .gitignore or aide.ignore. May be null or non-existent.
      */
-    public AdocFileFilter(Path gitignorePath) {
+    public AdocFileFilter(Path ignoreFilePath) {
         GitignoreFilter gf = null;
-        if (gitignorePath != null) {
+        if (ignoreFilePath != null) {
             try {
-                gf = new GitignoreFilter(gitignorePath);
+                gf = new GitignoreFilter(ignoreFilePath);
             } catch (IOException e) {
-                // If parsing fails, we’ll just log a warning (or ignore).
-                System.err.println("[WARN] Failed to parse .gitignore: " + e.getMessage());
+                System.err.println("[WARN] Failed to parse ignore file: " + ignoreFilePath
+                        + " (" + e.getMessage() + ")");
             }
         }
         this.gitignoreFilter = gf;
     }
 
     /**
-     * Determines if a given file should be included based on .gitignore
-     * and local filter rules.
+     * Determines whether a given file should be included based on
+     * .gitignore/aide.ignore patterns and local skip logic.
      *
-     * @param path the file or directory path
-     * @return true if included, false if excluded
+     * @param path path to a file (directories are skipped)
+     * @return true if this file is accepted for processing, false otherwise
      */
     public boolean include(Path path) {
         try {
-            // 0) If it's a directory, skip it here (the engine handles recursion).
+            // 1) Skip directories (the engine or orchestrator will handle recursion).
             if (Files.isDirectory(path)) {
                 return false;
             }
 
-            if (path.toString().contains(".git")) {
-                return false;
-            }
-
-            // 1) Check if .gitignore is loaded; if so, see if it explicitly ignores or includes.
+            // 2) Check .gitignore / aide.ignore rules if available.
             if (gitignoreFilter != null) {
-                MatchResult result = gitignoreFilter.isExcluded(path);
-                if (result == MatchResult.IGNORED) {
+                MatchResult matchResult = gitignoreFilter.isExcluded(path, false);
+                if (matchResult == MatchResult.IGNORED) {
                     return false; // explicitly ignored
-                } else if (result == MatchResult.NOT_IGNORED) {
-                    // explicitly included -> but still subject to overshadow logic, etc.
-                    // we continue to local checks
                 }
+                if (matchResult == MatchResult.NOT_IGNORED) {
+                    return true; // explicitly included
+                }
+                // matchResult == DEFAULT => continue with local checks
             }
 
-            // Exclude hidden
+            // 3) Skip hidden or dot files
             if (isHiddenOrDotFile(path)) {
                 return false;
             }
-            // Exclude overshadowed by .ad
+
+            // 4) Skip if overshadowed by .ad
             if (isOvershadowedByAd(path)) {
                 return false;
             }
-            // Exclude certain file extensions
-            String fileName = path.getFileName().toString().toLowerCase();
+
+            // 5) Skip known undesired extensions
+            final String fileName = path.getFileName().toString().toLowerCase();
             if (hasSkipExtension(fileName)) {
                 return false;
             }
 
-            // 5) Exclude "out-" prefix, e.g. out-something.txt
+            // 6) Skip files starting with "out-"
             if (fileName.startsWith("out-")) {
                 return false;
             }
-            // 7) Skip large files over MAX_SIZE_BYTES
+
+            // 7) Skip large files
             try {
-                if (Files.size(path) > MAX_SIZE_BYTES) {
+                long size = Files.size(path);
+                if (size > MAX_SIZE_BYTES) {
                     return false;
                 }
             } catch (IOException e) {
-                return false; // skip if can't read size
+                // If we can't get size, exclude by default
+                return false;
             }
 
-            // If none of the rules exclude it, we include.
+            // If no rule excludes the file, include it
             return true;
 
         } catch (Exception ex) {
-            // If anything unexpected happens, we fail safe by excluding
+            // Fail-safe: if an error occurs, exclude
             return false;
         }
     }
 
     /**
-     * Determines if the path is overshadowed by a companion ".ad" file.
-     * E.g. if path is "someFile.txt" and "someFile.txt.ad" exists, skip.
+     * Check if this file is overshadowed by a companion ".ad" file.
+     * E.g., "someFile.txt" is overshadowed if "someFile.txt.ad" exists.
      */
     private boolean isOvershadowedByAd(Path path) {
-        String filePath = path.toString();
-        Path overshadow = Path.of(filePath + ".ad");
-        return Files.exists(overshadow);
+        Path overshadowCandidate = Path.of(path.toString() + ".ad");
+        return Files.exists(overshadowCandidate);
     }
 
     /**
-     * Checks for hidden or dot-file (like ".foo" or ".hidden.txt").
+     * Checks if the file is hidden or has a name beginning with '.'.
      */
     private boolean isHiddenOrDotFile(Path path) throws IOException {
-        // isHidden is OS-dependent. Also check for filename starting with "."
         if (Files.isHidden(path)) {
             return true;
         }
@@ -151,7 +158,7 @@ public class AdocFileFilter {
     }
 
     /**
-     * Returns true if the file has one of our skip-extensions (like .png, .asciidoc).
+     * Checks whether the file name ends with any extension in {@link #SKIP_EXTENSIONS}.
      */
     private boolean hasSkipExtension(String fileName) {
         for (String ext : SKIP_EXTENSIONS) {

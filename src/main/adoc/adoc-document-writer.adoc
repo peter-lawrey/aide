@@ -2,16 +2,29 @@
 
 Writes text to the current output file and updates statistics line-by-line:
 
-1. **Fields**:
+=== 4.1 Fields
 - `AdocDocumentStats stats`
-- `PrintWriter currentWriter` – Open output stream.
+- `PrintWriter currentWriter`
+- Possibly a `snapshotStats()` method to measure deltas
 
-2. **Behavior**:
-- `open(String outputFile, boolean append)`: Opens a file for writing/appending.
-- `write(String text)`: Appends `text` to the current file, calls `stats.updateStats(text)`.
-- `snapshotStats()`: Saves current stats to track future deltas.
-- `close()`: Closes the writer if open.
+=== 4.2 Behavior
 
-3. **Usage**:
-- Called by `AdocDocumentEngine` for both `context.asciidoc` (full mode) and `increment.asciidoc` (incremental mode).
-- Throws `IllegalStateException` if `write` is called while no file is open.
+- `open(String outputFile, boolean append)`
+  - Opens or creates a file, with `append` controlling whether we overwrite or add to the file.
+- `write(String text)`
+  - Appends text, calls `stats.updateStats(text)`.
+- `snapshotStats()`
+  - Saves current totals so the next writes measure deltas.
+- `close()`
+  - Closes the writer if open.
+
+=== 4.3 Usage
+- Typically used by `AdocDocumentEngine` in either full or incremental mode.
+- Overwrites (`append=false`) by default in the engine; can be changed to `append=true` if needed.
+
+=== 4.4 Unit Tests
+`AdocDocumentWriterTest` checks:
+- Writing lines updates the file and stats.
+- Blank lines are counted correctly.
+- No file open => throws `IllegalStateException`.
+- Append mode writes new content without overwriting.

@@ -1,19 +1,78 @@
 == 1. `AdocDocumentApp`
 
-Java main entry point for the command-line application:
+A thin CLI wrapper that orchestrates:
+1. **Reading** system properties (`context`, `increment`, `removeCopyrightMessage`)
+2. **Accepting** zero or more CLI arguments as scan paths (defaulting to `.` if none)
+3. **Constructing** the `AdocDocumentEngine` and supporting classes
+4. **Determining** which ignore file to use (`aide.ignore` preferred, else `.gitignore`)
+5. **Executing** the scan/merge cycle (`engine.execute()`)
+6. **Printing** summaries (`engine.printSummary()`)
+7. **Closing** resources (`engine.close()`)
 
-1. **Purpose**:
-- Reads system properties:
-- `context` (default: `"context.asciidoc"`)
-- `increment` (default: `"increment.asciidoc"`)
-- `removeCopyrightMessage` (default: `"true"`)
-- Accepts command-line arguments as paths to scan; if none provided, uses `"."`.
-- Creates and configures the `AdocDocumentEngine` along with `AdocFileFilter`, `AdocDocumentStats`, and `AdocDocumentWriter`.
-- Executes the engine, prints a final summary, and closes resources.
+=== 1.1 System Properties
 
-2. **Behaviour**:
-- Invokes `engine.execute()`, `engine.printSummary()`, then `engine.close()`.
-- System properties can override default file names.
+- `context`  
+  Defaults to `"context.asciidoc"`.  
+  The *full mode* target file if no existing context is found.
 
-3. **Key Method**:
-- `public static void main(String[] args) throws IOException`
+- `increment`  
+  Defaults to `"increment.asciidoc"`.  
+  The *incremental mode* target file if a context already exists.
+
+- `removeCopyrightMessage`  
+  Defaults to `"true"`.  
+  If set to `false`, preserves recognized copyright blocks.
+
+=== 1.2 CLI Arguments
+
+If **no arguments** are provided, the application scans `.` (current directory).  
+If **one or more** arguments are given, each argument is treated as a path (file or directory) to process.
+
+=== 1.3 Handling `aide.ignore` vs. `.gitignore`
+
+1. By default, the app checks for:
+   - **`aide.ignore`** in the *first CLI argument*’s directory if provided, else in `"."`.
+   - If **`aide.ignore`** is *not* found, it falls back to **`.gitignore`**.
+2. Passes the resolved path to the constructor of `AdocFileFilter` (or a similarly named filter) for file-inclusion logic.
+
+=== 1.4 Merging and Statistics
+
+Once configured, the application:
+1. Creates an `AdocDocumentStats` instance for line/blank/token tracking.
+2. Creates an `AdocDocumentWriter` to output AsciiDoc lines and update stats.
+3. Instantiates `AdocDocumentEngine` with the file filter, writer, and stats.
+4. Calls `engine.execute()`, which:
+   - Determines if `context.asciidoc` already exists to pick full or incremental mode.
+   - Prints to `System.out`: `"Full mode"` or `"Incremental mode"`.
+   - Recursively scans each path.
+   - Writes or appends to `context.asciidoc` or `increment.asciidoc`.
+5. Calls `engine.printSummary()`, which appends totals and any skipped files.
+
+=== 1.5 Example Flow
+
+[.procedure]
+----
+1. **Initial Run** (no existing context file):
+   * `context.asciidoc` is created; all scanned files appear in it.
+
+2. **Subsequent Run** (existing context file):
+   * `increment.asciidoc` is created; only newer/modified files appear.
+
+3. **No CLI Args**:
+   * Defaults to scanning `"."`, using either `aide.ignore` or `.gitignore`.
+
+4. **Multiple Paths**:
+   * e.g., `AdocDocumentApp /docs /src /assets`, each directory is processed.
+----
+
+=== 1.6 Putting It All Together
+
+1. Read properties → set engine’s context/increment file names and flags.
+2. Determine **aide.ignore** or fallback **.gitignore** path, pass to `AdocFileFilter`.
+3. Build `AdocDocumentStats` + `AdocDocumentWriter` → create `AdocDocumentEngine`.
+4. Add paths from CLI args (or `"."` if none).
+5. `engine.execute()` merges AsciiDoc content, printing a console message for the mode.
+6. `engine.printSummary()` logs total lines, blanks, tokens, plus any skipped files.
+7. `engine.close()` finalizes output.
+
+This design ensures a straightforward workflow that respects `.gitignore` or `aide.ignore` rules, overshadow logic, and large-file skips.

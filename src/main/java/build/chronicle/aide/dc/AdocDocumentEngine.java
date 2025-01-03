@@ -1,46 +1,81 @@
 package build.chronicle.aide.dc;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Central orchestrator for scanning, filtering, processing, and writing outputs.
+ * AdocDocumentEngine orchestrates scanning directories or files, filtering
+ * unwanted items, and merging content into one or more AsciiDoc outputs.
  *
- * <p>This class decides whether to operate in full context mode (if the context file
- * does not exist) or incremental mode (if the context file already exists). It
- * processes files through the provided filter, reads/cleans lines, and writes
- * them into the AsciiDoc context or incremental file.
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Detect full vs. incremental mode based on the presence of {@code context.asciidoc}.</li>
+ *   <li>Recurse over directories, filtering files via {@link AdocFileFilter}.</li>
+ *   <li>Process each file by reading lines (optionally removing copyright)
+ *       and writing them to either {@code context.asciidoc} (full mode) or
+ *       {@code increment.asciidoc} (incremental mode).</li>
+ *   <li>Maintain line/blank/token counts ({@link AdocDocumentStats}),
+ *       printing a final summary that includes any skipped files.</li>
+ *   <li>Handle I/O exceptions gracefully (skipping unreadable files).</li>
+ * </ul>
+ *
+ * <p>Usage Flow:
+ * <ol>
+ *   <li>Instantiate with {@link #AdocDocumentEngine(AdocFileFilter, AdocDocumentWriter, AdocDocumentStats)}.</li>
+ *   <li>Set {@link #setContextAsciidoc(String)}, {@link #setIncrementalAsciidoc(String)}, and {@link #setRemoveCopyright(boolean)}.</li>
+ *   <li>Add one or more paths via {@link #addInputPath(String)}.</li>
+ *   <li>Call {@link #execute()} to detect mode, open the appropriate file, and process inputs.</li>
+ *   <li>Call {@link #printSummary()} to append final statistics.</li>
+ *   <li>Call {@link #close()} to release resources.</li>
+ * </ol>
  */
-public class AdocDocumentEngine implements AutoCloseable {
+public class AdocDocumentEngine {
 
+    /** Filters files according to .gitignore / aide.ignore / overshadowing rules, etc. */
     private final AdocFileFilter fileFilter;
+
+    /** Handles writing text (and stats updates) to the output AsciiDoc. */
     private final AdocDocumentWriter writer;
+
+    /** Tracks global line, blank, and token counts. */
     private final AdocDocumentStats stats;
 
-    private final List<Path> inputPaths;
-    private String contextAsciidoc;
-    private String incrementalAsciidoc;
-    private boolean removeCopyright;
-    private long contextFileLastModified;
-    private final List<String> skippedFiles;
-
-    private boolean incrementalMode;
-    private boolean engineExecuted;
-
+    /** Processor for reading file lines and optionally removing blocks. */
     private final AdocFileProcessor fileProcessor;
 
+    /** List of paths (files/directories) to scan. */
+    private final List<Path> inputPaths;
+
+    /** Path to the main context file (full mode). Defaults to "context.asciidoc". */
+    private String contextAsciidoc;
+
+    /** Path to the incremental output file. Defaults to "increment.asciidoc". */
+    private String incrementalAsciidoc;
+
+    /** Whether to remove recognized copyright blocks. */
+    private boolean removeCopyright;
+
+    /** Timestamp of the context file, used for incremental checks. */
+    private long contextFileLastModified;
+
+    /** True if we are in incremental mode. */
+    private boolean incrementalMode;
+
+    /** Prevents multiple executions in the same engine instance. */
+    private boolean engineExecuted;
+
+    /** Collects file paths that fail to process (I/O issues, etc.). */
+    private final List<String> skippedFiles;
+
     /**
-     * Constructs the engine with the necessary filter, writer, and stats.
+     * Constructs an engine with required collaborators.
      *
-     * @param fileFilter file inclusion/exclusion rules
-     * @param writer     the writer that appends to output files
-     * @param stats      the stats tracker for lines, blanks, tokens
+     * @param fileFilter the {@link AdocFileFilter} for include/exclude decisions
+     * @param writer     the {@link AdocDocumentWriter} for writing AsciiDoc output
+     * @param stats      the {@link AdocDocumentStats} tracking lines/blank/token counts
      */
     public AdocDocumentEngine(AdocFileFilter fileFilter,
                               AdocDocumentWriter writer,
@@ -48,207 +83,222 @@ public class AdocDocumentEngine implements AutoCloseable {
         this.fileFilter = fileFilter;
         this.writer = writer;
         this.stats = stats;
-        this.inputPaths = new ArrayList<>();
-        this.skippedFiles = new ArrayList<>();
         this.fileProcessor = new AdocFileProcessor();
+        this.inputPaths = new ArrayList<>();
+        this.contextAsciidoc = "context.asciidoc";
+        this.incrementalAsciidoc = "increment.asciidoc";
+        this.removeCopyright = true;
+        this.contextFileLastModified = 0L;
+        this.incrementalMode = false;
+        this.engineExecuted = false;
+        this.skippedFiles = new ArrayList<>();
     }
 
+    // ------------------------------------------------------------------------
+    // Setters
+    // ------------------------------------------------------------------------
+
     /**
-     * Adds a path (file or directory) for processing.
+     * Sets the path/name of the context file for full mode.
      *
-     * @param pathStr the path string to add
+     * @param contextAsciidoc path to context file
      */
-    public void addInputPath(String pathStr) {
-        if (pathStr == null) {
-            return;
-        }
-        Path p = Path.of(pathStr);
-        inputPaths.add(p);
+    public void setContextAsciidoc(String contextAsciidoc) {
+        this.contextAsciidoc = contextAsciidoc;
     }
 
     /**
-     * Sets the main context AsciiDoc filename.
+     * Sets the path/name of the incremental file for incremental mode.
      *
-     * @param contextFileName the file name for the context (full) output
+     * @param incrementalAsciidoc path to incremental file
      */
-    public void setContextAsciidoc(String contextFileName) {
-        this.contextAsciidoc = contextFileName;
+    public void setIncrementalAsciidoc(String incrementalAsciidoc) {
+        this.incrementalAsciidoc = incrementalAsciidoc;
     }
 
     /**
-     * Sets the incremental AsciiDoc filename.
+     * Whether to remove recognized copyright blocks.
      *
-     * @param incrementalFileName the file name for the incremental output
-     */
-    public void setIncrementalAsciidoc(String incrementalFileName) {
-        this.incrementalAsciidoc = incrementalFileName;
-    }
-
-    /**
-     * Specifies whether to remove copyright blocks.
-     *
-     * @param remove true to remove, false otherwise
+     * @param remove true if removal is desired
      */
     public void setRemoveCopyright(boolean remove) {
         this.removeCopyright = remove;
     }
 
+    // ------------------------------------------------------------------------
+    // Public API
+    // ------------------------------------------------------------------------
+
     /**
-     * Executes the scanning and writing process.
+     * Adds a single file or directory path for scanning.
      *
-     * @throws IOException if an I/O error occurs
+     * @param pathStr file or directory path
+     */
+    public void addInputPath(String pathStr) {
+        if (pathStr == null || pathStr.isEmpty()) {
+            return;
+        }
+        Path p = Paths.get(pathStr).toAbsolutePath().normalize();
+        inputPaths.add(p);
+    }
+
+    /**
+     * Main execution method. Checks for an existing context file; if found,
+     * sets incremental mode, otherwise runs full mode. Opens the respective
+     * AsciiDoc file (overwriting by default) and processes the paths.
+     *
+     * @throws IOException if reading or writing fails
      */
     public void execute() throws IOException {
         if (engineExecuted) {
-            // Prevent multiple calls
-            return;
+            throw new IllegalStateException("This AdocDocumentEngine has already executed. "
+                    + "Use a new instance for another run.");
         }
         engineExecuted = true;
 
-        // Determine if contextAsciidoc already exists
-        Path contextPath = Path.of(contextAsciidoc);
+        // 1) Check if context.asciidoc exists => set incremental
+        Path contextPath = Paths.get(contextAsciidoc).toAbsolutePath();
         if (Files.exists(contextPath)) {
             incrementalMode = true;
             contextFileLastModified = Files.getLastModifiedTime(contextPath).toMillis();
-        } else {
-            incrementalMode = false;
         }
 
+        // 2) Open the correct output file and print console message
         if (incrementalMode) {
-            // We open/append to the incremental file
+            System.out.println("Incremental mode: " + incrementalAsciidoc);
+            // Overwrite incrementalAsciidoc by default
             writer.open(incrementalAsciidoc, false);
-            writer.write("= Directory Content Increment\n\n");
+            writer.write("= Directory Content (Incremental Mode)\n\n");
         } else {
-            // We open/overwrite the context file
+            System.out.println("Full mode: " + contextAsciidoc);
+            // Overwrite context.asciidoc by default
             writer.open(contextAsciidoc, false);
             writer.write("= Directory Content\n\n");
         }
-        writer.snapshotStats();
 
-        // Process input paths
-        for (Path p : inputPaths) {
-            processPath(p);
+        // 3) Process each path
+        for (Path inputPath : inputPaths) {
+            processPath(inputPath);
         }
     }
 
     /**
-     * Prints a summary of lines, blanks, tokens, and skipped files.
+     * Prints a summary of lines, blanks, tokens, tokens/line, and any skipped files
+     * to the currently open output file. Should be called after {@link #execute()}.
      */
     public void printSummary() {
-        long lines = stats.getTotalLines();
-        long blanks = stats.getTotalBlanks();
-        long tokens = stats.getTotalTokens();
-        double ratio = (lines == 0) ? 0.0 : (double) tokens / (double) lines;
+        writer.write("\n....\n");
+        writer.write("Lines " + stats.getTotalLines() + ", "
+                + "Blanks " + stats.getTotalBlanks() + ", "
+                + "Tokens " + stats.getTotalTokens() + "\n");
 
-        writer.write("== Summary ==\n");
-        writer.write("Total Lines:  " + lines + "\n");
-        writer.write("Total Blanks: " + blanks + "\n");
-        writer.write("Total Tokens: " + tokens + "\n");
-        writer.write(String.format("Tokens/Line:  %.1f%n", ratio));
+        double tokensPerLine = (stats.getTotalLines() == 0)
+                ? 0.0
+                : (double) stats.getTotalTokens() / stats.getTotalLines();
+        writer.write(String.format("Tokens/Line: %.1f\n", tokensPerLine));
 
         if (!skippedFiles.isEmpty()) {
             writer.write("\nSkipped Files:\n");
-            for (String f : skippedFiles) {
-                writer.write(" - " + f + "\n");
+            for (String sf : skippedFiles) {
+                writer.write(" - " + sf + "\n");
             }
         }
+        writer.write("....\n");
     }
 
     /**
-     * Closes any underlying resources (if not already closed).
+     * Closes the underlying writer. Safe to call multiple times.
      */
-    @Override
     public void close() {
         writer.close();
     }
 
-    /**
-     * Recursively processes a file or directory path.
-     *
-     * @param path the path to process
-     * @throws IOException if an I/O error occurs
-     */
-    private void processPath(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            // Non-existent path, skip
-            return;
-        }
-        if (Files.isDirectory(path)) {
-            // Recurse
-            Files.walkFileTree(path, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                        throws IOException {
-                    if (fileFilter.include(file)) {
-                        // If incremental mode, only process if file is new/updated
-                        if (incrementalMode) {
-                            long lastMod = Files.getLastModifiedTime(file).toMillis();
-                            if (lastMod > contextFileLastModified) {
-                                processFile(file);
-                            }
-                        } else {
-                            processFile(file);
-                        }
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } else {
-            // Single file
-            if (fileFilter.include(path)) {
-                if (incrementalMode) {
-                    long lastMod = Files.getLastModifiedTime(path).toMillis();
-                    if (lastMod > contextFileLastModified) {
-                        processFile(path);
-                    }
-                } else {
-                    processFile(path);
-                }
-            }
-        }
-    }
+    // ------------------------------------------------------------------------
+    // Internal Methods
+    // ------------------------------------------------------------------------
 
     /**
-     * Processes a single file: reads lines, optionally removes copyright,
-     * and writes them to the open output file.
+     * Recursively processes a directory or processes a single file.
      *
-     * @param path the file to process
+     * @param path path to directory or file
      */
-    private void processFile(Path path) {
+    private void processPath(Path path) {
         try {
-            List<String> lines = fileProcessor.readFileLines(path);
-            if (removeCopyright) {
-                lines = fileProcessor.maybeRemoveCopyright(lines);
+            if (!Files.exists(path)) {
+                // skip non-existent
+                return;
             }
+            if (Files.isDirectory(path)) {
+                // Walk the directory tree
+                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                            throws IOException {
+                        processSingleFile(file);
+                        return FileVisitResult.CONTINUE;
+                    }
 
-            writer.write("== File: " + relativePathString(path) + "\n");
-            writer.write("....\n");
-            writer.snapshotStats();
-            for (String line : lines) {
-                writer.write(line + "\n");
+                    @Override
+                    public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                        skippedFiles.add(file.toString());
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } else {
+                // Single file
+                processSingleFile(path);
             }
-
-            // Deltas (lines, blanks, tokens) for this file
-            long dLines = stats.getDeltaLines();
-            long dBlanks = stats.getDeltaBlanks();
-            long dTokens = stats.getDeltaTokens();
-
-            writer.write("....\n\n");
-            writer.write("Lines " + dLines + ", Blanks " + dBlanks + ", Tokens " + dTokens + "\n\n");
-
         } catch (IOException e) {
             skippedFiles.add(path.toString());
         }
     }
 
-    private String relativePathString(Path path) {
+    /**
+     * Process a single file by applying filters, checking timestamps (in incremental mode),
+     * and writing content to the open AsciiDoc file with stats.
+     */
+    private void processSingleFile(Path path) {
         try {
-            // Attempt to show a relative path if possible
-            Path current = Path.of("").toAbsolutePath();
-            return current.relativize(path.toAbsolutePath()).toString();
-        } catch (Exception e) {
-            // Fallback
-            return path.toString();
+            // If not included by filter, skip
+            if (!fileFilter.include(path)) {
+                return;
+            }
+
+            // In incremental mode, check timestamps
+            if (incrementalMode) {
+                long fileLastMod = Files.getLastModifiedTime(path).toMillis();
+                if (fileLastMod <= contextFileLastModified) {
+                    return;
+                }
+            }
+
+            // Read lines, remove copyright if needed
+            List<String> lines = fileProcessor.readFileLines(path);
+            if (removeCopyright) {
+                lines = fileProcessor.maybeRemoveCopyright(lines);
+            }
+
+            // Write a heading for this file
+            writer.write("== File: " + path.getFileName() + "\n");
+            writer.write("....\n");
+
+            // Snapshot stats, then write file content
+            writer.snapshotStats();
+            for (String line : lines) {
+                writer.write(line + "\n");
+            }
+
+            // Summarize new lines, blanks, tokens
+            long dLines = stats.getDeltaLines();
+            long dBlanks = stats.getDeltaBlanks();
+            long dTokens = stats.getDeltaTokens();
+
+            writer.write("....\n");
+            writer.write(String.format("Lines %d, Blanks %d, Tokens %d\n\n",
+                    dLines, dBlanks, dTokens));
+
+        } catch (IOException e) {
+            skippedFiles.add(path.toString());
         }
     }
 }

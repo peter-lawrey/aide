@@ -11,6 +11,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests for {@link AdocDocumentWriter}, verifying it writes text to disk and
+ * updates {@link AdocDocumentStats} accordingly.
+ */
 class AdocDocumentWriterTest {
 
     @TempDir
@@ -18,35 +22,42 @@ class AdocDocumentWriterTest {
 
     @AfterEach
     void cleanup() {
-        // Just in case we opened any file, the writer should be closed
+        // If you need any cleanup after each test (e.g., closing the writer), do it here.
     }
 
     @Test
     void testWrite_updatesStatsAndFile() throws IOException {
+        // Create a new stats instance
         AdocDocumentStats stats = new AdocDocumentStats();
+        // Create the writer with that stats
         AdocDocumentWriter writer = new AdocDocumentWriter(stats);
 
-        Path output = tempDir.resolve("testOutput.adoc");
-        writer.open(output.toString(), false);
+        Path outputFile = tempDir.resolve("testOutput.adoc");
+        // Open (overwrite mode)
+        writer.open(outputFile.toString(), false);
 
+        // Write two non-blank lines
         writer.write("Line 1\n");
         writer.write("Line 2\n");
-        assertEquals(2, stats.getTotalLines());
-        assertEquals(0, stats.getTotalBlanks());
-        assertTrue(stats.getTotalTokens() > 0);
 
-        writer.write("\n"); // Another blank line
-        assertEquals(2, stats.getTotalLines());
-        assertEquals(1, stats.getTotalBlanks());
+        // Verify stats
+        assertEquals(2, stats.getTotalLines(), "We wrote 2 non-blank lines so far");
+        assertEquals(0, stats.getTotalBlanks(), "No blank lines yet");
+        assertTrue(stats.getTotalTokens() > 0, "Tokens should be > 0 if lines contain text");
+
+        // Write a blank line
+        writer.write("\n");
+        assertEquals(2, stats.getTotalLines(), "Still 2 non-blank lines");
+        assertEquals(1, stats.getTotalBlanks(), "Now 1 blank line total");
 
         writer.close();
 
-        // Verify file contents
-        List<String> fileLines = Files.readAllLines(output);
-        assertEquals(3, fileLines.size());
-        assertEquals("Line 1", fileLines.get(0));
-        assertEquals("Line 2", fileLines.get(1));
-        assertEquals("", fileLines.get(2)); // blank
+        // Verify actual file contents
+        List<String> lines = Files.readAllLines(outputFile);
+        assertEquals(3, lines.size(), "3 total lines in output file");
+        assertEquals("Line 1", lines.get(0));
+        assertEquals("Line 2", lines.get(1));
+        assertEquals("", lines.get(2)); // blank line
     }
 
     @Test
@@ -54,9 +65,9 @@ class AdocDocumentWriterTest {
         AdocDocumentStats stats = new AdocDocumentStats();
         AdocDocumentWriter writer = new AdocDocumentWriter(stats);
 
-        assertThrows(IllegalStateException.class, () -> {
-            writer.write("Should fail");
-        });
+        // Attempting to write without calling open(...) should throw
+        assertThrows(IllegalStateException.class, () -> writer.write("Should fail"),
+                "Should throw if no file is open for writing");
     }
 
     @Test
@@ -64,17 +75,25 @@ class AdocDocumentWriterTest {
         AdocDocumentStats stats = new AdocDocumentStats();
         AdocDocumentWriter writer = new AdocDocumentWriter(stats);
 
-        Path output = tempDir.resolve("appendTest.adoc");
-        writer.open(output.toString(), false);
+        Path outputFile = tempDir.resolve("appendTest.adoc");
+
+        // 1) Open in overwrite mode first
+        writer.open(outputFile.toString(), false);
         writer.write("First line\n");
         writer.close();
 
-        // Re-open in append mode
-        writer.open(output.toString(), true);
+        // Check single line so far
+        List<String> initialLines = Files.readAllLines(outputFile);
+        assertEquals(1, initialLines.size());
+        assertEquals("First line", initialLines.get(0));
+
+        // 2) Re-open in append mode
+        writer.open(outputFile.toString(), true);
         writer.write("Appended line\n");
         writer.close();
 
-        List<String> lines = Files.readAllLines(output);
+        // Verify the new line was appended
+        List<String> lines = Files.readAllLines(outputFile);
         assertEquals(2, lines.size());
         assertEquals("First line", lines.get(0));
         assertEquals("Appended line", lines.get(1));

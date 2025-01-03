@@ -1,63 +1,106 @@
 package build.chronicle.aide.dc;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Main entry point for the command-line application.
- *
- * <p>Reads system properties for:
+ * A thin CLI wrapper which:
  * <ul>
- *   <li><b>context</b>: name of the full context file (default "context.asciidoc")</li>
- *   <li><b>increment</b>: name of the incremental file (default "increment.asciidoc")</li>
- *   <li><b>removeCopyrightMessage</b>: whether to remove copyright blocks (default "true")</li>
+ *   <li>Reads system properties (<code>context</code>, <code>increment</code>, <code>removeCopyrightMessage</code>)</li>
+ *   <li>Accepts zero or more command-line arguments as scan paths (defaults to "." if none)</li>
+ *   <li>Determines which ignore file to use (<code>aide.ignore</code> preferred, otherwise <code>.gitignore</code>)</li>
+ *   <li>Constructs and configures an {@link AdocDocumentEngine}</li>
+ *   <li>Executes the engine to merge AsciiDoc content (full or incremental mode)</li>
+ *   <li>Prints a summary and closes resources</li>
  * </ul>
  *
- * <p>Accepts command-line arguments for directories or files to scan. If none are provided,
- * scans the current directory.
- *
- * <p>After scanning and processing, prints a final summary.
+ * <p>This class is the main entry point for scanning directories/files,
+ * aggregating them into a single (or incremental) <code>.asciidoc</code> output.</p>
  */
 public class AdocDocumentApp {
 
     /**
-     * CLI entry point that configures and runs the document engine.
-     *
-     * @param args paths to scan (if empty, uses current directory)
-     * @throws IOException if an I/O error occurs
+     * System property key for the context file name (defaults to "context.asciidoc").
      */
-    public static void main(String[] args) throws IOException {
+    public static final String PROP_CONTEXT = "context";
 
-        // Read system properties
-        String contextFile = System.getProperty("context", "context.asciidoc");
-        String incrementFile = System.getProperty("increment", "increment.asciidoc");
+    /**
+     * System property key for the incremental file name (defaults to "increment.asciidoc").
+     */
+    public static final String PROP_INCREMENT = "increment";
+
+    /**
+     * System property key for whether to remove copyright messages (defaults to "true").
+     */
+    public static final String PROP_REMOVE_COPYRIGHT = "removeCopyrightMessage";
+
+    /**
+     * Main entry point. Orchestrates file scanning, merges AsciiDoc content, and prints a summary.
+     *
+     * <p>Usage:
+     * <pre>
+     *   java -Dcontext=myContext.asciidoc \
+     *        -Dincrement=myIncrement.asciidoc \
+     *        -DremoveCopyrightMessage=false \
+     *        -cp aide.jar build.chronicle.aide.dc.AdocDocumentApp [paths...]
+     * </pre>
+     *
+     * @param args Zero or more file/directory paths to scan. If none provided, defaults to ".".
+     */
+    public static void main(String[] args) {
+        // 1. Read system properties (with fallbacks).
+        String contextFile = System.getProperty(PROP_CONTEXT, "context.asciidoc");
+        String incrementFile = System.getProperty(PROP_INCREMENT, "increment.asciidoc");
         boolean removeCopyright = Boolean.parseBoolean(
-                System.getProperty("removeCopyrightMessage", "true"));
+                System.getProperty(PROP_REMOVE_COPYRIGHT, "true"));
 
-        // Create filter, stats, writer, and engine
-        Path gitignorePath = Path.of(args.length > 0 ? args[0] : ".", ".gitignore");
-        AdocFileFilter fileFilter = new AdocFileFilter(gitignorePath);
-        AdocDocumentStats stats = new AdocDocumentStats();
-        AdocDocumentWriter writer = new AdocDocumentWriter(stats);
+        // 2. Determine paths to scan (default to ".")
+        if (args == null || args.length == 0) {
+            args = new String[]{ "." };
+        }
+
+        // 3. Determine which ignore file to use (prefer aide.ignore in the first argument's directory, else .gitignore)
+        Path firstArgDir = Path.of(args[0]).toAbsolutePath();
+        if (Files.isRegularFile(firstArgDir)) {
+            // If the first argument is a file, use its parent directory to look for ignore files.
+            firstArgDir = firstArgDir.getParent() == null ? Path.of(".") : firstArgDir.getParent();
+        }
+        Path aideIgnore = firstArgDir.resolve("aide.ignore");
+        Path fallbackGitignore = firstArgDir.resolve(".gitignore");
+        Path ignoreFile = null;
+        if (Files.exists(aideIgnore)) {
+            ignoreFile = aideIgnore;
+        } else if (Files.exists(fallbackGitignore)) {
+            ignoreFile = fallbackGitignore;
+        }
+
+        // 4. Build the core collaborators: filter, stats, writer, engine.
+        AdocFileFilter fileFilter = new AdocFileFilter(ignoreFile);      // Takes .gitignore or aide.ignore
+        AdocDocumentStats stats = new AdocDocumentStats();               // Tracks lines/blanks/tokens
+        AdocDocumentWriter writer = new AdocDocumentWriter(stats);       // Writes output + updates stats
         AdocDocumentEngine engine = new AdocDocumentEngine(fileFilter, writer, stats);
 
-        // Configure engine
+        // 5. Configure the engine with user-specified or default settings.
         engine.setContextAsciidoc(contextFile);
         engine.setIncrementalAsciidoc(incrementFile);
         engine.setRemoveCopyright(removeCopyright);
 
-        // If no args provided, use "."
-        if (args.length == 0) {
-            engine.addInputPath(".");
-        } else {
-            for (String path : args) {
-                engine.addInputPath(path);
-            }
+        // 6. Add all argument paths to the engine.
+        for (String pathStr : args) {
+            engine.addInputPath(pathStr);
         }
 
-        // Run
-        engine.execute();
-        engine.printSummary();
-        engine.close();
+        // 7. Execute the engine, print a summary, and close.
+        try {
+            engine.execute();
+            engine.printSummary();
+        } catch (IOException e) {
+            System.err.println("Error running AdocDocumentEngine: " + e.getMessage());
+            // Optionally exit with non-zero status in real applications
+            // System.exit(1);
+        } finally {
+            engine.close();
+        }
     }
 }

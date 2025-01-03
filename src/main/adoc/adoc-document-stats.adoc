@@ -1,12 +1,10 @@
 == 3. `AdocDocumentStats` Class
 
 Maintains counters for:
-
-- **non-blank lines**,
-- **blank lines**, and
-- **total tokens** (GPT-like, via an O200K_BASE encoder),
-
-while supporting snapshot-based *delta* calculations. The updated logic uses **partial-line buffering** to wait for a newline before finalizing counts for lines and tokens.
+- non-blank lines,
+- blank lines,
+- total tokens (GPT-like),
+with partial-line accumulation.
 
 === 3.1 Partial Line Accumulation
 
@@ -106,4 +104,4 @@ This class is *not* designed for concurrent usage. Calls should be serialised ex
    long newBlanks     = stats.getDeltaBlanks();
    long newTokens     = stats.getDeltaTokens();
 
-This updated design ensures partial lines are accumulated before counting, uses a single GPT-like token calculation per chunk, and preserves snapshot/delta functionality in line with the corrected implementation.
+This ensures accurate line/blank/token counts for each file or block of text the writer processes.

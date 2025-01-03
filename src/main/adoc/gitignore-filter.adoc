@@ -6,37 +6,21 @@
 
 == Overview
 
-The `GitignoreFilter` processes `.gitignore` files to determine which files and directories should be excluded during project scans.
-It ensures compliance with `.gitignore` rules and integrates seamlessly into broader file filtering mechanisms.
+`GitignoreFilter` processes `.gitignore` (or `aide.ignore`) files to determine excluded or included files.
 
 == Functional Requirements
 
-. **Parse `.gitignore`**
-* Read and process the `.gitignore` file, supporting:
-- Wildcards (`*.log`, `*.tmp`)
-- Directory rules (`target/`, `.idea/`)
-- Negations (`!important_file.txt`)
-- Relative paths (`/.config`)
-
-. **Ignore Comments and Blanks**
-* Skip lines starting with `#` or containing only whitespace.
-
-. **Match File Paths**
-* Determine file inclusion/exclusion based on `.gitignore` rules:
-- `IGNORED`: Explicitly excluded.
-- `NOT_IGNORED`: Explicitly included via negation.
-- `DEFAULT`: No matching rule; further filters decide.
-
-. **Precedence**
-* Apply the last matching rule in `.gitignore` (Git standard).
+1. **Parse `.gitignore`**: wildcards, directory rules, negations (`!file`), relative paths.
+2. **Ignore Comments and Blanks**: skip lines starting with `#` or whitespace only.
+3. **Match File Paths**:
+   - `IGNORED`: explicitly excluded
+   - `NOT_IGNORED`: explicitly included
+   - `DEFAULT`: no matching rule; local checks decide.
+4. **Precedence**: last matching rule has priority.
 
 == Integration
 
-The filter supports integration but overrides with other rules, ensuring:
-
-1. Overshadowed files (`file.txt` excluded if `file.txt.ad` exists).
-2. Skipping large files (>64KB).
-3. Excluding hidden files and certain extensions (`.asciidoc`, `.png`).
+`AdocFileFilter` or other filters can chain `.gitignore` logic with overshadow logic, large-file skips, etc.
 
 == Examples
 
@@ -66,7 +50,7 @@ target/
 
 == Summary
 
-`GitignoreFilter` ensures `.gitignore` rules are respected, enhancing project clarity and consistency.
+`GitignoreFilter` ensures `.gitignore` rules are respected, returning `IGNORED`, `NOT_IGNORED`, or `DEFAULT`.
 
 == References
 

@@ -5,6 +5,8 @@
 :lang: en-GB
 :toc:
 
+== Purpose
+
 This AsciiDoc document describes all classes under the package `build.chronicle.aide.dc` and the relationships between them.
 It provides enough details for an AI (or a developer) to recreate the Java source code files entirely.
 
