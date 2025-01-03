@@ -23,7 +23,7 @@ This can be as much or as little detail as you have.
 You can start by asking the AI to generate a detailed functional requirements document from the code you have or an idea.
 2. **Write or Update Tests** – Create tests that reflect documented requirements.
 AI can suggest skeletons; you refine domain logic.
-3. **Write or Update Code** – Let AI produce a boilerplate or refactor existing code.
+3. **Write or Update Code** – Let AI produce boilerplate or refactor existing code.
 You verify its validity.
 4. **Continuous Review** – AI flags discrepancies; humans resolve them.
 5. **Repeat** – Each new or changed requirement triggers another loop.
@@ -58,7 +58,7 @@ This tight loop informs the AI and creates immediate clarity for all team member
 
 == Benefits of Keeping Requirements, Tests, and Code In Sync
 
-- **Reduced Drift**: Fewer gaps between documentation and iimplementation
+- **Reduced Drift**: Fewer gaps between documentation and implementation.
 - **Faster Feedback**: AI can quickly generate stubs and highlight inconsistencies.
 - **Better Quality**: Frequent checks align the code with tests and docs.
 - **Smoother Onboarding**: Up-to-date AsciiDoc clarifies the system for new developers.
@@ -66,17 +66,13 @@ This tight loop informs the AI and creates immediate clarity for all team member
 == Best Practices
 
 1. **Single Source of Truth**
-Keep docs (AsciiDoc), tests, and code in version control.
-
+   Keep docs (AsciiDoc), tests, and code in version control.
 2. **Frequent Iterations**
-Update documentation first, then let AI produce or refine code and tests.
-
+   Update documentation first, then let AI produce or refine code and tests.
 3. **Small Commits**
-Each commit should relate to a single requirement or story, making reviewing changes easier.
-
+   Each commit should relate to a single requirement or story, making reviewing changes easier.
 4. **Team Buy-In**
-Encourage everyone to review AI outputs.
-Use a consistent coding style guided by the style guide.
+   Encourage everyone to review AI outputs. Use a consistent coding style guided by the xref:aide-style-guide.adoc[AIDE Style Guide].
 
 == Summarising Large Files
 
@@ -95,8 +91,6 @@ This produces a concise `.ad` file containing essential details.
 Include a concise commit message like "Summarise large class as `.ad` to reduce token length."
 
 This approach keeps your AI-based tooling efficient and your repository lean while preserving a high-level understanding of classes that do not require frequent full-detail scrutiny.
-
-'''
 
 == Why Integrate Chronicle Products?
 

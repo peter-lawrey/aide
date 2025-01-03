@@ -11,21 +11,21 @@ A thin CLI wrapper that orchestrates:
 
 === 1.1 System Properties
 
-- `context`  
-  Defaults to `"context.asciidoc"`.  
+- `context`
+  Defaults to `"context.asciidoc"`.
   The *full mode* target file if no existing context is found.
 
-- `increment`  
-  Defaults to `"increment.asciidoc"`.  
+- `increment`
+  Defaults to `"increment.asciidoc"`.
   The *incremental mode* target file if a context already exists.
 
-- `removeCopyrightMessage`  
-  Defaults to `"true"`.  
+- `removeCopyrightMessage`
+  Defaults to `"true"`.
   If set to `false`, preserves recognized copyright blocks.
 
 === 1.2 CLI Arguments
 
-If **no arguments** are provided, the application scans `.` (current directory).  
+If **no arguments** are provided, the application scans `.` (current directory).
 If **one or more** arguments are given, each argument is treated as a path (file or directory) to process.
 
 === 1.3 Handling `aide.ignore` vs. `.gitignore`

@@ -28,3 +28,8 @@ Refer to each `.adoc` for details:
 * xref:examples.adoc[Examples using AIDE]: Sample AI queries using AIDE.
 
 These documents are stored in version control alongside the code, ensuring they evolve together.
+
+== Usage
+
+Many of these `.adoc` files are included in the final `context.asciidoc` or `increment.asciidoc` (depending on whether you run a full or incremental build). Keep them as small as practical to avoid exceeding token limits in AI-driven tasks.
+

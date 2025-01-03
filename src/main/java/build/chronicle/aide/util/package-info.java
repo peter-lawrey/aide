@@ -4,7 +4,7 @@
  *
  * <p>Highlights include:</p>
  * <ul>
- *   <li>{@link build.chronicle.aide.util.GitignoreFilter} - Parses a .gitignore file and 
+ *   <li>{@link build.chronicle.aide.util.GitignoreFilter} - Parses a .gitignore file and
  *       determines inclusion/exclusion of specific paths.</li>
  * </ul>
  */

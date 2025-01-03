@@ -1,6 +1,6 @@
 == 2. `AdocDocumentEngine`
 
-Central orchestrator for scanning, filtering, processing, and writing AsciiDoc or text-based files.  
+Central orchestrator for scanning, filtering, processing, and writing AsciiDoc or text-based files.
 This version includes console output indicating whether **full** or **incremental** mode is active, as well as updated file overwrite logic.
 
 === 2.1 Responsibilities
@@ -8,8 +8,8 @@ This version includes console output indicating whether **full** or **incrementa
 1. **Detect Full vs. Incremental Mode**
 - Checks if `context.asciidoc` exists. If yes, run incremental; if no, run full.
 
-2. **Console Output**  
-   - Immediately before opening the output file, the engine prints either:  
+2. **Console Output**
+   - Immediately before opening the output file, the engine prints either:
      ```
      Full mode: {contextAsciidoc}
      ```
@@ -19,7 +19,7 @@ This version includes console output indicating whether **full** or **incrementa
      ```
    - This is a new addition, helping users see which file is being written.
 
-3. **File Scanning**  
+3. **File Scanning**
    - Recursively walks directories (using `Files.walkFileTree`) or processes single files.
    - Uses `AdocFileFilter` to decide inclusion.
    - Compares file timestamps in incremental mode (only new or updated files).
@@ -37,67 +37,67 @@ This version includes console output indicating whether **full** or **incrementa
 
 === 2.2 Fields
 
-1. `AdocFileFilter fileFilter`  
+1. `AdocFileFilter fileFilter`
    - Manages file inclusion (e.g., overshadowed `.ad`, large files, `.gitignore`).
 
-2. `AdocDocumentWriter writer`  
+2. `AdocDocumentWriter writer`
    - Writes lines to disk in the correct AsciiDoc file (context or increment) while updating stats.
 
-3. `AdocDocumentStats stats`  
-   - Tracks total lines, blank lines, and tokens.  
+3. `AdocDocumentStats stats`
+   - Tracks total lines, blank lines, and tokens.
    - Allows deltas via snapshot calls (`stats.snapshotTotals()`).
 
-4. `AdocFileProcessor fileProcessor`  
+4. `AdocFileProcessor fileProcessor`
    - Reads file content, optionally stripping recognized copyright blocks.
 
-5. `List<Path> inputPaths`  
+5. `List<Path> inputPaths`
    - Collects paths (files/directories) for scanning.
 
-6. `String contextAsciidoc` and `String incrementalAsciidoc`  
+6. `String contextAsciidoc` and `String incrementalAsciidoc`
    - Filenames for full vs. incremental output.
 
-7. `boolean removeCopyright`  
+7. `boolean removeCopyright`
    - Controls optional block removal.
 
-8. `long contextFileLastModified`  
+8. `long contextFileLastModified`
    - Used to determine whether a file is “new” in incremental mode.
 
-9. `boolean incrementalMode`  
-   - True if `context.asciidoc` already existed.  
+9. `boolean incrementalMode`
+   - True if `context.asciidoc` already existed.
    - If true, only files with a newer timestamp are processed.
 
-10. `boolean engineExecuted`  
+10. `boolean engineExecuted`
    - Guards against multiple consecutive calls to `execute()` in the same instance.
 
-11. `List<String> skippedFiles`  
+11. `List<String> skippedFiles`
    - Paths for files that could not be processed.
 
 === 2.3 Usage Flow
 
-1. **Create/Configure**  
-   Instantiate `AdocDocumentEngine` with references to the filter, writer, and stats.  
+1. **Create/Configure**
+   Instantiate `AdocDocumentEngine` with references to the filter, writer, and stats.
    Set `contextAsciidoc`, `incrementalAsciidoc`, and `removeCopyright`.
 
-2. **Add Input Paths**  
+2. **Add Input Paths**
    Call `addInputPath(...)` for each directory or file.
 
-3. **Execute**  
-   - Check for existing `context.asciidoc`.  
-     - If found, set `incrementalMode = true`.  
-       - *Prints to console:* `Incremental mode: increment.asciidoc`.  
+3. **Execute**
+   - Check for existing `context.asciidoc`.
+     - If found, set `incrementalMode = true`.
+       - *Prints to console:* `Incremental mode: increment.asciidoc`.
        - Opens `increment.asciidoc` and writes a heading, e.g.:
          ```
          = Directory Content (Incremental Mode)
-         
+
          ```
-     - If not found, set `incrementalMode = false`.  
-       - *Prints to console:* `Full mode: context.asciidoc`.  
+     - If not found, set `incrementalMode = false`.
+       - *Prints to console:* `Full mode: context.asciidoc`.
        - Opens `context.asciidoc` and writes a heading, e.g.:
          ```
          = Directory Content
-         
+
          ```
-   - Recursively processes each path, filtering out excluded items.  
+   - Recursively processes each path, filtering out excluded items.
    - For each included file, reads lines, optionally removes copyright, and writes them with a heading:
      ```
      == File: filename.ext
@@ -107,60 +107,60 @@ This version includes console output indicating whether **full** or **incrementa
      (delta counts)
      ```
 
-4. **Print Summary**  
-   - Append total lines, blanks, tokens, tokens/line.  
-   - Lists skipped files if any.  
+4. **Print Summary**
+   - Append total lines, blanks, tokens, tokens/line.
+   - Lists skipped files if any.
    - Renders the summary in an AsciiDoc block (`....`).
 
-5. **Close**  
-   - Closes the `AdocDocumentWriter`.  
+5. **Close**
+   - Closes the `AdocDocumentWriter`.
    - Safe to call multiple times.
 
 === 2.4 Key Methods
 
-1. `public void addInputPath(String pathStr)`  
-   Adds a path to be scanned.  
+1. `public void addInputPath(String pathStr)`
+   Adds a path to be scanned.
    *If the string is blank or `null`, nothing is added.*
 
-2. `public void execute()`  
-   - Detects full vs. incremental mode.  
-   - Opens the correct file (overwrites by default).  
-   - Prints a console message indicating “Full mode” or “Incremental mode.”  
-   - Scans each path (or walks directories), calling `processSingleFile(path)` for each included file.  
+2. `public void execute()`
+   - Detects full vs. incremental mode.
+   - Opens the correct file (overwrites by default).
+   - Prints a console message indicating “Full mode” or “Incremental mode.”
+   - Scans each path (or walks directories), calling `processSingleFile(path)` for each included file.
    - **Throws** an `IllegalStateException` if called more than once on the same engine instance.
 
-3. `public void printSummary()`  
-   - Appends a final stats block (lines, blanks, tokens) and any skipped files.  
+3. `public void printSummary()`
+   - Appends a final stats block (lines, blanks, tokens) and any skipped files.
    - Called after `execute()` finishes processing.
 
-4. `public void close()`  
+4. `public void close()`
    - Closes the writer.
 
-5. `private void processPath(Path path)`  
-   - If `Files.isDirectory(path)`, recursively walks via `Files.walkFileTree(...)`.  
+5. `private void processPath(Path path)`
+   - If `Files.isDirectory(path)`, recursively walks via `Files.walkFileTree(...)`.
    - Otherwise, calls `processSingleFile(path)`.
 
-6. `private void processSingleFile(Path path)`  
-   - Checks `AdocFileFilter#include(...)`.  
-   - If incremental mode, verifies `fileLastMod > contextFileLastModified`.  
-   - Reads lines using `AdocFileProcessor`.  
-   - Optionally removes recognized blocks if `removeCopyright` is `true`.  
+6. `private void processSingleFile(Path path)`
+   - Checks `AdocFileFilter#include(...)`.
+   - If incremental mode, verifies `fileLastMod > contextFileLastModified`.
+   - Reads lines using `AdocFileProcessor`.
+   - Optionally removes recognized blocks if `removeCopyright` is `true`.
    - Writes heading, listing block, and delta (lines, blanks, tokens).
 
 === 2.5 Unit Tests
 
 Tests in **`AdocDocumentEngineTest`** validate the logic:
 
-- **`testExecute_fullContextMode_noExistingFile()`**  
+- **`testExecute_fullContextMode_noExistingFile()`**
   Ensures a new `context.asciidoc` is created in full mode if none is present.
 
-- **`testExecute_incrementalMode_existingContext()`**  
+- **`testExecute_incrementalMode_existingContext()`**
   Confirms the engine recognizes an existing `context.asciidoc` and writes only changed files to `increment.asciidoc`.
 
-- **`testExecute_withNonExistentPath()`**  
+- **`testExecute_withNonExistentPath()`**
   Verifies the engine handles missing paths gracefully.
 
-- **`testProcessFile_unreadableFile()`**  
+- **`testProcessFile_unreadableFile()`**
   Asserts that unreadable files are skipped without halting the run.
 
 Additionally, the updated code ensures a **console message** is displayed for each mode:
@@ -175,23 +175,23 @@ Incremental mode: increment.asciidoc
 
 === 2.6 Best Practices and Notes
 
-1. **Single Run**  
-   - Create a fresh `AdocDocumentEngine` for each scan.  
+1. **Single Run**
+   - Create a fresh `AdocDocumentEngine` for each scan.
    - Once `execute()` is called, the engine disallows further executions in the same instance.
 
-2. **Parallelism**  
+2. **Parallelism**
    - By default, directory walks are single-threaded. For concurrency, you could split paths or manually parallelize.
 
-3. **Testing**  
-   - The included unit tests cover typical usage patterns.  
+3. **Testing**
+   - The included unit tests cover typical usage patterns.
    - You can add integration tests to confirm the final `.asciidoc` merges if needed.
 
-4. **Append Mode**  
-   - Currently, **both** full and incremental modes overwrite their respective files (`append = false`).  
+4. **Append Mode**
+   - Currently, **both** full and incremental modes overwrite their respective files (`append = false`).
    - If you want continuous accumulation for incremental runs, change `writer.open(incrementalAsciidoc, true)`.
 
-5. **Maintenance**  
-   - Watch for performance if scanning deeply nested or large directories.  
+5. **Maintenance**
+   - Watch for performance if scanning deeply nested or large directories.
    - `.gitignore` or `aide.ignore` usage helps exclude bulky or irrelevant files.
 
 By reflecting these **console outputs** and **overwrite** semantics, this updated document aligns with the latest implementation of `AdocDocumentEngine`.
