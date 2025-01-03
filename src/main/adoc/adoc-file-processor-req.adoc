@@ -1,0 +1,111 @@
+== 6. `AdocFileProcessor`
+
+Handles reading file lines in UTF-8 and optionally removing a multi-line or single-line copyright comment block **if it appears within the first 20 lines**.
+
+=== 6.1 Overview
+
+1. **Methods**:
+* `List<String> readFileLines(Path file) throws IOException`
+- Reads all lines from the given file in UTF-8.
+* `List<String> maybeRemoveCopyright(List<String> lines)`
+- Searches the first 20 lines for one of the recognised copyright markers
+and, if found, removes that block along with any additional lines that form
+part of it. Returns the modified list (or original if no match).
+
+2. **Usage**:
+- Typical flow:
+    * **Read** the file contents via `readFileLines(...)`.
+    * **Strip** out a recognized copyright block (if present).
+    * **Return** the resulting list of lines.
+
+=== 6.2 Copyright Removal Logic
+
+Based on the parameterized tests, the current implementation handles several comment styles when looking for the word “Copyright” within the first 20 lines:
+
+==== AsciiDoc Comment Block
+- Pattern:
+
+[source]
+----
+////
+Copyright (c) ....
+[Optional lines...]
+////
+----
+
+- If this pattern is detected before line 20:
+- All lines within this block (including the `////`) are removed.
+
+==== Java Block Comment
+- Pattern:
+
+[source]
+----
+/*
+[Optional lines...]
+Copyright (c) ...
+[Optional lines...]
+*/
+----
+- If it appears within the first 20 lines, all lines from the `/*` up to `*/` (inclusive) are removed.
+
+==== Forward-Slash Line Comment
+- Pattern:
+
+`// Copyright (c) ...`
+
+- If found near the top, the block of consecutive `//` lines containing “Copyright” can be stripped.
+
+==== Shell Script (`#`) Comments
+
+- Pattern:
+
+[source]
+----
+#!{shebang line}
+...
+# Copyright (c) ...
+----
+- If such a block occurs in the first 20 lines, the lines from the initial `#` to just before the next non-`#` content may be removed. Don't remove the line starting with the shebang (`#!`).
+
+=== 6.3 Test Scenarios (Parameterised)
+
+Below are test scenarios (as seen in `AdocFileProcessorTest`) verifying each comment style:
+
+. **No Copyright Found**
+- Input lines remain unchanged.
+. **AsciiDoc Comment within First 20 Lines**
+- A block surrounded by `////` is removed if it contains “Copyright ...”.
+. **Copyright beyond 20 lines**
+- Ignored by the removal logic; the file remains unmodified.
+. **Java Block Comments**
+- Lines from `/*` to `*/` that include “Copyright” are removed.
+. **Forward-Slash Line Comments**
+- Consecutive `//` lines (including one with “Copyright”) are removed, up to the non-`//` line.
+. **Shell Script Style (`#`) Comments**
+- Leading or consecutive `#` lines containing “Copyright” are removed.
+
+**Important**: Depending on implementation details, the entire “block” is typically removed if it’s identified in the first 20 lines. The exact definition of “block” can vary (e.g., strictly between `/* ... */`, or consecutive lines starting with `//`/`#`). Ensure tests confirm the intended boundaries.
+
+=== 6.4 Implementation Notes
+
+* If **multiple** potential blocks are present within the first 20 lines, only the **first** recognized block is removed (by default).
+* The method currently assumes that if any recognized comment opening is found (`////`, `/*`, `//`, or `#`) and includes a line with “Copyright”, then the subsequent lines in that block are stripped until the block’s closing delimiter or a change in comment style.
+
+=== 6.5 Example Flow
+
+[.procedure]
+----
+1. Read file lines into a `List<String>`.
+2. Scan up to line 20:
+   a. Detect start of comment marker (e.g. `////`, `/*`, `//`, `#`) and check whether it contains “Copyright”.
+   b. If found, remove those lines up to the block’s end marker (or until a different style of comment is encountered).
+3. Return modified list.
+----
+
+=== 6.6 Future Enhancements
+
+* **Configurable Markers**: A config or YAML-driven approach could let users define custom comment delimiters.
+* **Partial Comment Removal**: If only specific lines should be removed rather than entire blocks.
+* **Multi-Block Handling**: Removal of multiple distinct blocks within the first 20 lines, if necessary.
+

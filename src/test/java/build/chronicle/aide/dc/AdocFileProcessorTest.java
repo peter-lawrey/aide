@@ -1,20 +1,16 @@
 package build.chronicle.aide.dc;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AdocFileProcessorTest {
 
-    @TempDir
-    Path tempDir;
     private AdocFileProcessor processor;
 
     @BeforeEach
@@ -22,53 +18,121 @@ class AdocFileProcessorTest {
         processor = new AdocFileProcessor();
     }
 
-    @Test
-    void testReadFileLines() throws IOException {
-        Path sample = Files.write(tempDir.resolve("sample.txt"),
-                List.of("Line 1", "Line 2", "Line 3"));
-        List<String> lines = processor.readFileLines(sample);
-        assertEquals(3, lines.size());
-        assertEquals("Line 1", lines.get(0));
+    /**
+     * Parameterized test that covers various scenarios for copyright removal.
+     * Each scenario includes:
+     * - A description
+     * - A list of input lines
+     * - The expected list of lines after removing the copyright block
+     */
+    @ParameterizedTest(name = "{index} => {0}")
+    @MethodSource("copyrightScenarios")
+    void testMaybeRemoveCopyright(String scenario, List<String> input, List<String> expected) {
+        List<String> result = processor.maybeRemoveCopyright(input);
+        assertEquals(expected, result, () -> "Failed scenario: " + scenario);
     }
 
-    @Test
-    void testMaybeRemoveCopyright_noneFound() {
-        List<String> lines = List.of(
-                "Line 1",
-                "Line 2"
+    /**
+     * Supplies scenarios for the parameterized test.
+     */
+    static Stream<Object[]> copyrightScenarios() {
+        return Stream.of(
+                new Object[]{
+                        "No copyright found",
+                        List.of("Line 1", "Line 2"),
+                        List.of("Line 1", "Line 2")
+                },
+                new Object[]{
+                        "AsciiDoc block comment within first 20 lines",
+                        List.of("= Actual Title",
+                                "////",
+                                "Copyright (c) 2025 My Company",
+                                "More copyright information",
+                                "////",
+                                "== First Header"),
+                        // Expect to remove lines 0..3 and keep only "= Actual Title"
+                        List.of("= Actual Title",
+                                "== First Header")
+                },
+                new Object[]{
+                        "Copyright beyond 20 lines",
+                        List.of(
+                                "Line 0", "Line 1", "Line 2", "Line 3", "Line 4",
+                                "Line 5", "Line 6", "Line 7", "Line 8", "Line 9",
+                                "Line 10", "Line 11", "Line 12", "Line 13", "Line 14",
+                                "Line 15", "Line 16", "Line 17", "Line 18", "Line 19",
+                                "Line 20", "Copyright 2024"
+                        ),
+                        // Should remain unchanged
+                        List.of(
+                                "Line 0", "Line 1", "Line 2", "Line 3", "Line 4",
+                                "Line 5", "Line 6", "Line 7", "Line 8", "Line 9",
+                                "Line 10", "Line 11", "Line 12", "Line 13", "Line 14",
+                                "Line 15", "Line 16", "Line 17", "Line 18", "Line 19",
+                                "Line 20", "Copyright 2024"
+                        )
+                },
+                new Object[]{
+                        "Java block comment style 1",
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "/*",
+                                " Copyright (c) 2025 Java Company",
+                                " Licensed under the ...",
+                                "*/",
+                                "public class MyClass {}"
+                        ),
+                        // Suppose the processor removes lines 0..3 and keeps "public class MyClass {}"
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "public class MyClass {}")
+                },
+                new Object[]{
+                        "Java block comment style 2",
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "/*",
+                                " * one line comment",
+                                " * second line comment",
+                                " * Copyright (c) 2025 Java Company",
+                                " * Licensed under the ...",
+                                "*/",
+                                "public class MyClass {}"
+                        ),
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "public class MyClass {}")
+                },
+                new Object[]{
+                        "Forward slash comment lines",
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "// not the first line",
+                                "// Copyright (c) 2025 My Java Project",
+                                "// Some other text",
+                                "public class MyClass {}"
+                        ),
+                        List.of(
+                                "package build.chronicle.aide.dc;",
+                                "public class MyClass {}"
+                        )
+                },
+                new Object[]{
+                        "Shell script style comments",
+                        List.of(
+                                "#!/usr/bin/env bash",
+                                "",
+                                "# first line comment",
+                                "# Copyright (c) 2025 My Shell Tools",
+                                "# Some other shell comment",
+                                "echo \"Hello World\""
+                        ),
+                        List.of(
+                                "#!/usr/bin/env bash",
+                                "",
+                                "echo \"Hello World\""
+                        )
+                }
         );
-        List<String> result = processor.maybeRemoveCopyright(lines);
-        assertEquals(lines, result, "Should be unchanged if no 'Copyright ' is found");
-    }
-
-    @Test
-    void testMaybeRemoveCopyright_inFirst20Lines() {
-        // Lines simulating an AsciiDoc block comment
-        List<String> lines = List.of(
-                "////",
-                "Copyright (c) 2025 My Company",
-                "////",
-                "= Actual Title"
-        );
-        // indexOfCopyright(...) would detect line 1
-        List<String> result = processor.maybeRemoveCopyright(lines);
-        // Lines 0..2 are removed (the block), leaving only the last line
-        assertEquals(1, result.size());
-        assertEquals("= Actual Title", result.get(0));
-    }
-
-    @Test
-    void testMaybeRemoveCopyright_beyond20Lines() {
-        // Put "Copyright " at line 21
-        List<String> lines = List.of(
-                "Line 0", "Line 1", "Line 2", "Line 3", "Line 4",
-                "Line 5", "Line 6", "Line 7", "Line 8", "Line 9",
-                "Line 10", "Line 11", "Line 12", "Line 13", "Line 14",
-                "Line 15", "Line 16", "Line 17", "Line 18", "Line 19",
-                "Line 20", "Copyright 2024"
-        );
-        List<String> result = processor.maybeRemoveCopyright(lines);
-        // Should remain unchanged
-        assertEquals(lines, result);
     }
 }

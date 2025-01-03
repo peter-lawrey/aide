@@ -1,9 +1,10 @@
 # Build/test dirs
 target/
 temp/
+.git/
 
 ### IntelliJ IDEA ###
-.idea/*
+.idea/
 *.iws
 *.iml
 *.ipr

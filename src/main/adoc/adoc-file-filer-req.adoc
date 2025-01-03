@@ -1,0 +1,45 @@
+== 5. `AdocFileFilter`
+
+Encapsulates the rules for including/excluding files. This filter also optionally leverages a `.gitignore` parser (`GitignoreFilter`) if a valid `.gitignore` file is provided.
+
+=== Responsibilities
+
+1. **Check `.gitignore` First (if available)**
+- Uses `GitignoreFilter` to see if a file is explicitly `IGNORED` or `NOT_IGNORED`.
+- If `IGNORED`, exclude immediately.
+- If `NOT_IGNORED`, the filter defers to local logic for final checks.
+- If `DEFAULT` (no matching rule), the filter applies the rules below.
+
+2. **Skip Directories**
+`AdocDocumentEngine` generally handles traversal, but `AdocFileFilter` returns `false` if the path is a directory.
+
+3. **Skip Hidden or “Dot” Files**
+Checks both `Files.isHidden(path)` and per-segment `.`, e.g., `.hidden.adoc`.
+
+4. **Skip If Overshadowed by `.ad`**
+If `myFile.txt.ad` exists, exclude `myFile.txt`.
+
+5. **Exclude Certain Extensions**
+- Skips `.asciidoc`, `.png`, `.jpg`, `.pdf`, `.class`, and similar.
+- Rationale: Some are too large or non-text formats not relevant to AsciiDoc processing.
+
+6. **Exclude `out-` Prefix**
+Any file whose name starts with `out-` is excluded as these are generated agitation test results.
+
+7. **Skip Large Files**
+File size over 64 KB (`MAX_SIZE_BYTES = 65536`) is excluded. If an I/O error occurs reading size, exclude it by default to avoid partial or broken data.
+
+8. **`include(Path path)`** Method Summary
+- Returns `true` if the file passes all checks above (and is not `.gitignore`-excluded).
+- Returns `false` otherwise.
+
+=== Key Methods
+
+- **`public AdocFileFilter(Path gitignorePath)`**
+Constructor attempts to parse the `.gitignore` file at `gitignorePath`. If parsing fails or the file doesn’t exist, `.gitignore` checks are skipped.
+
+- **`public boolean include(Path path)`**
+Applies the layered checks:
+1. `.gitignore` rules (if any).
+2. Local skip rules: hidden files, overshadowed by `.ad`, disallowed extensions, large file, etc.
+Returns `true` if included, `false` if excluded.

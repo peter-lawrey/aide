@@ -1,0 +1,17 @@
+== 4. `AdocDocumentWriter`
+
+Writes text to the current output file and updates statistics line-by-line:
+
+1. **Fields**:
+- `AdocDocumentStats stats`
+- `PrintWriter currentWriter` – Open output stream.
+
+2. **Behavior**:
+- `open(String outputFile, boolean append)`: Opens a file for writing/appending.
+- `write(String text)`: Appends `text` to the current file, calls `stats.updateStats(text)`.
+- `snapshotStats()`: Saves current stats to track future deltas.
+- `close()`: Closes the writer if open.
+
+3. **Usage**:
+- Called by `AdocDocumentEngine` for both `context.asciidoc` (full mode) and `increment.asciidoc` (incremental mode).
+- Throws `IllegalStateException` if `write` is called while no file is open.

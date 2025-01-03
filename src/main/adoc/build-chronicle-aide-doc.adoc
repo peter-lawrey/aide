@@ -21,140 +21,17 @@ It supports:
 
 The following classes each serve a distinct responsibility:
 
-== 1. `AdocDocumentApp`
+include::adoc-document-app.adoc[]
 
-Java main entry point for the command-line application:
+include::adoc-document-engine.adoc[]
 
-1. **Purpose**:
-- Reads system properties:
-- `context` (default: `"context.asciidoc"`)
-- `increment` (default: `"increment.asciidoc"`)
-- `removeCopyrightMessage` (default: `"true"`)
-- Accepts command-line arguments as paths to scan; if none provided, uses `"."`.
-- Creates and configures the `AdocDocumentEngine` along with `AdocFileFilter`, `AdocDocumentStats`, and `AdocDocumentWriter`.
-- Executes the engine, prints a final summary, and closes resources.
+include::adoc-document-stats.adoc[]
 
-2. **Behaviour**:
-- Invokes `engine.execute()`, `engine.printSummary()`, then `engine.close()`.
-- System properties can override default file names.
+include::adoc-document-writer.adoc[]
 
-3. **Key Method**:
-- `public static void main(String[] args) throws IOException`
+include::adoc-file-filer-req.adoc[]
 
-== 2. `AdocDocumentEngine`
-
-Central orchestrator for scanning, filtering, processing, and writing:
-
-1. **Implements**: `AutoCloseable`
-2. **Fields**:
-- `AdocFileFilter fileFilter`
-- `AdocDocumentWriter writer`
-- `AdocDocumentStats stats`
-- `List<Path> inputPaths` – Directories or files to process.
-- `String contextAsciidoc` – The main output file (or path).
-- `String incrementalAsciidoc` – The incremental output file (or path).
-- `boolean removeCopyright`
-- `long contextFileLastModified` – Timestamp for `context.asciidoc` if it exists.
-- `List<String> skippedFiles` – Tracks files that could not be processed.
-- `boolean incrementalMode` – Decided by existence of `contextAsciidoc`.
-- `boolean engineExecuted` – Prevents multiple consecutive `execute()` calls.
-- `AdocFileProcessor fileProcessor`
-
-3. **Responsibilities**:
-- Detect if `contextAsciidoc` already exists → set incremental mode if so.
-- Open `context.asciidoc` (full mode) or `increment.asciidoc` (incremental mode).
-- Recursively walk each `inputPaths`, check file inclusion with `fileFilter`.
-- In incremental mode, only process files with timestamps newer than `contextFileLastModified`.
-- For each included file, calls `processFile(path)`.
-- Provides a summary (`printSummary`) of lines, blanks, tokens, and skipped files.
-- Closes its writer in `close()`.
-
-4. **Key Methods**:
-- `public void addInputPath(String pathStr)`
-- `public void setContextAsciidoc(String contextFileName)`
-- `public void setIncrementalAsciidoc(String incrementalFileName)`
-- `public void setRemoveCopyright(boolean remove)`
-- `public void execute() throws IOException`
-- `public void printSummary()`
-- `public void close()`
-
-5. **`processFile(Path path)`**:
-- Reads lines via `AdocFileProcessor.readFileLines()`.
-- Optionally removes copyright lines/blocks.
-- Writes a heading: `== File: <relativePath>`.
-- Calls `writer.snapshotStats()` **before** writing the file’s content to track per-file deltas properly.
-- Writes content in a listing block: `.... ... ....`
-- After writing lines, calculates deltas for lines, blanks, and tokens, then prints a short stats line:
-`Lines X, Blanks Y, Tokens Z`.
-
-NOTE: Changes to requirements or tests should be reflected in `.adoc` documentation immediately. This ensures the engine processes an accurate “single source of truth” and avoids sync drift between code, tests, and docs.
-
-== 3. `AdocDocumentStats`
-
-Maintains counters for lines, blank lines, total tokens, and supports per-file deltas:
-
-1. **Uses**: `com.knuddels.jtokkit.Encodings` and `O200K_BASE` for GPT-like token counting.
-2. **Fields**:
-- `long totalLines`
-- `long totalBlanks`
-- `long totalTokens`
-- Snapshot fields:
-- `long previousLines`
-- `long previousBlanks`
-- `long previousTokens`
-3. **Behavior**:
-- `updateStats(String line)`: Increments line or blank count, then uses the GPT-like encoder to count tokens for that line.
-- `snapshotTotals()`: Captures current totals into `previousLines`, `previousBlanks`, `previousTokens`.
-- `getDeltaLines()`, `getDeltaBlanks()`, `getDeltaTokens()`: Return the difference (current - previous).
-4. **Methods**:
-- `public void updateStats(String line)`
-- `public void snapshotTotals()`
-- `public long getDeltaLines()`
-- `public long getDeltaBlanks()`
-- `public long getDeltaTokens()`
-- `public long getTotalLines()`
-- `public long getTotalBlanks()`
-- `public long getTotalTokens()`
-
-== 4. `AdocDocumentWriter`
-
-Writes text to the current output file and updates statistics line-by-line:
-
-1. **Fields**:
-- `AdocDocumentStats stats`
-- `PrintWriter currentWriter` – Open output stream.
-
-2. **Behavior**:
-- `open(String outputFile, boolean append)`: Opens a file for writing/appending.
-- `write(String text)`: Appends `text` to the current file, calls `stats.updateStats(text)`.
-- `snapshotStats()`: Saves current stats to track future deltas.
-- `close()`: Closes the writer if open.
-
-3. **Usage**:
-- Called by `AdocDocumentEngine` for both `context.asciidoc` (full mode) and `increment.asciidoc` (incremental mode).
-- Throws `IllegalStateException` if `write` is called while no file is open.
-
-== 5. `AdocFileFilter`
-
-Encapsulates the rules for including/excluding files:
-
-1. **Method**: `public boolean include(Path path)`
-2. **Logic**:
-- Excludes overshadowed `.ad` files.
-- Excludes `.asciidoc` files.
-- Skips large files over 64 KB.
-- Excludes hidden files or directories as per `GitignoreFilter` see <<gitignore-filter>> using the `.gitignore` file in the root directory.
-- `isUnderTargetDir(Path path)`: checks for directory structure
-
-== 6. `AdocFileProcessor`
-
-Handles reading file lines (UTF-8) and optionally removing a leading multi-line or single-line copyright block:
-
-1. **Methods**:
-- `public List<String> readFileLines(Path file) throws IOException`: Reads all lines in UTF-8.
-- `public List<String> maybeRemoveCopyright(List<String> lines)`
-- If “Copyright ” is within the first 20 lines, tries to detect a block with `/*` to `*/, '#', '//', or  `////`.
-- Removes the block and returns the modified lines.
+include::adoc-file-processor-req.adoc[]
 
 == 7. Relationships and Flow
 

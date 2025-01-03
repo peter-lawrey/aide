@@ -1,0 +1,47 @@
+== 2. `AdocDocumentEngine`
+
+Central orchestrator for scanning, filtering, processing, and writing:
+
+1. **Implements**: `AutoCloseable`
+2. **Fields**:
+- `AdocFileFilter fileFilter`
+- `AdocDocumentWriter writer`
+- `AdocDocumentStats stats`
+- `List<Path> inputPaths` – Directories or files to process.
+- `String contextAsciidoc` – The main output file (or path).
+- `String incrementalAsciidoc` – The incremental output file (or path).
+- `boolean removeCopyright`
+- `long contextFileLastModified` – Timestamp for `context.asciidoc` if it exists.
+- `List<String> skippedFiles` – Tracks files that could not be processed.
+- `boolean incrementalMode` – Decided by existence of `contextAsciidoc`.
+- `boolean engineExecuted` – Prevents multiple consecutive `execute()` calls.
+- `AdocFileProcessor fileProcessor`
+
+3. **Responsibilities**:
+- Detect if `contextAsciidoc` already exists → set incremental mode if so.
+- Open `context.asciidoc` (full mode) or `increment.asciidoc` (incremental mode).
+- Recursively walk each `inputPaths`, check file inclusion with `fileFilter`.
+- In incremental mode, only process files with timestamps newer than `contextFileLastModified`.
+- For each included file, calls `processFile(path)`.
+- Provides a summary (`printSummary`) of lines, blanks, tokens, and skipped files.
+- Closes its writer in `close()`.
+
+4. **Key Methods**:
+- `public void addInputPath(String pathStr)`
+- `public void setContextAsciidoc(String contextFileName)`
+- `public void setIncrementalAsciidoc(String incrementalFileName)`
+- `public void setRemoveCopyright(boolean remove)`
+- `public void execute() throws IOException`
+- `public void printSummary()`
+- `public void close()`
+
+5. **`processFile(Path path)`**:
+- Reads lines via `AdocFileProcessor.readFileLines()`.
+- Optionally removes copyright lines/blocks.
+- Writes a heading: `== File: <relativePath>`.
+- Calls `writer.snapshotStats()` **before** writing the file’s content to track per-file deltas properly.
+- Writes content in a listing block: `.... ... ....`
+- After writing lines, calculates deltas for lines, blanks, and tokens, then prints a short stats line:
+`Lines X, Blanks Y, Tokens Z`.
+
+NOTE: Changes to requirements or tests should be reflected in `.adoc` documentation immediately. This ensures the engine processes an accurate “single source of truth” and avoids sync drift between code, tests, and docs.

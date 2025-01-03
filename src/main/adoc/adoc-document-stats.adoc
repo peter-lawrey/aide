@@ -1,0 +1,26 @@
+== 3. `AdocDocumentStats`
+
+Maintains counters for lines, blank lines, total tokens, and supports per-file deltas:
+
+1. **Uses**: `com.knuddels.jtokkit.Encodings` and `O200K_BASE` for GPT-like token counting.
+2. **Fields**:
+- `long totalLines`
+- `long totalBlanks`
+- `long totalTokens`
+- Snapshot fields:
+- `long previousLines`
+- `long previousBlanks`
+- `long previousTokens`
+3. **Behavior**:
+- `updateStats(String line)`: Increments line or blank count, then uses the GPT-like encoder to count tokens for that line.
+- `snapshotTotals()`: Captures current totals into `previousLines`, `previousBlanks`, `previousTokens`.
+- `getDeltaLines()`, `getDeltaBlanks()`, `getDeltaTokens()`: Return the difference (current - previous).
+4. **Methods**:
+- `public void updateStats(String line)`
+- `public void snapshotTotals()`
+- `public long getDeltaLines()`
+- `public long getDeltaBlanks()`
+- `public long getDeltaTokens()`
+- `public long getTotalLines()`
+- `public long getTotalBlanks()`
+- `public long getTotalTokens()`

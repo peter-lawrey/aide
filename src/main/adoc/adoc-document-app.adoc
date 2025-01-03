@@ -1,0 +1,19 @@
+== 1. `AdocDocumentApp`
+
+Java main entry point for the command-line application:
+
+1. **Purpose**:
+- Reads system properties:
+- `context` (default: `"context.asciidoc"`)
+- `increment` (default: `"increment.asciidoc"`)
+- `removeCopyrightMessage` (default: `"true"`)
+- Accepts command-line arguments as paths to scan; if none provided, uses `"."`.
+- Creates and configures the `AdocDocumentEngine` along with `AdocFileFilter`, `AdocDocumentStats`, and `AdocDocumentWriter`.
+- Executes the engine, prints a final summary, and closes resources.
+
+2. **Behaviour**:
+- Invokes `engine.execute()`, `engine.printSummary()`, then `engine.close()`.
+- System properties can override default file names.
+
+3. **Key Method**:
+- `public static void main(String[] args) throws IOException`
