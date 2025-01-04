@@ -6,13 +6,13 @@
 
 If it's worth doing by hand, it's worth automating.
 
-Just because not everyone is (yet) a world-class developer; that doesn't mean we can't step closer to that expert-level space.
-In this post, I will introduce AIDE (Artifical Intelligence Development Environment), a powerful workflow that merges AI-driven code generation with a sharp focus on documentation-driven development.
+Just because not everyone is (yet) a world-class developer doesn't mean we can't step closer to that expert-level space.
+In this post, I will introduce AIDE (Artificial Intelligence Development Environment), a powerful workflow that merges AI-driven code generation with a sharp focus on documentation-driven development.
 With AIDE, I tap into the best of artificial intelligence (AI) while respecting the real human insight needed for domain-specific logic.
 
 The result? An environment that streamlines repetitive coding, synchronises requirements, code, and tests, and elevates your engineering game.
 
-Here is a practical example of an https://github.com/peter-lawrey/aide[AIDE on GitHub] developed using it's own AIDE.
+Here is a practical example of an https://github.com/peter-lawrey/aide[AIDE on GitHub] developed using its own AIDE approach.
 
 == Introducing AIDE: Merging AI and Documentation-Driven Development
 
@@ -44,7 +44,7 @@ A common pitfall in software projects is rewriting patterns or boilerplate code 
 AIDE fosters a cyclical workflow that keeps requirements, tests, and code in lockstep:
 
 1. **Document Requirements**: Start with AsciiDoc. Clearly articulate requirements to guide both AI and developers.
-2. **Generate Tests**: Let AI draft test cases from the documentation; refine these for domain-specific nuances.
+2. **Generate Tests**: Let AI draft test cases from the documentation; refine them for domain-specific nuances.
 3. **Generate Code**: AI produces initial implementations, scaffolded from documentation and tests.
 4. **Review and Refine**: Validate AI outputs, ensuring domain-specific logic and correctness.
 
@@ -63,7 +63,7 @@ flowchart LR
   C <-.-> A
 ----
 
-The most precise way to define what is needed is in unit tests. The Source Code is about 20% human written as you can't be sure how to update the requirements to get it to do what you want. As you iterate, you can refine the requirements between updating the tests and code.
+The most precise way to define what is needed is in unit tests. The Source Code is about 20% human written, since you can’t be sure how to update the requirements to get precisely the code you want. As you iterate, you can refine the requirements between updating the tests and code.
 
 === AI <--> Human Collaboration
 
@@ -88,9 +88,11 @@ Consider a scenario where sub-millisecond latency is non-negotiable. Without pre
 
 === Learning Curve
 
-Adopting AIDE requires a mindset shift:
+Adopting AIDE blends multiple approaches:
 
-- **Documentation First**: Writing AsciiDoc before coding can feel counterintuitive but ensures clarity.
+- **Prototype Refinement**: AI scaffolds prototypes; human developers refine them for performance and maintainability.
+- **Test-Driven Development**: AI-generated tests form a starting point; refine them to capture domain-specific nuances.
+- **Documentation First**: Generating code from requirements documents in AsciiDoc can feel counterintuitive but ensures clarity.
 - **Guiding AI**: Effective prompt engineering is key. Misguided prompts lead to irrelevant outputs.
 
 === AI’s Limitations
@@ -113,16 +115,16 @@ The takeaway? Use AI for foundational tasks but expect manual effort for final p
 == Key Takeaways
 
 1. **Leverage AI for Boilerplate**: Delegate repetitive tasks to AI, preserving your mental energy for strategic decisions.
-2. **Synchronise Continuously**: Use AsciiDoc as the source of truth to align requirements, tests, and code.
+2. **Synchronise Continuously**: Use AsciiDoc as the single source of truth to align requirements, tests, and code.
 3. **Iterate Strategically**: Small, frequent updates reduce complexity and ensure alignment.
 
-== About the author
+== About the Author
 
 As the CEO of https://chronicle.software/[Chronicle Software^,role=external],
 https://www.linkedin.com/in/peterlawrey/[Peter Lawrey^,role=external] leads the development of cutting-edge,
 low-latency solutions trusted by https://chronicle.software/8-out-of-11-investment-banks/[8 out of the top 11 global investment banks^,role=external].
 With decades of experience in the financial technology sector, he specialises in delivering ultra-efficient
-enabling technology which empowers businesses to handle massive volumes of data with unparalleled speed
+enabling technology that empowers businesses to handle massive volumes of data with unparalleled speed
 and reliability. Peter's deep technical expertise and passion for sharing knowledge have established him
 as a thought leader and mentor in the Java and FinTech communities. Follow Peter on
 https://bsky.app/profile/peterlawrey.bsky.social[BlueSky^,role=external] or
@@ -133,4 +135,3 @@ https://mastodon.social/@PeterLawrey[Mastodon^,role=external].
 AIDE embodies a simple philosophy: automate where possible, refine where necessary. By combining AI’s efficiency with human insight, it transforms the development process. Whether you’re building a high-frequency trading system or a standard web application, AIDE reduces repetitive tasks, enhances clarity, and helps you focus on what truly matters: performance, scalability, and maintainability.
 
 Most importantly, AIDE lets you level up your development practice, making it as efficient as it is effective.
-
