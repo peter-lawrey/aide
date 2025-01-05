@@ -1,0 +1,366 @@
+= Prompt Engineering for AIDE
+:author: Peter Lawrey
+:doctype: article
+:lang: en-GB
+:toc:
+
+This article was AI-generated using this project as context. https://github.com/peter-lawrey/aide/tree/main[AIDE Project]. The purpose of this project is to see how much an AI could generate given enough context, and in this project, all the "source" code is generated using the requirements and unit tests as context. This follows the https://blog.vanillajava.blog/2024/12/next-level-development-harnessing-ai.html[Next-Level Development: Harnessing AI with AIDE] approach.
+
+The main parts are:
+
+- https://github.com/peter-lawrey/aide/tree/main/src/main/adoc[Requirements Documents] in `.adoc` format.
+- https://github.com/peter-lawrey/aide/tree/main/src/test/java/build/chronicle/aide[JUnit tests] in Java.
+- https://github.com/peter-lawrey/aide/tree/main/aide[AIDE] itself.
+- https://github.com/peter-lawrey/aide/tree/main/src/main/java/build/chronicle/aide[AI-generated code] in Java.
+
+Even the articles written about AIDE are part of the context for the AI. This article is about how to write requirements as a prompt for AI to generate code, seeded with AIDE in the context.
+
+Everything after this line is AI generated.
+
+'''
+
+Prompt engineering can differentiate between AI-driven code that *works* and genuinely excels. Drawing insights from real-world Java projects—especially those striving for low latency, high throughput, and clear domain logic—this article will show you how to shape AsciiDoc prompts to engage the AI more effectively. We’ll also explore how these techniques fit neatly into AIDE’s (Artificial Intelligence Development Environment) documentation-driven approach, building on the examples below.
+
+== 0. Well-Formed Prompt Examples
+
+Strong prompts don’t just request code; they specify context, constraints, references, and testing requirements. Below are refined examples of “good prompts” structured to deliver more domain-aligned code and documentation.
+
+=== 0.1 Concurrency-Safe Service Prompt
+
+[source,adoc]
+----
+= Concurrency-Safe Order Processor
+:context: high-throughput trading system
+
+We need a Java service that:
+
+* Accepts orders via a concurrent queue (Chronicle Queue recommended).
+* Processes up to 100,000 orders per second.
+* Ensures thread safety using optimised locking (or lock-free where practical).
+* Logs all failures (e.g., malformed orders) with a contextual message.
+
+Constraints:
+* Sub-100 µs end-to-end latency per order.
+* Must pass the existing `OrderProcessorTest` found in xref:order-tests.ad[Order Tests].
+* Implement a robust error-handling strategy (no silent failures).
+
+References:
+* xref:architecture-overview.adoc[Architecture Overview] for event-driven design patterns.
+* xref:aide-style-guide.adoc[AIDE Style Guide] for code conventions.
+
+Objectives:
+* Provide concurrency-safe code with minimal contention.
+* Generate Javadoc describing the concurrency strategy used (e.g., `StampedLock` or `synchronised`).
+* The resulting code must compile under Java 17+ and run within a JUnit 5 testing framework.
+
+Desired Output:
+* A Java class, e.g. `HighThroughputOrderService.java`.
+* Integration with Chronicle Queue or a clear explanation of an alternative.
+
+NOTE:
+Focus on code clarity, concurrency correctness, and easy debugging.
+----
+
+**Why it’s Good**
+
+- Explicit concurrency constraints (`100,000 orders/s`, sub-100 µs latency).
+- References specific tests and docs.
+- Encourages thorough concurrency strategies and error logs.
+- Aims for minimal lock contention and clear debugging.
+
+=== 0.2 Microservice with Persistence Prompt
+
+[source,adoc]
+-----
+= Inventory Microservice
+:context: e-commerce platform
+
+We want to create a lightweight microservice to manage product inventory. Specifically:
+
+1. Read/write operations should persist to `ChronicleMap`, allowing near-zero-latency lookups.
+2. RESTful endpoints (`GET /inventory/{productId}`, `POST /inventory`) for querying/updating stock levels.
+3. Concurrency: handle up to 500 concurrent clients.
+4. Must align with our JSON-based contract, as tested in `InventoryContractTest` (xref:inventory-tests.ad[Contract Tests]).
+5. Provide meaningful response codes (e.g. `404` for an unknown product, `422` for an invalid update).
+
+Constraints:
+* 100,000 read ops/minute, 10,000 write ops/minute.
+* Must handle partial failures gracefully—log rather than crash if ChronicleMap is momentarily locked.
+* Style: Follow xref:aide-style-guide.adoc[AIDE Style Guide].
+
+Outcome:
+* A minimal Spring Boot microservice (Java 17+).
+* Clear separation of controller logic, domain logic, and persistence.
+* Must pass the existing contract tests without modifications.
+
+Example Usage:
+----
+POST /inventory
+{
+"productId": "ABC-123",
+"delta": 5
+}
+----
+-----
+
+**Why it’s Good**
+
+- Connects domain specifics (inventory, concurrency, JSON contracts) with performance targets.
+- Mentions partial failure handling and references exact tests.
+- Ensures compliance with existing style guidelines.
+
+=== 0.3 Detailed Prompt for Event-Driven Architecture
+
+[source,adoc]
+----
+= Payment Event Listener
+:context: financial clearing system
+
+Create an event listener service that:
+
+* Reads payment events from Chronicle Queue (`payment-queue`).
+* Validates each payment using domain rules (xref:domain-rules.ad[Domain Rules]).
+* Routes valid payments to xref:payment-handler.ad[PaymentHandler].
+* Logs invalid payments, includes a reason and discards them.
+
+Performance Targets:
+* Must handle 10,000 payment events per second without exceeding 100 microseconds per event in average throughput.
+* Concurrency: multiple event readers can be active, so design for a multi-threaded environment.
+
+Constraints:
+* Use Chronicle Queue’s `MethodReader` interface for simplicity.
+* Implement domain checks for currency codes (ISO-4217).
+* Generate code under Java 21, using `java.time` for timestamps and record classes where beneficial.
+
+Testing & Style:
+* Must pass the `PaymentEventListenerTest` in xref:test-summaries.ad[Tests Summary].
+* Comply with xref:aide-style-guide.adoc[AIDE Style Guide].
+
+Desired Output:
+* `PaymentEventListener.java` with comprehensive Javadoc.
+* Performance notes included in code comments.
+
+NOTE:
+Ensure the solution is robust if the queue grows large or a thread briefly stalls. Focus on minimal GC overhead and stable latencies.
+----
+
+**Why it’s Good**
+
+- Targets performance (10,000 events/s, 100 µs/event).
+- Enforces domain rules for currency codes.
+- Encourages stable latencies and minimal GC overhead.
+
+=== 0.4 Document-First & Testing Integration Prompt
+
+[source,adoc]
+-----
+= Document-Driven Concurrent Logging
+:context: system-wide telemetry
+
+Objective:
+* Implement a concurrent logging utility in Java 17.
+* Integrate seamlessly with the existing telemetry pipeline, documented in xref:pipeline-overview.adoc[Telemetry Pipeline].
+* Must pass the test suite in `ConcurrentLoggerTest` (xref:logger-tests.ad[Logger Test Summary]).
+
+Key Details:
+1. Concurrent logging for up to 1,000 messages/second.
+2. Configurable “flush frequency” for disk writes, defaulting to 5 seconds.
+3. Handle I/O failures gracefully—retry or degrade functionality, but never lose critical log entries.
+
+Requirements:
+* Use `java.nio.file` for file operations.
+* Provide a JMH microbenchmark (see xref:notes-on-using-aide.adoc[Notes on Using AIDE]) verifying minimal overhead.
+* Follow xref:aide-style-guide.adoc[AIDE Style Guide] for code indentation and doc comments.
+
+Sample Usage:
+----
+ConcurrentLogger logger = new ConcurrentLogger(Paths.get("logs/app.log"));
+logger.log("Application started.");
+logger.shutdown(); // flush remaining logs
+----
+
+Desired Output:
+* `ConcurrentLogger.java` plus any supporting utilities.
+* Clear doc comments about concurrency management (e.g. threads, concurrency library).
+-----
+
+**Why it’s Good**
+
+- Mentions performance metrics and JMH benchmarks.
+- Requires graceful error handling for I/O.
+- Specifies code style and doc requirements, ensuring a consistent project approach.
+
+=== 0.5 Focused Prompt on Error Handling & Testing
+
+[source,adoc]
+-----
+= Robust File Import Service
+:context: data ingestion pipeline
+
+We need a Java service that:
+
+* Reads CSV files from a directory (`/data/incoming`) at intervals (every 30 seconds).
+* Parses each file, handling malformed rows by logging an error with the row index and skipping them.
+* Uses concurrency (up to 4 worker threads) to process multiple files simultaneously.
+
+Performance Goals:
+* Must handle up to 500k lines per file, staying under 1 second on modern hardware.
+* Avoid unbounded buffering—streamlines whenever possible.
+
+Constraints:
+* If any file is fully unreadable (permissions/error), log an exception and continue to the next file.
+* JUnit tests must pass in `FileImportTest` referencing xref:import-tests.ad[Import Tests].
+* Comply with xref:aide-style-guide.adoc[AIDE Style Guide]: Javadoc for all public methods, British English in comments.
+
+Example Logs:
+----
+ERROR [FileImportService] Row 2336 is invalid: "MalformedDate"
+INFO  [FileImportService] Completed /data/incoming/file1.csv in 0.7s
+----
+
+Desired Output:
+* `FileImportService.java`
+* A method `processAllFiles()` with concurrency handling
+* Clear doc comments describing error-handling decisions
+-----
+
+**Why it’s Good**
+
+- Emphasises skip-logic for malformed data and concurrency.
+- Matches a realistic ingestion scenario with partial file errors.
+- References testing files and doc style.
+
+== 1. Introduction
+
+=== 1.1 Purpose
+Prompt engineering underpins *every* successful AI-driven workflow, but especially so in AIDE. High-quality, domain-specific prompts drastically reduce churn. Instead of patching code after the fact, you’re specifying requirements—performance, concurrency, domain checks—right at the start.
+
+=== 1.2 Scope
+The aim is to offer best practices for `.adoc`-based prompt creation in AIDE. Well-structured prompts, combined with domain constraints, produce more coherent, tested, and easily maintainable output. If you want more information on iterative dev flows, https://github.com/peter-lawrey/aide/blob/main/aide/aide-workflow.adoc[AIDE Workflow] is an essential reading. For stylistic guidelines, see https://github.com/peter-lawrey/aide/blob/main/aide/aide-style-guide.adoc[AIDE Style Guide].
+
+=== 1.3 Who Should Read This
+These concepts apply to:
+- Developers migrating from ad-hoc AI usage to a formal, doc-centric approach.
+- Technical leads ensuring *domain logic* is central to AI-generated code.
+- Anyone seeking to unify concurrency, performance, or error-handling constraints within prompt engineering.
+
+== 2. Why Prompt Engineering Matters in AIDE
+
+=== 2.1 Impact on AI Outputs
+A well-defined prompt is your AI’s compass. You must say so if you need deterministic throughput in a sub-microsecond range (e.g., Chronicle-based code). If your domain forbids negative transactions, declare it. The AI may produce *technically correct* but domain-agnostic solutions without these details.
+
+=== 2.2 Reducing Rewrites and Clarifications
+Ambiguous prompts waste time. By embedding concurrency patterns (`StampedLock` or `AtomicReference`?), logging rules, and test references up front, you skip multiple “why didn’t you do it this way?” revisions.
+
+=== 2.3 Workflow Efficiency Gains
+https://github.com/peter-lawrey/aide/blob/main/aide/aide-glossary.adoc[Incremental Mode] automatically filters changes, but clarity remains key. If your new feature depends heavily on a queue-based design, mention Chronicle Queue or the expected scale. That ensures the AI merges code changes with minimal friction.
+
+== 3. Fundamentals of Prompt Engineering
+
+=== 3.1 Clarity & Context
+Be explicit about constraints, whether they relate to throughput (10 million messages/day), latency (under 10 µs), or domain logic (e.g., specific financial rules). This ensures that the AI sets up data structures, concurrency wrappers, and error checks that match your scenario.
+
+=== 3.2 Structured Format
+
+----
+[.prompt-structure]
+Title: e.g. `HighPerformanceDataIngestion`
+Background/Context: Summarise domain or architectural considerations
+Objectives: Key bullet points of what the solution must accomplish
+Constraints: Performance, concurrency, or memory rules
+Example Usage or Tests: Link to specific `.adoc` or test class
+Desired Output: Summarise final deliverables (classes, doc comments, logs, etc.)
+----
+
+An anchor for each category reminds you to specify domain-critical details you might otherwise overlook.
+
+=== 3.3 Focus on Outcomes
+Pair the AI’s output with known tests or performance metrics. Want sub-250 µs on average for order validation? Write it. Expect 99.9% under 1 ms? Be explicit. AI is quite literal; it’ll rarely guess your performance thresholds accurately.
+
+== 4. Crafting Effective Prompts
+
+=== 4.1 Addressing Common Code Patterns
+Repeatable patterns (CRUD ops, event-driven frameworks, concurrency wrappers) can be signposted. If it’s common in your domain (like a message bus or a microservice pattern), mention the needed interface or approach—Chronicle Queue for low-latency, or direct `java.nio.channels` if you want non-blocking I/O.
+
+=== 4.2 Specifying Project or Domain Requirements
+Use domain examples, such as “Orders must have a positive quantity” or “Requests must carry an authenticated user ID.” This ensures that the AI includes or checks for these domain invariants.
+
+=== 4.3 Referencing Existing Documentation
+When your architecture is locked away in large `.asciidoc` or `.adoc` files, summarise them into `.ad` for your prompt. That practice helps you circumvent token limits (https://github.com/peter-lawrey/aide/blob/main/aide/notes-on-using-aide.adoc[Notes on Using AIDE]) and keep the AI’s context tight.
+
+=== 4.4 Error Handling & Edge Cases
+If you prefer custom exceptions or want to avoid swallowing exceptions silently, say so. If performance is key, emphasise minimal overhead in error-handling. Remember: if the AI sees “log an error with row index,” it’ll do so, but if you forget that detail, it might ignore it.
+
+== 5. Examples of Good vs. Bad Prompts
+
+=== 5.1 Bad Prompt Example
+
+----
+Generate a service to process orders.
+----
+
+*Issue:* No concurrency or domain detail, references to tests, or performance aim. The AI might produce a boilerplate that compiles but fails real-world requirements.
+
+=== 5.2 Good Prompt Example
+
+----
+= Service to Process Orders
+:context: e-commerce domain
+
+We need a Java service that:
+* Validates incoming JSON orders against our domain model
+* Uses Chronicle Map for persistence
+* Logs unsuccessful attempts
+* Must pass the existing `OrderServiceTest` in `order-tests.adoc`
+* Performs concurrency safely up to 100 parallel threads
+
+Required outcome:
+* Must not exceed 250 microseconds on average for validation
+* Implement robust exception handling for any missing fields
+* Align with our existing style guidelines (xref:aide-style-guide.adoc[AIDE Style Guide])
+----
+
+Explicit concurrency, error handling, performance, and test references. The AI sees a clear target.
+
+=== 5.3 Before & After Comparison
+Side-by-side diffing reveals how a more detailed prompt leads to domain-fitting code, while a vague prompt yields something superficial. This is particularly obvious in an iterative environment like AIDE, where each `.adoc` revision refines the code.
+
+== 6. Testing and Refining Prompts
+
+=== 6.1 Iterative Approach
+Prompts are living documents. If you shift from sub-millisecond to sub-50s µs latencies, update the `.adoc`. The AI can revisit the relevant sections and adjust accordingly—just like a developer would, but with less friction.
+
+=== 6.2 Automated Testing of Generated Outputs
+Use JMH if your prompt demands performance. Checkstyle or SpotBugs for style and safety. This ensures the AI’s code meets baseline metrics, so you don’t manually fix formatting or straightforward concurrency mistakes.
+
+=== 6.3 Validation Against the Style Guide
+If your house style forbids single-letter variables or requires British English, mention it. The AI will produce variable names like `orderedQuantity` instead of `q`, decreasing your diff churn.
+
+== 7. Common Pitfalls & How to Avoid Them
+
+=== 7.1 Overly Long or Unfocused Prompts
+When a prompt tries to unify multiple microservices or business domains, the AI merges them haphazardly. Break large tasks into smaller prompts referencing each other. That keeps each iteration more manageable.
+
+=== 7.2 Ambiguity in Requirements
+If a domain rule is hidden, the AI can’t guess it. You must specify if specific fields must be encrypted or if certain data is ephemeral. In finance or e-commerce, subtle domain logic is critical: “No negative amounts” or “Tax ID must match region code.”
+
+=== 7.3 Ignoring AI Feedback
+Sometimes, the AI produces output that points to conflicting or incomplete instructions. If it flags an impossible scenario (e.g., “You asked for an immutable record that modifies itself.”), revise your requirements, not just override them.
+
+== 8. Conclusion & Next Steps
+
+=== 8.1 Recap of Key Lessons
+- **Precision** in prompts fosters domain-aligned, robust AI outputs.
+- **Structured** sections—objectives, constraints, references—clarify your intent.
+- **Iterate** with small, targeted updates, leveraging https://github.com/peter-lawrey/aide/blob/main/aide/aide-workflow.adoc[AIDE Workflow].
+
+=== 8.2 Links to Further Reading
+- https://github.com/peter-lawrey/aide/blob/main/aide/notes-on-using-aide.adoc[Notes on Using AIDE]: Summaries, large-file token constraints.
+- https://github.com/peter-lawrey/aide/blob/main/aide/aide-style-guide.adoc[AIDE Style Guide]: Consistency in naming, Javadoc, and British English.
+
+=== 8.3 Encouragement to Experiment
+Permit yourself to experiment. Perhaps you want a microservice handling system-wide unique nanosecond timestamps? State exactly that—detail performance, concurrency, and error handling. Each iteration hones the AI’s suggestions, weaving your entire codebase, tests, and doc in a neat loop. Over time, you create a reliable, custom knowledge base that *any* developer (and the AI) can leverage.
+
+== Final Thoughts
+
+Following these guidelines, your AI-generated code steadily converges on your domain’s performance and style expectations, minimising boilerplate and guesswork. Prompt engineering is iterative: with every refined `.adoc`, you uncover more AI potential, letting it extend and enhance your Java expertise.
