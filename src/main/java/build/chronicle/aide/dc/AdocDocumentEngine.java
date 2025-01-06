@@ -278,8 +278,10 @@ public class AdocDocumentEngine {
                 lines = fileProcessor.maybeRemoveCopyright(lines);
             }
 
-            // Write a heading for this file
-            writer.write("== File: " + path.getFileName() + "\n");
+            // Write a heading with the relative path
+            Path currentPath = Paths.get(".").toAbsolutePath().normalize();
+            Path relativePath = currentPath.relativize(path);
+            writer.write("== File: " + relativePath + "\n");
             writer.write("....\n");
 
             // Snapshot stats, then write file content
