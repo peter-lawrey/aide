@@ -83,13 +83,13 @@ class AdocFileFilterTest {
 
     @Test
     void testLargeFileExclusion() throws IOException {
-        // Create a file just over 64 KB
-        byte[] largeData = new byte[65537]; // 64KB + 1
+        // Create a file just over 128 KB
+        byte[] largeData = new byte[(128<<10)+1]; // 64KB + 1
         Path largeFile = tempDir.resolve("bigfile.bin");
         Files.write(largeFile, largeData);
 
         assertFalse(filter.include(largeFile),
-                "File exceeding 64KB should be excluded");
+                "File exceeding 128KB should be excluded");
     }
 
     @Test

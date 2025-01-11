@@ -25,13 +25,13 @@ import java.util.List;
  *   <li>Skip if overshadowed by .ad</li>
  *   <li>Skip known file extensions (e.g. .asciidoc, images, etc.)</li>
  *   <li>Skip files beginning with "out-" prefix</li>
- *   <li>Skip large files (>64 KB)</li>
+ *   <li>Skip large files (>128 KB)</li>
  * </ol>
  */
 public class AdocFileFilter {
 
-    /** Max file size we allow (64 KB). */
-    private static final long MAX_SIZE_BYTES = 64L * 1024L;
+    /** Max file size we allow (128 KB). */
+    private static final long MAX_SIZE_BYTES = 128L * 1024L;
 
     /** Manages .gitignore / aide.ignore logic. Could be null if parsing failed or no file is provided. */
     private final GitignoreFilter gitignoreFilter;

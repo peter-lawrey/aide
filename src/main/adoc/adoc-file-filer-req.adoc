@@ -29,7 +29,7 @@ determine which files should be processed.
 - E.g., `out-log.txt`.
 
 7. **Skip Large Files**
-- Anything over 64 KB is excluded.
+- Anything over 128 KB is excluded.
 - If file size cannot be determined (I/O error), exclude by default.
 
 === 5.2 Usage Flow

@@ -57,7 +57,7 @@ public class AdocDocumentApp {
 
         // 2. Determine paths to scan (default to ".")
         if (args == null || args.length == 0) {
-            args = new String[]{ "." };
+            args = new String[]{"."};
         }
 
         // 3. Determine which ignore file to use (prefer aide.ignore in the first argument's directory, else .gitignore)
@@ -66,14 +66,13 @@ public class AdocDocumentApp {
             // If the first argument is a file, use its parent directory to look for ignore files.
             firstArgDir = firstArgDir.getParent() == null ? Path.of(".") : firstArgDir.getParent();
         }
-        Path aideIgnore = firstArgDir.resolve("aide.ignore");
-        Path fallbackGitignore = firstArgDir.resolve(".gitignore");
-        Path ignoreFile = null;
-        if (Files.exists(aideIgnore)) {
-            ignoreFile = aideIgnore;
-        } else if (Files.exists(fallbackGitignore)) {
-            ignoreFile = fallbackGitignore;
-        }
+        Path[] ignorePaths = {
+                firstArgDir.resolve("aide.ignore"),
+                firstArgDir.resolve(".gitignore"),
+                Path.of(".", "aide.ignore"),
+                Path.of(".", ".gitignore")
+        };
+        Path ignoreFile = getIgnorePath(ignorePaths);
 
         // 4. Build the core collaborators: filter, stats, writer, engine.
         AdocFileFilter fileFilter = new AdocFileFilter(ignoreFile);      // Takes .gitignore or aide.ignore
@@ -102,5 +101,15 @@ public class AdocDocumentApp {
         } finally {
             engine.close();
         }
+    }
+
+    private static Path getIgnorePath(Path[] ignorePaths) {
+        for (Path ignorePath : ignorePaths) {
+            if (Files.exists(ignorePath)) {
+                System.out.println("loading ignore file: " + ignorePath);
+                return ignorePath;
+            }
+        }
+        return null;
     }
 }
