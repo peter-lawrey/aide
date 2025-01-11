@@ -1,0 +1,50 @@
+= Gen AI and the Reverse Baltimore Phenomenon
+
+One of the first challenges developers might face is getting generative AI to produce accurate documentation. Once you are comfortable doing this, the next challenge is creating enough documentation to be helpful without overwhelming the reader.
+
+Until generative AI came along, it might have seemed like there could never be too much documentation. Now, the challenge is to provide just enough detail to give understanding without overwhelming the material with unnecessary details.
+
+I was exploring the best way to generate accurate documentation for a project as I was flying over Australia and saw Alice Springs on the map, and it reminded me of the Reverse Baltimore Phenomenon. Generating documentation can give a "sense of completeness" that will likely be a distraction rather than have practical value. The text produced by a generative AI system can superficially convincingly feel "whole", but much of it is fluff that isn't actually helpful to the reader or an AI using it as instructions. e.g. copilot or a chat app.
+
+The Reverse Baltimore Phenomenon describes how small but isolated towns (like Alice Springs) can appear on a zoomed-out map while much larger cities elsewhere remain unlabeled. They appear because, in a sparsely populated area, the cartographer (or map algorithm) has "room" for that single label—despite far bigger cities in denser regions that don't make it onto the map.
+
+Generative AI exhibits a similar dynamic with documentation and code comments: in an attempt to be thorough, it sometimes fills "empty space" with details that don't truly matter. Much like Alice Springs popping up on world maps simply because there's little else around, AI-generated documentation can insert seemingly authoritative but superfluous commentary simply because there's room to elaborate.
+
+Both phenomena stem from "filling a void":
+
+1. Sparse vs. Dense Spaces
+- **Cartography**: Sparse regions allow tiny towns to receive disproportionate emphasis.
+- **AI Text Generation**: Minimal context leads the AI to add extraneous details to make it appear more complete.
+
+2. Sense of Completeness
+- **Cartography**: Mapmakers strive for "balanced" labels over geographic space.
+- **AI Generation**: Documentation generators try to create self-contained solutions, sometimes over-elaborating.
+
+3. Misplaced Emphasis
+- **Cartography**: A lone settlement in the desert seems more prominent than it ought to be.
+- **AI Generation**: Trivial points get inflated discussion, while major concepts receive too little attention.
+
+In both cases, the result is information (the map label or the generated text) that may look correct and complete at a glance but doesn't necessarily match the importance or relevance of what's left out.
+
+https://www.youtube.com/watch?v=b376pe7LM1E[Why Every Map Has This Tiny Australian Town] is a fascinating video that explains the Reverse Baltimore Phenomenon in cartography.`
+
+== Final Thoughts & Key Takeaways
+
+- **Balance Is Key**: Aim for documentation that informs and guides rather than overwhelms.
+- **Selective Highlighting**: Not every detail merits a label; some aspects are best omitted or cross-referenced.
+- **Practical Relevance**: If a comment or piece of text doesn't provide actionable insights, consider removing it.
+- **Continuous Improvement**: Use benchmark tools like JMH and measure the cost of your utilities when dealing with substantial auto-generated documentation.
+
+"A map is not the territory", and documentation is not the code—merely a guide.
+
+== About the author
+
+As the CEO of https://chronicle.software/[Chronicle Software^,role=external],
+https://www.linkedin.com/in/peterlawrey/[Peter Lawrey^,role=external] leads the development of cutting-edge,
+low-latency solutions trusted by https://chronicle.software/8-out-of-11-investment-banks/[8 out of the top 11 global investment banks^,role=external].
+With decades of experience in the financial technology sector, he specialises in delivering ultra-efficient
+enabling technology which empowers businesses to handle massive volumes of data with unparalleled speed
+and reliability. Peter's deep technical expertise and passion for sharing knowledge have established him
+as a thought leader and mentor in the Java and FinTech communities. Follow Peter on
+https://bsky.app/profile/peterlawrey.bsky.social[BlueSky^,role=external] or
+https://mastodon.social/@PeterLawrey[Mastodon^,role=external].

@@ -1,0 +1,168 @@
+= Does AI-Generated Documentation Have Value?
+:author: Peter Lawrey
+:doctype: article
+:source-highlighter: rouge
+
+As many have observed, at best, AI generates either:
+
+- Mundane, repetitive documentation or code that most experts already know or
+- If an expert doesn't know it, they can ask an AI to explain it anyway.
+
+Is it the case that if an AI can generate it, it's not worth adding to your documentation or code? While this is usually the case, there is still value in reading AI-generated documentation as a means of reviewing and validating what you might write differently.
+
+In this post, I show how changing the documentation can affect the AI's output and how reviewing it can be a useful exercise.
+
+== Estimating the value of AI-generated documentation
+
+I tried to gauge the relative value of AI-generated documentation for my knowledge and set expectations for others.
+
+I asked o1 pro to generate user guides in several different ways I considered effective for:
+
+- a simple class and package
+- a large class and package
+- a complex class and package
+
+Then, I subjectively estimated how many points made were compelling, interestingly incorrect, correct but not interesting, or just plain wrong. I ignored repeated points. This is what I concluded:
+
+[cols="2,1,1",options="header"]
+|====
+| Type | Average points per query | Percentage
+| Correct but not interesting >| 35 >| 80%
+| Just plain wrong >| 5.4 >| 13%
+| Compelling to keep  >| 2.1 >| 5%
+| Wrong But Interestingly >| 0.8 >| 2%
+|====
+
+This assumes I crafted the query to be as specific as possible. Without a specific query, the AI can generate a lot of irrelevant or wrong content.
+
+Understandably, this can lead people to conclude that AI is unusable. However, there is still value in *reviewing* AI-generated documentation.
+
+== Why Bother Reviewing AI-Generated Content?
+
+If we go into this process with the mindset that the content will be ruthlessly edited, we can extract value for relatively low effort. For example, each file I have reviewed had, on average approx 3 points that are compelling to keep or errors worth addressing.
+
+- _Is this point worth emphasising in your official documentation?_
+- _Is the suggestion so far off that it needs immediate correction to avoid misleading readers?_
+- _Could it be a prompt for additional tests, performance checks, or clarifications?_
+
+== Wrong But Interesting
+
+I asked o1 to generate a user guide for a `net.openhft.chronicle.core.StackTrace`
+
+[quote, Cunningham's Law]
+The best way to get the right answer on the internet is not to ask a question; it's to post the wrong answer.
+
+=== StackTrace for the current thread
+
+There is a method for getting a StackTrace for a given thread `forThread(Thread t)`, but not for the current thread. However, I had assumed developers would know that `new StackTrace()` would give the current thread's stack trace.
+
+`o1` suggested there was a method that it assumed existed but isn't needed.
+
+[source,java]
+----
+public static StackTrace current() {
+   return forThread(Thread.currentThread());
+}
+----
+
+Adding to the documentation, I can clarify that a helper method isn't needed. All you need is `new StackTrace()`.
+
+BTW: Copilot added this last sentence after I wrote the paragraph above.
+
+=== Logging the StackTrace (Interesting But Wrong)
+
+The AI suggested logging the StackTrace by calling `toString()` e.g.
+
+[source,java]
+----
+// BTW Copilot wrote this
+LOGGER.info("Stack trace: " + new StackTrace().toString());
+----
+
+However, this is not the best way to log a stack trace as it will be a single line *without the actual stack trace* as a `StackTrace` is a `Throwable` so you can write:
+
+[source,java]
+----
+// BTW Copilot wrote this too, after I wrote the paragraph above
+LOGGER.info("Stack trace", new StackTrace());
+----
+
+NOTE: Copilot will read your documentation and change its suggestions based on it.
+
+=== Timestamp for a StackTrace (Interesting But Wrong)
+
+The AI there was a timestamp to the StackTrace, which is a good idea, but it suggested using `System.currentTimeMillis()`, which is not the best way to get a timestamp as it is not monotonic. A better way would be to use `CLOCK.currentTimeNanos()` as a nanosecond resolution timestamp.
+
+.Likely addition based on this assumed method
+[source,java]
+----
+class StackTrace extends Throwable {
+    // TODO add a timestamp to the stack trace
+    final long timestampNS = CLOCK.currentTimeNanos();
+    public long timestampNS() {
+        return timestampNS;
+    }
+}
+----
+
+== Frequently Asked Questions (Suggested by o1 pro)
+
+_I thought these points were worth including somewhere in the documentation._
+
+=== Q: Why not just use `new Exception()` or `new Throwable()` to capture a stack trace?
+
+**A**: You certainly can. But the `StackTrace` class provides a simpler, more descriptive pattern and supports capturing another thread's frames with `forThread(...)`. This approach avoids confusion with typical exception usage and clarifies the diagnostic intent.
+
+=== Q: Can I throw `StackTrace`?
+
+**A**: The Javadoc strongly discourages it: "not designed as an Error or an Exception and is not intended to be thrown or caught." While it could compile, that's not the pattern or intention, and it may create confusion or rely on unexpected behaviours.
+
+=== Q: Is there a performance penalty?
+
+**A**: Capturing a stack trace is inherently more expensive than just running code. The overhead depends on how often you do it, how large the stack is, and the JVM. Infrequent usage for debugging is typically fine. Constant usage in tight loops is not recommended.
+
+=== Q: Does it handle partial frames?
+
+**A**: In certain JVM states, the returned stack trace could be incomplete or lacking line numbers. The method also skips the first frame if `isNativeMethod()` is `true`—intended to reduce noise, although behaviour may vary by JDK version.
+
+=== Q: Are there concurrency concerns if I call `forThread(...)` on a thread that’s actively running?
+
+**A**: `Thread.getStackTrace()` is safe, but there is no guarantee you get a perfectly consistent snapshot if the thread is in the middle of certain operations. Typically, you get a best-effort stack trace at the moment of invocation. It can't forcibly pause the thread, so expect snapshots that might reflect a transitional or ephemeral state.
+
+=== Q: Can I use `StackTrace` in a production environment?
+
+**A**: Yes, but be mindful of the performance implications. It's designed for debugging and diagnostics, not as a general-purpose tool. If you're capturing stack traces frequently, consider the impact on your application's responsiveness and resource usage.
+
+BTW: Copilot added this last FAQ.
+
+== Conclusion
+
+While AI-generated documentation often appears superfluous at first glance, it can still serve as a launchpad for:
+
+- Identifying domain-specific insights you may have overlooked.
+- Exposing interesting misconceptions worth clarifying in your official docs.
+- Spurring performance and correctness tests based on the AI's questionable suggestions.
+
+It can be worth reviewing and editing with a ruthless eye. It can be a good way to get a list of things to consider or to avoid rather than include.
+
+It's important to remember that even if developers don't read documentation, AI does read all available text and will change the output produced based on it.
+
+== About the Author
+
+As the CEO of https://chronicle.software/[Chronicle Software^,role=external],
+https://www.linkedin.com/in/peterlawrey/[Peter Lawrey^,role=external] leads the development of cutting-edge,
+low-latency solutions trusted by https://chronicle.software/8-out-of-11-investment-banks/[8 out of the top 11 global investment banks^,role=external].
+With decades of experience in the financial technology sector, he specialises in delivering ultra-efficient
+enabling technology that empowers businesses to handle massive volumes of data with unparalleled speed
+and reliability. Peter's deep technical expertise and passion for sharing knowledge have established him
+as a thought leader and mentor in the Java and FinTech communities. Follow Peter on
+https://bsky.app/profile/peterlawrey.bsky.social[BlueSky^,role=external] or
+https://mastodon.social/@PeterLawrey[Mastodon^,role=external].
+
+== Key Takeaways
+
+- Don't abandon your documentation: AI-generated text can spark valuable ideas.
+- Employ a ruthlessly selective approach: discard the routine, keep the gems, refute the nonsense.
+- Consider performance: capturing stack traces (or any reflective data) has a real cost.
+- Scepticism is your ally: AI's "interesting but wrong" points can reveal hidden assumptions.
+- AI might shape future developers' understanding: the more precise your published docs, the better the AI will eventually become.
