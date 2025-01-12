@@ -105,3 +105,7 @@ This class is *not* designed for concurrent usage. Calls should be serialised ex
    long newTokens     = stats.getDeltaTokens();
 
 This ensures accurate line/blank/token counts for each file or block of text the writer processes.
+
+== References
+
+- https://platform.openai.com/tokenizer[OpenAI Tokenizer] which counts and displayes how many tokens are in a given text, as well as the actual tokens.
