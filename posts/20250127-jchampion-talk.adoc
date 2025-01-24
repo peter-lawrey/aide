@@ -1,0 +1,420 @@
+= Hands-On Career: The Evolution of a Java Champion
+Peter Lawrey
+:lang: en-GB
+:toc:
+
+This article is background material for this talk
+https://www.youtube.com/watch?v=t8Oq-Hr6ua8[Lessons learnt from founding my own company, and over 30 years hands-on coding]
+
+== Introduction
+
+Unlike most deterministic development tools, Generative AI is a productivity tool that uses a statistical model to produce results.  It can be useful when used appropriately and carefully reviewed, but fundamentally, it only has a probability of being correct.  Plausible results can be challenging to review unless you have expertise in the content produced.
+
+In this talk, I will explore where I see Generative AI fitting into development and how it can help developers grow their careers.  I will look at practical tips and ways to consider it for development.
+
+Working with Generative AI can feel meta, so I will start with a quote about quotes:
+
+[quote, Marlene Dietrich, 1901-1992]
+____
+I love quotations because it is a joy to find thoughts one might have beautifully expressed with much authority by someone recognised as wiser than oneself.
+____
+
+=== Superhuman Intelligence Is Already Here
+
+[quote, TOP500 Supercomputer Wikipedia]
+As of November 2024, the United States' El Capitan is the most powerful supercomputer in the TOP500, reaching 1742 petaFlops (1.742 exaFlops) on the LINPACK benchmarks.
+
+Supercomputers have long been able to do calculations no human can, yet they can't do many tasks.  Even when super AI is estimated to have 1000 IQs, there will still be many tasks that only a human can do.
+
+=== ATMs Didn't Replace Bank Tellers
+
+There was a fear that when ATMs were introduced, the number of bank tellers would fall; however, "the story is that as the ATM machines arrived, the number of bank tellers held steady and even rose slightly."
+
+"Banks began to offer more services, and tellers evolved from being people who put checks in one drawer and handed out cash from another drawer to people who solved a variety of financial problems for customers."
+
+image:https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiQNFwTimfPu8cSmR4j2xAYxe7RIR4GbZeaN_k9vbFRL5fXgtk61w0SMKq0OheZXEbKBrRqAKcpEmSUpmHXzZKUFYELP2iuw3uHqiy7WEh29vD8rhsmwTzNKVoLq06VbZ4hzvHapWOnHqK0/s1600/bessen+1.jpg[]
+
+https://conversableeconomist.blogspot.com/2015/03/atms-and-rising-number-of-bank-tellers.html[ATMs and a Rising Number of Bank Tellers?]
+
+The same applies to software development: we adapt, learn new tools, and find higher-level tasks that still require human intelligence.
+
+== About Me
+
+In 2013, I founded a self-funded company, https://chronicle.software[Chronicle Software], to develop low-latency, high-performance solutions for the financial industry.
+Today, my company has 8 of the top 11 investment banks as clients.
+This is my tenth year as a Java Champion, and I have a chance to reflect on what I have learnt over the years and consider what the next ten years will look like with generative AI-based tooling.
+
+In this talk, I will look at:
+
+- How developers can continue building code-centric expertise while advancing their careers.
+- What I have learnt as a founder of a self-funded company.
+- Ways of developing with AI are different from traditional development.
+- Some practical considerations for using AI in development.
+
+== Multidimensional Growth
+
+[quote, Grace Hopper, Computerworld 1976]
+The most dangerous phrase a Data Processing manager can use is "We've always done it that way."
+
+=== Areas of Career Development
+
+At each stage, you can develop your career in different dimensions.  How you do this will depend on your interests.
+
+. *Technical Depth & Breadth*
+Mastering new programming languages, frameworks, and tools; developing expert-level understanding in specific domains.
+. *Innovative Problem-Solving*
+Identifying novel solutions to complex challenges and experimenting with emerging technologies such as AI.
+. *Operational Excellence & Adaptability*
+Ensuring reliability, maintainability, and scalability; adapting quickly to changing requirements or environments.
+. *Business & Financial Acumen*
+Understanding market dynamics, ROI, and cost-effectiveness to align technical efforts with business objectives.
+. *Collaboration & People Development*
+Mentoring team members, leading workshops, and facilitating cross-functional teamwork.
+. *User Empathy & Emotional Intelligence*
+Prioritising user needs; effectively navigating interpersonal interactions and team dynamics.
+. *Influential Communication & Leadership*
+Presenting technical ideas clearly; building consensus across teams or stakeholder groups.
+. *Strategy & Resource Management*
+Defining long-term technical roadmaps, optimising budgets, tools, and team allocation.
+
+AI can support these areas—for example, by brainstorming ideas, prototyping new solutions, reviewing content to inform business decisions, or even assisting with communication templates.  Human review remains essential to verify accuracy and context.  However, you can also use AI to review your own material and code, though again, you need to check whatever it comes up with.
+
+I used AI to review this talk, keeping only compelling changes.
+
+=== Scope of Consideration
+
+[quote, African Proverb]
+If you want to go fast, go alone; if you want to go far, go together
+
+==== Early Career (Primarily Areas 1–2)
+
+When you start development, you are focused on individual contribution, adding features and lines of code.
+The challenge is to get the application to compile and work correctly.
+You are focused on learning new tools and libraries.
+
+==== Mid-Career (Primarily Areas 1–6)
+
+As you gain experience, you become more focused on ensuring that the code meets the business's requirements and is maintainable.
+You are more focused on mentoring junior developers and helping them to be more productive, either as a mentor, team lead, or manager.
+
+==== Senior & Leadership Roles (All Areas May Apply)
+
+As you gain more experience, you are more focused on enabling teams and projects for success.
+You concentrate on driving business outcomes and helping the business owners make the right decisions.
+Your influence often extends to company-wide standards and cultural norms.
+All areas might be important.
+
+==== Thought Leaders (Industry-Wide Impact)
+
+A few developers have become thought leaders, looking at software engineering principles across companies for decades.
+They shape the conversation around software engineering and push the industry forward.
+They inspire others to think differently about their work, career, and the industry.
+
+=== Roles Where All Areas Are Important
+
+==== Principal Engineer / Staff Engineer
+
+A Principal or Staff Engineer focuses on delivering high-impact technical solutions across multiple teams or domains.
+They act as technical authorities who shape the architectural roadmap, resolve critical issues, and mentor other engineers.
+
+==== Solutions Architect
+
+A Solutions Architect designs comprehensive, end-to-end systems that address complex organisational needs.
+They often work closely with business stakeholders to ensure the technical approach aligns with financial, time, and strategic constraints.
+
+==== Engineering Manager (Hands-On Focus)
+
+While often associated with people management, an Engineering Manager with a hands-on focus also contributes to technical decision-making.
+They balance team leadership, project planning, and sometimes direct coding responsibilities.
+
+==== Product-Focused Technical Lead
+
+A Product-Focused Technical Lead bridges deep technical understanding with user-centric product development.
+They often prototype features, drive product direction, and interpret user feedback for the development team.
+
+== The Range of a Founder's Role
+
+The biggest shift is the breadth of responsibilities you have to consider.
+As a developer, you go from technical concerns to every aspect necessary to make a business successful.
+
+. Technology and Infrastructure
+.  Client Engagement and Support
+.  Sales and Partnership Development
+.  Product Development and Management
+.  Business Strategy and Market Positioning
+.  Financial Management and Administration
+.  Operations, Legal, and Compliance
+.  Marketing and Public Relations
+.  Growth and Scalability
+.  Human Resources and Talent Management
+.  Company Culture and Leadership
+.  Planning for the Future
+
+[quote, Misquoting President JFK ]
+We did it not because it was easy but because we thought it was easy
+
+You can start with the skeleton of all of these areas.
+As a self-funded company, I tackled these in earnest in this order, approximately one each year, evolving naturally from growing pains rather than having a plan to cover all of them.
+
+== How Will AI Change Development?
+
+[quote, Charles Franklin Kettering]
+A problem well stated is a problem half-solved.
+
+AI-driven tools are **statistical rather than deterministic**, meaning they rely on probabilities rather than fixed rules.  Details you might never have considered before can be important.  You are navigating an information path using a chat app or AI API.  A context is built up that changes the results of future queries.  Building a context can be useful but also a trap, making it difficult to get consistent results.
+
+One of the most surprising insights is that many traditional software development practices—like **planning before coding**—can also boost AI effectiveness.  For example, **prompting the AI for a plan first** often produces more structured and comprehensive outcomes than immediately asking for a result.
+
+Maintaining these requirements and plans as stand-alone documents becomes a form of Documentation Driven Development.  I use AsciiDoc under `src/main/adoc` for this purpose.
+
+=== How You Ask the Question Changes the Result
+
+[quote, attributed to Abraham Lincoln]
+Give me six hours to chop down a tree, and I will spend the first four sharpening the axe.
+
+A simple tip to getting better results is to ask it to produce a plan for what you want it to do before asking it to execute that plan.  This approach often gives a more complete result.
+
+Capturing requirements and planning before executing the plan is common for a developer, but it is usual to ask a tool to do this.
+
+==== Generated user guide
+
+I asked `o1 pro` to `generate a user guide for java.lang.<class> in asciidoc` and used the https://platform.openai.com/tokenizer[OpenAI Tokenizer] to count how many tokens were produced.  While the token count is no sign of quality, it is an objective measure that you get a different outcome.
+
+In another chat, I asked it to first `provide a step-by-step plan for a user guide for beginners and advanced users for the java.lang.<class> class` and then to `please generate a detailed user guide in asciidoc following the plan`.  This can produce a more complete result.
+
+[options= "header"]
+|===
+| Class | Type | Tokens in one step user guide | Tokens in plan for a user guide | Tokens in planned user guide
+| java.lang.Exception | Simple | 1,831 | 1,815 | 3,072
+| java.lang.System | Varied | 2,108 | 1,962 | 3,510
+| java.lang.Math | Lengthy | 2,552 | 1,680 | 3,581
+| java.lang.Reasoner | Hypothetical | 1,786 | 2,250 | 2,815
+|===
+
+It's worth noting that for the same task, it produced a remarkably similar amount of content in one step and not quite double in two steps.
+
+The AI warns that there is no `Reasoner` class, and the number of tokens is the same.
+
+[quote]
+NOTE: As of Java 21, there is no standard class named `java.lang.Reasoner` in the official Java API.  The following guide is purely hypothetical, illustrating how such a class _might_ look and behave if it existed.
+
+I suggest you generate content that can only be hypothetical to help you recognise when the AI is making things up for when it fails to flag that it is.
+
+==== Generated code
+
+Similarly, I asked the AI to generate different pieces of skeleton code.  While the plans were similar in size to the user guides, the resulting code was much longer in some cases.
+
+[options= "header"]
+|===
+| Class | Type | Tokens in one-step implementation | Tokens in plan for an implementation | Tokens in the implementation
+| A GPT-4 style tokeniser | library | 3,056 | 2,600 | 3,464
+| A Swing based Chat App | app | 4,573 | 2,905 | 5,823
+| Simple in memory DB with JDBC | library | 8,097 | 2,095 | 12,078
+|===
+
+NOTE: This only looks at quantity, not quality.  I will briefly look at quality later.
+
+=== Some key terms in understanding how Generative AI works
+
+Let's pause for a moment to look at some of the key terms.
+
+- *Human-in-the-loop (HITL)* is a collaborative approach that involves humans in the development and use of artificial intelligence (AI) and machine learning (ML) systems
+
+- *Tokens*
+Internally, large language models (LLMs) like GPT-4 break down text into smaller units (tokens), such as words or subword fragments.  The symbols in code and emojis are also broken down into integers.  You can see the integers GPT-4 uses here https://platform.openai.com/tokenizer[OpenAI Tokenizer], e.g. "unbelievable" is broken into three tokens un-bel-ievable or `[373, 9880, 45794]`, however in `var unbelievable = 1;` the word "unbelievable" becomes a single token `83614`.
+
+- *Context Window*
+The context window is the total number of tokens an AI model can handle in one session—combining both the prompt (input) and the response (output).  Once you exceed this limit, older tokens are dropped.  They scroll out of the context window, and the model "forgets" them.
+`o1 pro` has an input limit of 200k (including the result) and an output limit of 16k.  In practice, I have more consistent results with an input context of up to 80k and an output of 2.5k in one step and 4.5k over two steps.
+
+- **Temperature**
+A parameter that controls the "creativity" or randomness of the AI's responses.
+* *Higher temperatures* produce more varied or imaginative results, with a higher rate of incorrect information.
+* *Lower temperatures* generate more focused, deterministic answers with a lower rate of incorrect information.
+
+- **Prompt Engineering**
+The process of crafting and refining your prompts to get the best results from an AI model.  This can include providing context, specifying formats, or even asking the AI to outline a plan before generating final content.
+
+- **Hallucination**
+When the AI confidently provides incorrect or fabricated information.  This occurs because the AI relies on statistical associations rather than explicit facts or reasoning.
+
+- **Fine-Tuning**
+The process of taking a pre-trained model and training it further on a specialised dataset.  This helps the AI produce more domain-specific or task-specific responses.
+
+- **Chain-of-Thought**
+A prompting technique where the AI is asked to "think through" or articulate reasoning steps.  While it can produce more transparent or detailed answers, these intermediate steps should be critically evaluated because the model may still generate errors.
+
+== Estimating the Value of AI-Generated Documentation
+
+From https://blog.vanillajava.blog/2025/01/does-ai-generated-documentation-have.html[Does AI-Generated Documentation Have Value?]
+
+I tested the relative value of AI-generated documentation for my knowledge and set expectations for others.
+
+I asked `o1 pro` to generate user guides for classes and packages I wrote so I could better evaluate what it wrote.
+I considered the results for:
+
+- a simple class and package
+- a large class and package
+- a complex class and package
+
+Then, I subjectively estimated how many points made were compelling, interestingly incorrect, correct but not interesting, or just plain wrong.  I ignored repeated points.  This is what I concluded:
+
+[cols="2,1,1",options="header"]
+|====
+| Type | Average points per query | Percentage
+| Correct but not interesting >| 35 >| 80%
+| Just plain wrong >| 5.4 >| 13%
+| Compelling to keep  >| 2.1 >| 5%
+| Wrong But Interestingly >| 0.8 >| 2%
+|====
+
+These results assume I crafted the query to be as specific as possible.  Without a specific query, the AI can generate irrelevant or wrong content.
+
+Understandably, this can lead people to conclude that AI is unusable.  However, there is still value in *reviewing* AI-generated documentation to mine for gems.  This still represents around 3 points worth highlighting or correcting from each prompt, though I had to sift out around 40 to find them.
+
+== AI and the Reverse Baltimore Phenomenon
+
+[quote, Blaise Pascal]
+I have only made this letter longer because I have not had the time to make it shorter
+
+From https://blog.vanillajava.blog/2025/01/generative-ai-and-reverse-baltimore.html[Generative AI and the Reverse Baltimore Phenomenon]
+
+One of the AI's first considerations is the length of the result.  You can influence this by asking for `about 8k words` or `exactly 250 words`.
+The downside of this approach is that it can attempt to "fill the void" and generate a predetermined amount of words, whether they merit it or not.
+
+In Cartography, the challenge is to provide enough detail to be useful and practical but not so much detail as to overwhelm the reader.  AI presents a similar dilemma.  It is possible to generate a large amount of text that is just fluff, adding no value and hiding anything that would be of value.
+
+=== The Baltimore Phenomenon
+
+Baltimore is a major city in the US, with millions of people living in the metro area.  However, it is near the US Capitol, Washington, DC.  As such, it is unlikely to appear on a map of the USA, as it's too close.
+
+=== The Reverse Baltimore Phenomenon
+
+Conversely, with just 34K people, Alice Springs in Australia is in the middle of nowhere.  It often appears even on a world map, having nothing around it to overshadow it.  It is added to "fill a void" in the centre of Australia.
+
+=== Filling a void
+
+Generative AI tends to fill a result with "fluff" to satisfy a predetermined guide on how many words to produce, regardless of whether the topic is simple or complex.  As we saw earlier, it produced a remarkably similar number of words for the same task but with significantly different content to describe.
+
+Both phenomena stem from "filling a void":
+
+1.  Sparse vs. Dense Spaces
+- **Cartography**: Sparse regions allow tiny towns to receive disproportionate emphasis.
+- **AI Text Generation**: Minimal context leads the AI to add extraneous details to make it appear more complete.
+
+2.  Sense of Completeness
+- **Cartography**: Mapmakers strive for "balanced" labels over geographic space.
+- **AI Generation**: Documentation generators try to create self-contained solutions, sometimes over-elaborating.
+
+3.  Misplaced Emphasis
+- **Cartography**: A lone settlement in the desert seems more prominent than it ought to be.
+- **AI Generation**: Trivial points get inflated discussion, while major concepts receive too little attention.
+
+== Brainstorming Ideas
+
+[quote, Linus Pauling]
+The best way to get a good idea is to get a lot of ideas.
+
+When you start a project, you are in the exploring phase of what you want to consider.
+AI can help you cover aspects you might not have considered.
+Depending on how you want to approach it, here are some tricks I have found useful for extracting more information from AI.
+
+.Approximate Guide on the Difference in Approach
+[cols="4,1,1,1",options="header"]
+|===
+| Approach | Queries | Words | Useful Points
+| Ask for a user guide or detailed requirements document | 1 | 2000 | 1 - 2
+| Ask it to plan a document, then ask for that document | 2 | 3000 | 1 - 3
+| Ask it to plan a document, then ask for that document with around 8k words | 2 | 8000 | 3 - 7
+| Ask it to plan a document, then ask for around 8k words on each of the ~10 sections of the plan | 12 | 50000 | 5 - 12
+|===
+
+This "mining for gems" approach results in a lot of content, most of which is not useful.  In the last case above, you might retain about 1/400th of the content produced.
+
+However, it can get you thinking about libraries, tools, and techniques you might not have considered.  One of Generative AI's strengths is that it has indexed nearly everything publicly available and can quickly cover a lot of ground.
+
+=== Sample Project 2048
+
+Using the approaches I have mentioned, I recreated a Sliding Block Puzzle game called 2048.  It is available on https://github.com/Vanilla-Java/aide-2048[AIDE 2048 Game on GitHub].  To bootstrap the content I started with
+
+- The style guide, workflow, and glossary content in my "aide" project. ~ 1K tokens.
+- Generate requirements in AsciiDoc under `src/main/adoc`, reviewed and asked for improvements ~ 1.5k tokens after editing.
+- Asked it `Generate all the unit test.  Provide them in separate code blocks with headings.` ~ 4K tokens
+- Asked it to `Generate all the main code.  Provide them in separate code blocks with headings.` ~ 4K tokens
+- Asked it to produce all the additional files, total now ~ 10K tokens.
+- Ran the unit test, three failed.  So I pasted the assertion error into the prompt, and it suggested a few ways to fix it, which I selected and did manually.
+- I asked it to suggest enhancements which I placed into it's own adoc. ~ 700 tokens
+- I then ask for a plan for which files need updating.  I followed this but found more files also needed updating.  More tests failed which it helped me fix.  Total ~21K tokens
+- I asked it to add animations to the requirements.  This followed a similar pattern, but required more manual editing than before, or I decided it would be easier than tricking it into doing it at this point.
+
+I used the AI to help change the colour scheme.
+
+The project is now around 25K tokens.  I use my AIDE project to bundle the project into a single AsciiDoc I could then add to the prompt as needed.  Generally this is on the first prompt of a new chat session, after that it's in the context.
+
+While working correctly, the animation is more confusing than useful.  It should be fixed, and an option added to turn it off.
+
+[quote, enhancements.adoc]
+**Caveat**: Identical-value merges can cause confusion, For a robust merge animation, add unique IDs to each tile in the model.
+
+== Using Prompts as Meta-Programming
+
+It can seem like using "prompt" is a meta-programming language.  It can be used to specify requirements, generate tests, and generate/update code.  With enough context, you can even post error messages into the prompt, and it will give you suggestions on how to fix them.
+
+Rather than version the prompts, I suggest making your project the part of the prompt you version control, asking the AI to update, suggest improvements, and refactor it for the next iteration.
+
+At every stage, having a tool with a multi-line comparison is very helpful.  It will produce different results each time, and if you are not careful, you can get into a cycle of endless churn.  For example, I always use "Compare with Clipboard" in IntelliJ IDEA.
+
+For documentation, I prefer AsciiDoc as a markup language, though Markdown is naturally supported by tools like ChatGPT, so use that if you don't have a preference.  The benefit is that markup is structured text, so formatting, links, tables, and lists are easily reviewed for comparison and copy-and-pasted.  You can also copy it into and out of other tools like Grammarly easily without losing structure like heading, highlighting, lists, links, tables etc.
+
+=== When AI is useful
+
+In the prototype phase, you need a skeleton.
+Anything will do, provided you expect it will all be replaced in subsequent iterations.
+As you progress through the project's later stages, you will most likely systematically rewrite the entire documentation or code base.
+Using AI makes rewriting easier, and there is a good chance you significant refactor or write significant portions multiple times as a result.
+
+There is a perception of productivity, but this is often an illusion.
+AI provides text and code faster with a measure of completeness, which means you can stop working on a task sooner.   However, I suspect most people will use their time budget to develop further and make it more complete and maintainable.
+
+It will have the volume you might have been looking for, which can save you time if that is good enough.
+
+[cols="1,3",options="header"]
+|===
+| Stage | AI Generated Content
+| Prototype | Something is better than nothing, and it can produce a skeleton with very little effort.
+| Early Development | Saves time, but you will likely rewrite it.  Documentation of the AI reads helps keep the AI results stable and relevant.
+| Late Development | It gives you the bandwidth to focus on other things, such as maintainability.  You can trade time for quality.
+| Production Support | Useful for covering gaps in functionality
+|===
+
+== What Generative AI Can't Yet Do
+
+Despite its power, Generative AI still struggles with:
+
+Self-review.  You can also ask it to review its results, but this is also unreliable.  You get false positives and negatives as often as correct/incorrect statements.
+- Analytics.  Often, it will refuse to give an analysis, or include an appropriate warning it's just illustrative.  There may be good examples, but I haven't found one remotely accurate.
+- Aesthetics.  It has no eye for colours or animations.  It will happily put black text on a black background.  Animations that work but make no sense.
+
+=== Human in the Loop
+
+All the approaches I have outlined require an expert
+
+- to specify and review the requirements.
+- to check the results.
+- for subjective or numeric analysis.
+- for domain knowledge.
+
+Generative AI is like peak Dunning Kruger effect or "Mount Stupid".  It is absurdly widely read, but has no experience applying it or common sense.
+
+== Conclusion
+
+[quote, Antoine de Saint-Exupéry]
+Perfection is achieved not when there is nothing more to add but when nothing is left to take away.
+
+The ability to choose the right code is more important than the ability to write code, and AI won't change that.
+
+An AI can be a valuable tool for a developer or a founder's many areas of expertise.  However, it fundamentally uses a statistical model, which is powerful for generalising knowledge but must always be checked at every stage.
+
+At any stage of your career, AI can help if used appropriately; however, it is no replacement for experience, domain expertise, and common sense. I predict documentation-driven development will be utilised primarily to get better results from AI. For example, I believe copilot produces better results with requirements docs and user guides in your project.
+
+Combining human insight with Generative AI is a very different development experience, often more productive but mostly more complete and maintainable.
