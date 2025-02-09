@@ -3,66 +3,57 @@
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
+:revdate: 2025-02-09
 
 == Overview
 
-This document defines the requirements for implementing a Grep-like contextual search feature in the AIDE toolset. In the current implementation, the AdocDocumentEngine handles directory traversal and file filtering while the AdocContextualSearch component is responsible for processing individual files. When processing a file, the search operation:
-- First checks whether the file name matches the search pattern. If so, the entire file content is returned.
-- Otherwise, scans the file line-by-line and returns each matching line along with a fixed number of context lines before and after the match.
-- Merges overlapping context regions to keep the output concise.
-- Marks each matching segment with a “.lines [start, end]” header before outputting the content block.
+This document defines the requirements for implementing a Grep-like contextual search feature in the AIDE toolset. The **AdocContextualSearch** component works in tandem with the **AdocDocumentEngine** to process individual files. When processing a file, the search operation:
+
+* Checks whether the file name matches the search pattern. If so, the entire file content is returned.
+* Otherwise, scans the file line-by-line and returns each matching line along with a fixed number of context lines before and after the match.
+* Merges overlapping context regions to keep the output concise.
+* Marks each matching segment with a “.lines [start, end]” header before outputting the content block.
 
 == Functional Requirements
 
 === 1. Search Scoping
-
-The search component **MUST**:
+* The search component **MUST**:
 - Accept a regular expression as input.
-- Operate on individual files provided by the AdocDocumentEngine.
-- If the file name matches the pattern, include the full content; otherwise, perform line-by-line matching.
-- Inherit and respect the filtering rules (e.g. aide.ignore, .gitignore, hidden/binary files).
+- Operate on individual files provided by the **AdocDocumentEngine**.
+- Return the full file content if the file name matches the search pattern.
+- Otherwise, perform line-by-line matching respecting file filtering rules (e.g. aide.ignore, .gitignore, hidden/binary files).
 
 === 2. Context Retrieval
-
-The search component **MUST**:
-
-- Allow the user to specify a fixed number of context lines to include both before (-B) and after (-A) each matching line.
-- When multiple matches occur within a file, merge overlapping context regions so that the output remains concise.
-- Preserve the original ordering, formatting, and indentation of the context lines.
-- Return each search result as a match record that includes:
-- The file path
-- The starting and ending line numbers for the match (and context)
-- An indication of which lines directly match versus those provided as context
+* The search component **MUST**:
+- Allow specification of a fixed number of context lines before (-B) and after (-A) each match.
+- Merge overlapping context regions when multiple matches occur.
+- Preserve original ordering, formatting, and indentation.
+- Return match records that include the file path, the starting and ending line numbers, and a marker indicating direct matches versus context lines.
 
 === 3. Output Format
-
-Search results **MUST** be formatted to clearly convey context:
-
+* Search results **MUST** be formatted to clearly convey context:
 - Each match **MUST** include the file path and line numbers.
-- Direct match lines should be clearly distinguished (e.g. using markers or headings) from the context lines.
-- The output **SHOULD** support multiple formats, at a minimum:
+- Direct match lines should be clearly distinguished from context lines.
+- The output **SHOULD** support at least the following formats:
 - Plain text (default)
 - AsciiDoc (with proper section headings)
 - Markdown
-- HTML with syntax highlighting for code fragments
+- HTML (with syntax highlighting for code fragments)
 
 === 4. Integration with AdocDocumentEngine
-
-The contextual search feature is designed to work in tandem with the AdocDocumentEngine:
-
-- The AdocDocumentEngine is solely responsible for directory traversal and for applying file filtering rules.
-- For each file that passes filtering, the engine invokes the AdocContextualSearch component.
-- If the file name matches the search pattern, the entire file is returned.
-- Otherwise, the file content is scanned to extract matching lines with the configured context.
-- The results from AdocContextualSearch are then merged into the final output document.
+* The contextual search feature integrates as follows:
+- **AdocDocumentEngine** handles directory traversal and file filtering.
+- For each file that passes filtering, the engine invokes **AdocContextualSearch**.
+- If the file name matches the search pattern, the entire file is returned; otherwise, only matching segments with context are extracted.
+- Results are merged into the final output document.
 
 === 5. Non-Functional Requirements
-
-- The search operation **MUST** be efficient and capable of handling large files without excessive memory consumption.
-- It **SHOULD** support incremental searching such that unchanged files can reuse prior search results.
-- The implementation **MUST** be thread-safe when used as part of parallel processing in large codebases.
-- Clear error handling **MUST** be provided in cases where a file cannot be processed.
+* The search operation **MUST**:
+- Be efficient and capable of handling large files without excessive memory usage.
+- Support incremental searching so that unchanged files can reuse previous results.
+- Be thread-safe for parallel processing in large codebases.
+- Provide clear error handling for files that cannot be processed.
 
 == Summary
 
-The updated contextual search feature enhances the AIDE toolset by focusing on file-level search operations. Directory traversal and file filtering are handled by the AdocDocumentEngine, while the AdocContextualSearch component determines, per file, whether the search pattern is matched by the file name (in which case the entire file is returned) or if line-by-line analysis is required. This separation simplifies the implementation, improves performance, and ensures that search results are both precise and contextually rich.
+The updated contextual search feature enhances the AIDE toolset by focusing on precise file-level search. By separating directory traversal (handled by the engine) from per-file content extraction, the design simplifies implementation, improves performance, and delivers contextually rich search results optimized for downstream AI ingestion.

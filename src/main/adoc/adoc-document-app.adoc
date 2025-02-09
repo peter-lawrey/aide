@@ -3,55 +3,47 @@
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
+:revdate: 2025-02-09
 
 == Overview
 
-This document defines the requirements for generating a consolidated project context that is optimized for ingestion by downstream processes. File inclusion is strictly controlled by first consulting the ignore file—using `aide.ignore` if it exists or falling back to `.gitignore`—and then applying non-configurable default rules. In addition, files detected as binary, too large, or matching specific extensions are automatically excluded.
+This document defines the requirements for generating a consolidated project context optimized for ingestion by downstream processes. File inclusion is controlled by consulting an ignore file (preferably `aide.ignore`, or `.gitignore` if absent) and applying strict default rules. The output is token‑optimized for AI ingestion.
 
-== File Filtering via Ignore Files
+== 1. File Filtering via Ignore Files
 
-**Primary Check – `aide.ignore` or `.gitignore`:**
+=== Primary Check – `aide.ignore` or `.gitignore`
+- The tool **MUST** check for an `aide.ignore` file.
+- If absent, the tool **MUST** fall back to the `.gitignore` file.
+- If the ignore file explicitly **excludes** a file, that file is omitted.
+- If explicitly **included**, the file bypasses further checks.
 
-- The tool **MUST** first check for an `aide.ignore` file.
-- If an `aide.ignore` file is not present, the tool **MUST** fall back to the `.gitignore` file.
-- If the ignore file explicitly **excludes** a file, that file is excluded.
-- If the ignore file explicitly **includes** a file, that file is included and subsequent local checks are bypassed.
+=== Default Behavior
+- In the absence of an explicit rule, include all text files except:
+- Files starting with a dot (`.`) or in dot-prefixed directories.
+- Files detected as binary, overly large, or with disallowed extensions (e.g., `.asciidoc`, `.adoc`).
+- Files with a companion summary (with a `.ad` extension) replace the original.
 
-**Default Behavior When No Rule Exists:**
+== 2. Modular and Summarized Documentation
 
-- In the absence of an explicit rule, the default is to include all text files.
-- However, the following rules are non-configurable:
-- Files whose names start with a dot (`.`) are **ALWAYS** excluded.
-- Files located under any directory that starts with a dot (`.`) are **ALWAYS** excluded.
-- The tool **MUST** detect binary files (e.g. via content analysis or MIME type) and exclude them.
-- Files exceeding a configurable size threshold are **ALWAYS** excluded.
-- Files ending with the extensions `.asciidoc` or `.adoc` are **ALWAYS** excluded.
-- For any file, if a companion file exists with the same name plus a `.ad` extension, then that summary file **REPLACES** the original file for packaging purposes.
+- Documentation **SHOULD** be organized into modular units.
+- Each module **MUST** include a brief summary at its start if the original document is too large.
+- The final output file **MUST** be token-optimized by summarizing large documents while retaining essential context.
 
-== Modular and Summarized Documentation
+== 3. Consistent Formatting for Ingestion
 
-- Documentation **SHOULD** be organized into modular units so that only the most relevant content is packaged.
-- Each module or file section **MUST** include a brief summary at its start if the original document is too large to be included in full.
-- The output file must be token-optimized by automatically summarizing large documents.
+- Each included file **MUST** be clearly separated (using headings like “== File: [filename]”) for easy parsing.
+- Nonessential formatting (e.g., extraneous layout instructions or metadata) **MUST** be removed.
+- The output should be formatted to minimize token usage while preserving context.
 
-== Consistent Formatting for Ingestion
+== 4. Output Enhancements and Summary Information
 
-- Each included file or module **MUST** be clearly separated using standard headings (e.g., “== File: [filename]”) for easy parsing.
-- Nonessential formatting—such as overly detailed layout instructions, extraneous image references, and copyright metadata—
-**MUST** be removed.
-- The final output should be formatted in a manner that minimizes token usage while preserving the essential context.
+- The generated output **SHOULD** begin with a summary header that includes key statistics (total lines, token count, tokens per line).
 
-== Output Enhancements and Summary Information
+== 5. Logging, Error Handling, and Fallback Mechanisms
 
-- The generated output file **SHOULD** begin with a summary header that includes key statistics (e.g. total line count, token count, and a brief table of contents).
-- This summary enables a quick understanding of the scope and structure of the packaged documentation.
-
-== Logging, Error Handling, and Fallback Mechanisms
-
-- The tool **MUST** log detailed information about file inclusion/exclusion decisions to facilitate debugging (a `-Dverbose` option may be used to enable verbose logging).
-- If a file is too large, unreadable, or detected as binary, a warning **MUST** be logged and a brief note inserted into the output indicating that the section was omitted.
-- The output **SHOULD** clearly indicate any omissions resulting from filtering.
+- The tool **MUST** log detailed file inclusion/exclusion decisions (via a `-Dverbose` option).
+- If a file is too large, unreadable, or binary, a warning **MUST** be logged and a note inserted in the output.
 
 == Summary
 
-The AdocDocumentApp utility **MUST** generate a consolidated, token-optimized AsciiDoc file for project context ingestion. File inclusion is determined by first consulting the `aide.ignore` file (or falling back to `.gitignore` if needed). If the ignore file explicitly excludes or includes a file, that decision is final. In the absence of an explicit rule, all text files are included by default—except for those whose names begin with a dot or that reside in dot-prefixed directories, or any file detected as binary or too large or with a disallowed extension (with summary files taking precedence). These requirements ensure that the final packaged documentation is lean, focused, and ideally suited for ingestion by downstream processes.
+The AdocDocumentApp utility **MUST** generate a consolidated, token-optimized AsciiDoc file for project context ingestion. Decisions are finalized by the ignore file rules, ensuring that only relevant text files are included.

@@ -1,0 +1,33 @@
+= AIDE Toolset Requirements Documentation
+:doctype: book
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
+:toclevels: 2
+:revdate: 2025-02-09
+
+== Introduction
+
+This repository contains the complete, chat-optimized requirements for the AIDE toolset. The documentation is organized into modular units so that each component of the system is clearly defined and can be easily maintained or extended. The files have been structured with clear headings and cross-references to improve both human readability and AI processing (e.g. by GitHub Copilot or ChatGPT).
+
+== Documents Index
+
+* xref:adoc-contextual-search.adoc[Contextual Search Requirements] – Defines the requirements for the Grep-like contextual search feature.
+* xref:adoc-decisions-log.adoc[Requirements Decisions Log] – Captures the key design decisions and rationale for the AIDE toolset.
+* xref:adoc-document-app.adoc[Packaging Requirements for AdocDocumentApp] – Details how the tool generates the consolidated project context.
+* xref:adoc-document-engine.adoc[AdocDocumentEngine] – Describes the orchestration of file scanning, filtering, and processing.
+* xref:adoc-document-stats.adoc[AdocDocumentStats Requirements] – Defines the statistics tracking for lines and tokens.
+* xref:adoc-document-writer.adoc[AdocDocumentWriter] – Specifies the output writing behavior and formatting requirements.
+* xref:adoc-file-filter-req.adoc[AdocFileFilter Requirements] – Details the file inclusion/exclusion rules including .gitignore/aide.ignore integration.
+* xref:adoc-file-processor-req.adoc[AdocFileProcessor Requirements] – Outlines the file processing and copyright removal logic.
+* xref:build-chronicle-aide-doc.adoc[Detailed Requirements for build.chronicle.aide.dc] – Describes all classes in the build.chronicle.aide.dc package for AI-based code generation.
+* xref:gitignore-filter.adoc[Gitignore Filter Specification] – Defines the behavior of the GitignoreFilter component.
+* xref:requirements.adoc[Chat-Optimized Packaging Requirements] – High-level requirements for the overall packaging process.
+
+== How to Use
+
+Each document is self-contained and follows a standard structure: an Overview, detailed requirements (functional and non-functional as applicable), usage or integration flow, and a summary. Cross-references are provided for seamless navigation.
+
+== Revision History
+
+- 2025-02-09: Initial update for AI-friendly documentation, standardized headings, and modular organization.

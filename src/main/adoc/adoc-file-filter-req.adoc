@@ -1,90 +1,57 @@
-= AdocFileFilter
+= AdocFileFilter Requirements
+:doctype: requirements
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
+:revdate: 2025-02-09
 
-Encapsulates the rules for including or excluding files based on multiple checks:
-`.gitignore` or `aide.ignore`, overshadowed `.ad` files, hidden or large files, etc.
-This filter is used by higher-level scanning tools (e.g., `AdocDocumentEngine`) to
-determine which files should be processed.
+== Overview
+
+This document describes the requirements for the **AdocFileFilter** component, which encapsulates the rules for including or excluding files based on multiple criteria such as ignore files, hidden status, file size, and companion files.
 
 == Responsibilities
 
 1. **Check `.gitignore` or `aide.ignore`**
-- Uses `GitignoreFilter` to see if a file is explicitly *ignored* or *re-included*.
-- If `.gitignore` says `IGNORED`, skip the file immediately.
-- If `.gitignore` says `NOT_IGNORED`, **include** the file and **bypass** further checks.
-- If no matching rule (`DEFAULT`), apply local checks below.
+- Use **GitignoreFilter** to determine if a file is explicitly *ignored* or *included*.
+- If the ignore file returns `IGNORED`, skip the file immediately.
+- If it returns `NOT_IGNORED`, include the file and bypass further checks.
+- If `DEFAULT`, proceed with local checks.
 
 2. **Skip Directories**
-- The engine handles directory recursion; `AdocFileFilter` returns `false` for directories.
+- Always return `false` for directories (handled by the engine).
 
 3. **Skip Hidden or Dot Files**
-- Uses `Files.isHidden(...)` or checks if the filename starts with `.`.
+- Exclude files that are hidden or have names starting with a dot.
 
-4. **Overshadowed by `.ad`**
-- If `myFile.txt.ad` exists, exclude `myFile.txt`.
+4. **Overshadowed by Companion Summary**
+- Exclude a file if a companion file with the same name plus a `.ad` extension exists.
 
 5. **Exclude Certain Extensions**
-- Skips `.asciidoc`, images (`.png`, `.jpg`, etc.), and other large/binary types (`.pdf`, `.class`).
+- Skip files with disallowed extensions (e.g., `.asciidoc`, image formats, binary types).
 
-6. **Exclude Files Starting with `out-`**
-- E.g., `out-log.txt`.
+6. **Exclude Files with Specific Prefixes**
+- For example, files starting with `out-` are excluded.
 
-7. **Skip Large Files**
-- Anything over 128 KB is excluded.
-- If file size cannot be determined (I/O error), exclude by default.
+7. **Size Limit Check**
+- Exclude files larger than 128 KB (or if the size cannot be determined).
 
 == Usage Flow
-
-1. **Construction**
-- Optionally provide a path to `aide.ignore` or `.gitignore`.
-- If parsing fails or the file doesn’t exist, the filter runs without `.gitignore` checks.
-
-2. **Filtering**
-- Invoke `include(Path path)` for each file:
-- **Directories** → always `false` (the engine recurses).
-- **Check `.gitignore`**:
-- If `MatchResult.IGNORED` → return `false`.
-- If `MatchResult.NOT_IGNORED` → return `true` (immediately include, skipping local checks).
-- If `MatchResult.DEFAULT` → continue with local checks below.
-- **Local Checks**: hidden/dot, overshadow (`.ad`), skip extensions, `out-` prefix, size limit, etc.
-- If any check fails → `false`.
-- Otherwise → `true`.
-
-3. **Integration**
-- Typically used by `AdocDocumentEngine` (or a similar orchestrator).
-- The engine calls `include(...)` for each file it encounters while walking directories.
+1. **Construction:** Optionally supply an ignore file path. If parsing fails, run without ignore file checks.
+2. **Filtering:** For each file:
+- Check if it’s a directory (return `false`).
+- Check ignore file results.
+- Apply local checks (hidden, overshadow, extension, prefix, size).
+3. **Integration:** Used by **AdocDocumentEngine** during directory traversal.
 
 == Key Methods
+- `AdocFileFilter(Path ignoreFilePath)`
+- `boolean include(Path path)`
 
-1. `AdocFileFilter(Path ignoreFilePath)`
-- Tries to parse `.gitignore` or `aide.ignore`.
-- If not found or parsing fails, prints a warning and disables `.gitignore` logic.
+== Test Coverage Summary
+- Verifies correct integration with ignore files.
+- Checks that hidden files, overshadowed files, and disallowed extensions are excluded.
+- Ensures size limits and prefix rules are enforced.
 
-2. `boolean include(Path path)`
-- Returns `true` if a file is included, `false` if excluded.
-- Detailed 7-step check (with `.gitignore` taking precedence if `NOT_IGNORED` or `IGNORED`).
+== Summary
 
-== Test Coverage
-
-Unit tests ensure this logic is correct:
-
-1. **`.gitignore` Integration**:
-- `IGNORED` → skip.
-- `NOT_IGNORED` → include, ignoring local checks.
-- `DEFAULT` → local checks determine outcome.
-
-2. **Hidden/Dot Files**:
-- Should be excluded (e.g., `.hidden.adoc`).
-
-3. **Overshadow**:
-- If `file.txt.ad` exists, exclude `file.txt`.
-
-4. **Extensions**:
-- Exclude `.asciidoc`, `.png`, `.pdf`, etc.
-
-5. **Prefix**:
-- Exclude files starting with `out-`.
-
-6. **Size Limit**:
-- Exclude files over 64 KB or failing a size read.
-
-By respecting these rules and the `.gitignore` results, `AdocFileFilter` ensures that only relevant, manageable files are processed by the engine.
+The **AdocFileFilter** ensures that only relevant and manageable files are processed by applying a layered set of checks, prioritizing ignore file results and enforcing local filtering rules.

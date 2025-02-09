@@ -1,43 +1,43 @@
 = AdocDocumentWriter
+:doctype: requirements
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
+:revdate: 2025-02-09
 
-This component is responsible for writing processed text to the output AsciiDoc file while updating statistics (such as total lines and tokens) on a per-line basis. In the updated implementation, the writer also ensures that each file section is clearly delimited for downstream AI ingestion by inserting markdown-style file headings and contextual search markers.
+== Overview
+
+The **AdocDocumentWriter** is responsible for writing processed text to the output AsciiDoc file while updating statistics (total lines and tokens). It also ensures that each file section is clearly delimited for downstream AI ingestion by inserting markdown-style headings and contextual search markers.
 
 == Fields
-
-- **AdocDocumentStats stats**
-Tracks and updates the total number of lines and tokens in the output.
-
-- **PrintWriter currentWriter**
-The active writer used to append text to the output file.
+- **AdocDocumentStats stats** – Tracks and updates the output statistics.
+- **PrintWriter currentWriter** – The active writer for appending text to the output file.
 
 == Behavior
 
-- **open(String outputFile, boolean append):**
-- Opens (or creates) the output file specified by the path.
-- The `append` parameter controls whether existing content is overwritten or preserved.
+=== open(String outputFile, boolean append)
+- Opens or creates the specified output file.
+- The `append` flag determines whether to overwrite or preserve existing content.
 
-- **write(String text):**
+=== write(String text)
 - Writes the provided text to the currently open file.
-- Invokes `stats.updateStats(text)` to update line and token counts.
-- When beginning a new file section (e.g. when processing a new source file), a markdown-style heading (e.g. “# File: relative/path/to/file”) is output before the file’s content.
-- If contextual search is active, matching segments are preceded by a marker such as “.lines [start, end]” indicating the range of lines in the original file.
+- Invokes `stats.updateStats(text)` to update statistics.
+- When starting a new file section, writes a markdown-style heading (e.g., “# File: relative/path/to/file”).
+- If contextual search is active, precedes matching segments with a “.lines [start, end]” marker.
 
-- **snapshotStats():**
-- Captures a snapshot of the current statistics so that subsequent writes can report changes (deltas) in lines and tokens.
+=== snapshotStats()
+- Captures a snapshot of current statistics for delta reporting.
 
-- **close():**
-- Closes the current writer, ensuring all buffered output is flushed to disk.
+=== close()
+- Closes the writer, ensuring all buffered output is flushed.
 
-== Usage
-
-The writer is typically used by the AdocDocumentEngine during processing:
-- At the start, the engine opens the output file (e.g. `context.asciidoc` for full mode or `increment.asciidoc` for incremental mode) via `open()`.
-- A header (e.g. “= Directory Content”) is written to the output.
-- For each file processed, the engine writes a markdown-style heading (e.g. “# File: relative/path/to/file”) before the file’s content.
-- When a search pattern is active, any matching segments are marked with a “.lines [start, end]” header before their respective content blocks.
-- After processing, `snapshotStats()` is used to capture current counts and a summary block is appended.
-- Finally, `close()` is called to complete the output process.
+== Usage Flow
+1. The engine opens the output file (e.g., `context.asciidoc` for full mode).
+2. A header is written (e.g., “= Directory Content”).
+3. For each processed file, a markdown-style file heading and content are written.
+4. After processing, snapshot and summary statistics are appended.
+5. The writer is closed.
 
 == Summary
 
-The AdocDocumentWriter ensures that the final packaged output is clear, structured, and optimized for ingestion by downstream AI chat systems. By incorporating markdown-style file headings and contextual search markers, the output is not only token-optimized but also easy to parse and understand.
+The **AdocDocumentWriter** guarantees that the final output is clearly structured and token-optimized for AI chat ingestion by including consistent file delimiters and accurate statistics.
