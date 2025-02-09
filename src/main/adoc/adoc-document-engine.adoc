@@ -1,88 +1,64 @@
 = AdocDocumentEngine
+:doctype: requirements
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
+:revdate: 2025-02-09
 
-Central orchestrator for scanning, filtering, processing, and writing AsciiDoc or text-based files. Updates include:
-- **Mode Detection:**
-  If a context file (context.asciidoc) exists, the engine switches to incremental mode; otherwise, it runs in full mode. Console output clearly indicates the mode by printing either “Full mode: context.asciidoc” or “Incremental mode: increment.asciidoc”.
-- **Markdown File Headings:**
-  Each file processed is written to the output with a markdown-style header (for example, “# File: relative/path/to/file”) to aid downstream parsing.
-- **Contextual Search Integration:**
-  When a search pattern is configured, the engine invokes the AdocContextualSearch component to process the file. If the file name matches the search pattern, the entire file is returned; otherwise, the file is scanned line-by-line and matching segments are extracted along with a fixed number of context lines. Each match is preceded by a “.lines [start, end]” marker that indicates the original line numbers.
+== Overview
+
+The **AdocDocumentEngine** is the central orchestrator responsible for scanning directories, filtering files, processing file content, and writing the consolidated AsciiDoc output. It supports both full and incremental modes and integrates with components like **AdocContextualSearch**, **AdocFileFilter**, **AdocFileProcessor**, **AdocDocumentWriter**, and **AdocDocumentStats**.
 
 == Responsibilities
 
-1. **Detect Full vs. Incremental Mode**
-   - Checks whether `context.asciidoc` exists. If it does, the engine runs in incremental mode; otherwise, it runs in full mode.
+1. **Mode Detection**
+- Determine full mode if `context.asciidoc` does not exist.
+- Switch to incremental mode if `context.asciidoc` exists (process only new/updated files).
+
 2. **Console Output**
-   - Immediately before opening the output file, the engine prints either:
-
-    Full mode: {contextAsciidoc}
-
-   Incremental mode: {incrementalAsciidoc}
-
-   - This output helps users see which file is being written.
+- Print the mode before opening the output file:
+- “Full mode: context.asciidoc”
+- “Incremental mode: increment.asciidoc”
 
 3. **File Scanning**
-   - Recursively traverses directories or processes individual files.
-   - Utilizes the `AdocFileFilter` to decide on file inclusion.
-   - In incremental mode, compares file modification timestamps to process only new or updated files.
+- Recursively traverse directories.
+- Use **AdocFileFilter** to decide file inclusion.
+- In incremental mode, compare file modification timestamps.
+
 4. **File Processing**
-   - Reads file content using the `AdocFileProcessor` (UTF-8), optionally removing copyright.
-   - If a search pattern is provided, delegates to the AdocContextualSearch component to extract only matching segments with a specified number of context lines.
-   - Writes each file’s content preceded by a markdown-style header (e.g. “# File: relative/path/to/file”) and, when applicable, a “.lines [start, end]” marker before each match block.
+- Read file content using **AdocFileProcessor** (UTF-8).
+- Optionally remove copyright blocks.
+- If a search pattern is set, delegate to **AdocContextualSearch** to extract matching segments with context.
+- Write file content preceded by a markdown-style header (e.g., “# File: relative/path/to/file”) and, if applicable, a “.lines [start, end]” marker.
+
 5. **Statistics & Summaries**
-   - Maintains and updates global counters (total lines and tokens) using `AdocDocumentStats`.
-   - At the end of processing, appends a summary block with statistics and lists any skipped files.
+- Maintain and update global counters (total lines and tokens) via **AdocDocumentStats**.
+- Append a summary block at the end showing statistics and any skipped files.
+
 6. **Error Handling**
-   - Files that are unreadable or fail processing are skipped and logged.
+- Log and skip unreadable or problematic files.
 
-== 2.2 Integration with Other Components
+== 2. Integration with Other Components
 
-- **AdocDocumentApp:**
-  Instantiates the engine and configures it with input paths, output file names, and options such as search patterns.
-- **AdocFileFilter:**
-  Determines which files are eligible for processing.
-- **AdocFileProcessor:**
-  Reads file contents and optionally removes copyright blocks.
-- **AdocDocumentWriter:**
-  Writes the processed file content to the output and updates statistics.
-- **AdocDocumentStats:**
-  Tracks the number of lines and tokens to ensure the final document is optimized for chat ingestion.
-- **AdocContextualSearch:**
-  Processes individual files for matching content when a search pattern is provided.
+- **AdocDocumentApp:** Instantiates and configures the engine.
+- **AdocFileFilter:** Determines file eligibility.
+- **AdocFileProcessor:** Reads and cleans file content.
+- **AdocDocumentWriter:** Outputs the processed content.
+- **AdocDocumentStats:** Tracks statistics.
+- **AdocContextualSearch:** Processes file content when a search pattern is provided.
 
-== 2.3 Usage Flow
+== 3. Usage Flow
 
-1. **Initialization:**
-   - The engine is instantiated with required collaborators: a file filter, a document writer, and a statistics tracker.
-   - Configuration options (e.g. context and incremental file names, search pattern, number of context lines) are set.
-2. **Input Path Addition:**
-   - Directories or individual file paths are added for scanning.
-3. **Execution:**
-   - The engine checks for an existing `context.asciidoc`. If found, it switches to incremental mode (processing only files with a newer timestamp); otherwise, it runs in full mode.
-   - The appropriate output file is opened, and a header is written:
-     - In full mode:
+1. **Initialization:** Instantiate the engine with required collaborators and configuration options.
+2. **Input Path Addition:** Add directories or file paths.
+3. **Execution:** Check for an existing `context.asciidoc` to set mode, open the output file, and process each eligible file.
+4. **Summary and Closure:** Append statistics and close the output file.
 
-       = Directory Content
+== 4. Error Handling and Logging
 
-     - In incremental mode:
-
-         = Directory Content (Incremental Mode)
-
-   - Each eligible file is processed:
-     - The file is read and optionally cleaned of copyright blocks.
-     - If a search pattern is set, the file is processed via AdocContextualSearch to extract only the matching segments along with context.
-     - A markdown-style header (e.g. “# File: relative/path/to/file”) is written before the file’s content, and each match is marked with a “.lines [start, end]” indicator.
-4. **Summary and Closure:**
-   - After processing all files, a summary block is appended, showing the total lines, token count, and tokens per line.
-   - The output file is then closed.
-
-== 2.4 Error Handling and Logging
-
-- **Verbose Logging:**
-  When enabled (via the `-Dverbose` option), the engine outputs detailed log messages at each step, including file inclusion/exclusion decisions, mode detection, and any errors encountered.
-- **Skipped Files:**
-  Files that cannot be processed are recorded and listed in the final summary.
+- Detailed verbose logging (enabled via `-Dverbose`) for file inclusion/exclusion, mode detection, and errors.
+- Record skipped files in the final summary.
 
 == Summary
 
-The updated `AdocDocumentEngine` streamlines the generation of a chat-optimized AsciiDoc file by cleanly separating directory traversal, file filtering, and per-file content extraction. The addition of markdown-style file headings ensures that each file's content is clearly delimited, and the integration of contextual search allows for precise extraction of relevant segments. Incremental mode further optimizes the workflow by processing only new or modified files, resulting in efficient and up-to-date project documentation.
+The updated **AdocDocumentEngine** efficiently generates a chat-optimized AsciiDoc file by combining directory traversal, filtering, and per-file content extraction with clear markdown-style delimiters.
