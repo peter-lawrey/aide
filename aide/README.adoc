@@ -15,7 +15,7 @@ aide/
 ├─ aide-glossary.adoc       → Terminology definitions
 ├─ aide-style-guide.adoc    → Project coding style guidelines
 ├─ aide-workflow.adoc       → AI workflow explanation
-├─ examples.adoc            → Example using AI
+├─ examples.adoc            → Examples using AI
 └─ notes-on-using-aide.adoc → Notes on using AIDE
 ----
 
@@ -24,12 +24,11 @@ Refer to each `.adoc` for details:
 * xref:aide-glossary.adoc[AIDE Glossary]: Definitions of key terms (tokens, AIDE, tokens/line, etc.).
 * xref:aide-style-guide.adoc[AIDE Style Guide]: Conventions for naming, coding, and documentation.
 * xref:aide-workflow.adoc[AIDE Workflow]: The AIDE approach to iterative, documentation-driven engineering.
-* xref:notes-on-using-aide.adoc[Notes on Using AIDE]: Notes on previous revisions the AI can draw on for further suggestions.
-* xref:examples.adoc[Examples using AIDE]: Sample AI queries using AIDE.
+* xref:notes-on-using-aide.adoc[Notes on Using AIDE]: Revision notes and ideas for improvements.
+* xref:examples.adoc[Examples using AIDE]: Sample AI queries and examples.
 
 These documents are stored in version control alongside the code, ensuring they evolve together.
 
 == Usage
 
-Many of these `.adoc` files are included in the final `context.asciidoc` or `increment.asciidoc` (depending on whether you run a full or incremental build). Keep them as small as practical to avoid exceeding token limits in AI-driven tasks.
-
+Many of these `.adoc` files are included in the final context file (e.g. `context.asciidoc` or `increment.asciidoc`) used for project queries and reference. Keep them as small as practical to avoid exceeding token limits in AI-driven tasks.

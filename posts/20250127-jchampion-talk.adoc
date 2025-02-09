@@ -64,16 +64,16 @@ At each stage, you can develop your career in different dimensions.  How you do 
 Mastering new programming languages, frameworks, and tools; developing expert-level understanding in specific domains.
 . *Innovative Problem-Solving*
 Identifying novel solutions to complex challenges and experimenting with emerging technologies such as AI.
+. *Collaboration & People Development*
+Mentoring team members, leading workshops, and facilitating cross-functional teamwork.
+. *Influential Communication & Leadership*
+Presenting technical ideas clearly; building consensus across teams or stakeholder groups.
 . *Operational Excellence & Adaptability*
 Ensuring reliability, maintainability, and scalability; adapting quickly to changing requirements or environments.
 . *Business & Financial Acumen*
 Understanding market dynamics, ROI, and cost-effectiveness to align technical efforts with business objectives.
-. *Collaboration & People Development*
-Mentoring team members, leading workshops, and facilitating cross-functional teamwork.
 . *User Empathy & Emotional Intelligence*
 Prioritising user needs; effectively navigating interpersonal interactions and team dynamics.
-. *Influential Communication & Leadership*
-Presenting technical ideas clearly; building consensus across teams or stakeholder groups.
 . *Strategy & Resource Management*
 Defining long-term technical roadmaps, optimising budgets, tools, and team allocation.
 
@@ -86,7 +86,7 @@ I used AI to review this talk, keeping only compelling changes.
 [quote, African Proverb]
 If you want to go fast, go alone; if you want to go far, go together
 
-==== Early Career (Primarily Areas 1–2)
+==== Early Career (Primarily Areas 1–4)
 
 When you start development, you are focused on individual contribution, adding features and lines of code.
 The challenge is to get the application to compile and work correctly.
@@ -391,9 +391,9 @@ It will have the volume you might have been looking for, which can save you time
 
 Despite its power, Generative AI still struggles with:
 
-Self-review.  You can also ask it to review its results, but this is also unreliable.  You get false positives and negatives as often as correct/incorrect statements.
-- Analytics.  Often, it will refuse to give an analysis, or include an appropriate warning it's just illustrative.  There may be good examples, but I haven't found one remotely accurate.
-- Aesthetics.  It has no eye for colours or animations.  It will happily put black text on a black background.  Animations that work but make no sense.
+- _Self-review._  You can also ask it to review its results, but this is also unreliable.  You get false positives and negatives as often as correct/incorrect statements.
+- _Analytics._  Often, it will refuse to give an analysis, or include an appropriate warning it's just illustrative.  There may be good examples, but I haven't found one remotely accurate.
+- _Aesthetics._  It has no eye for colours or animations.  It will happily put black text on a black background.  Animations that work but make no sense.
 
 === Human in the Loop
 

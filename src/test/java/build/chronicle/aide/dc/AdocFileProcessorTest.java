@@ -13,25 +13,6 @@ class AdocFileProcessorTest {
 
     private AdocFileProcessor processor;
 
-    @BeforeEach
-    void setUp() {
-        processor = new AdocFileProcessor();
-    }
-
-    /**
-     * Parameterized test that covers various scenarios for copyright removal.
-     * Each scenario includes:
-     * - A description
-     * - A list of input lines
-     * - The expected list of lines after removing the copyright block
-     */
-    @ParameterizedTest(name = "{index} => {0}")
-    @MethodSource("copyrightScenarios")
-    void testMaybeRemoveCopyright(String scenario, List<String> input, List<String> expected) {
-        List<String> result = processor.maybeRemoveCopyright(input);
-        assertEquals(expected, result, () -> "Failed scenario: " + scenario);
-    }
-
     /**
      * Supplies scenarios for the parameterized test.
      */
@@ -134,5 +115,24 @@ class AdocFileProcessorTest {
                         )
                 }
         );
+    }
+
+    @BeforeEach
+    void setUp() {
+        processor = new AdocFileProcessor();
+    }
+
+    /**
+     * Parameterized test that covers various scenarios for copyright removal.
+     * Each scenario includes:
+     * - A description
+     * - A list of input lines
+     * - The expected list of lines after removing the copyright block
+     */
+    @ParameterizedTest(name = "{index} => {0}")
+    @MethodSource("copyrightScenarios")
+    void testMaybeRemoveCopyright(String scenario, List<String> input, List<String> expected) {
+        List<String> result = processor.maybeRemoveCopyright(input);
+        assertEquals(expected, result, () -> "Failed scenario: " + scenario);
     }
 }

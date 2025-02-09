@@ -1,8 +1,8 @@
-== 6. `AdocFileProcessor`
+= AdocFileProcessor
 
 Handles reading file lines in UTF-8 and optionally removing a multi-line or single-line copyright comment block **if it appears within the first 20 lines**.
 
-=== 6.1 Overview
+== Overview
 
 1. **Methods**:
 * `List<String> readFileLines(Path file) throws IOException`
@@ -18,11 +18,11 @@ part of it. Returns the modified list (or original if no match).
     * **Strip** out a recognized copyright block (if present).
     * **Return** the resulting list of lines.
 
-=== 6.2 Copyright Removal Logic
+== Copyright Removal Logic
 
 Based on the parameterized tests, the current implementation handles several comment styles when looking for the word “Copyright” within the first 20 lines:
 
-==== AsciiDoc Comment Block
+=== AsciiDoc Comment Block
 - Pattern:
 
 [source]
@@ -36,7 +36,7 @@ Copyright (c) ....
 - If this pattern is detected before line 20:
 - All lines within this block (including the `////`) are removed.
 
-==== Java Block Comment
+=== Java Block Comment
 - Pattern:
 
 [source]
@@ -49,14 +49,14 @@ Copyright (c) ...
 ----
 - If it appears within the first 20 lines, all lines from the `/*` up to `*/` (inclusive) are removed.
 
-==== Forward-Slash Line Comment
+=== Forward-Slash Line Comment
 - Pattern:
 
 `// Copyright (c) ...`
 
 - If found near the top, the block of consecutive `//` lines containing “Copyright” can be stripped.
 
-==== Shell Script (`#`) Comments
+=== Shell Script (`#`) Comments
 
 - Pattern:
 
@@ -68,7 +68,7 @@ Copyright (c) ...
 ----
 - If such a block occurs in the first 20 lines, the lines from the initial `#` to just before the next non-`#` content may be removed. Don't remove the line starting with the shebang (`#!`).
 
-=== 6.3 Test Scenarios (Parameterised)
+== Test Scenarios (Parameterised)
 
 Below are test scenarios (as seen in `AdocFileProcessorTest`) verifying each comment style:
 
@@ -87,12 +87,12 @@ Below are test scenarios (as seen in `AdocFileProcessorTest`) verifying each com
 
 **Important**: Depending on implementation details, the entire “block” is typically removed if it’s identified in the first 20 lines. The exact definition of “block” can vary (e.g., strictly between `/* ... */`, or consecutive lines starting with `//`/`#`). Ensure tests confirm the intended boundaries.
 
-=== 6.4 Implementation Notes
+== Implementation Notes
 
 * If **multiple** potential blocks are present within the first 20 lines, only the **first** recognized block is removed (by default).
 * The method currently assumes that if any recognized comment opening is found (`////`, `/*`, `//`, or `#`) and includes a line with “Copyright”, then the subsequent lines in that block are stripped until the block’s closing delimiter or a change in comment style.
 
-=== 6.5 Example Flow
+== Example Flow
 
 [.procedure]
 ----
@@ -103,7 +103,7 @@ Below are test scenarios (as seen in `AdocFileProcessorTest`) verifying each com
 3. Return modified list.
 ----
 
-=== 6.6 Future Enhancements
+== Future Enhancements
 
 * **Configurable Markers**: A config or YAML-driven approach could let users define custom comment delimiters.
 * **Partial Comment Removal**: If only specific lines should be removed rather than entire blocks.

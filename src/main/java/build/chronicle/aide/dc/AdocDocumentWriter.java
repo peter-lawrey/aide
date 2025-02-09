@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * Writes text to the current output file (either the context or incremental)
- * and updates statistics accordingly.
+ * Writes text to the current output file and updates statistics accordingly.
+ *
+ * <p>This writer is used by the engine to output the consolidated, chat-optimized documentation.
+ * It delegates text statistics tracking to an instance of {@link AdocDocumentStats}.</p>
  */
 public class AdocDocumentWriter {
 
@@ -14,20 +16,20 @@ public class AdocDocumentWriter {
     private PrintWriter currentWriter;
 
     /**
-     * Constructor with a reference to the stats for counting lines/blanks/tokens.
+     * Constructs a writer with a reference to the stats for counting lines and tokens.
      *
-     * @param stats the stats object
+     * @param stats the statistics instance to update
      */
     public AdocDocumentWriter(AdocDocumentStats stats) {
         this.stats = stats;
     }
 
     /**
-     * Opens or creates a file for writing, optionally in append mode.
+     * Opens or creates the output file for writing.
      *
      * @param outputFile the path to the output file
-     * @param append     true if appending, false to overwrite
-     * @throws IOException if an I/O error occurs
+     * @param append     if true, appends to the file; if false, overwrites any existing file
+     * @throws IOException if an I/O error occurs while opening the file
      */
     public void open(String outputFile, boolean append) throws IOException {
         if (currentWriter != null) {
@@ -39,28 +41,28 @@ public class AdocDocumentWriter {
     }
 
     /**
-     * Writes text to the open file, updating stats.
+     * Writes the given text to the currently open file and updates the statistics.
      *
      * @param text the text to write
+     * @throws IllegalStateException if no file is open for writing
      */
     public void write(String text) {
         if (currentWriter == null) {
             throw new IllegalStateException("No file is open for writing.");
         }
         currentWriter.print(text);
-        // Also update stats
         stats.updateStats(text);
     }
 
     /**
-     * Captures a snapshot of stats for delta calculations.
+     * Captures a snapshot of the current statistics.
      */
     public void snapshotStats() {
         stats.snapshotTotals();
     }
 
     /**
-     * Closes the writer if open.
+     * Closes the current writer if open.
      */
     public void close() {
         if (currentWriter != null) {

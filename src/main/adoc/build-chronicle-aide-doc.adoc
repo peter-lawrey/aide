@@ -1,6 +1,5 @@
-[#build-chronicle-aide-dc]
 = Detailed Requirements for `build.chronicle.aide.dc`
-:doctype: requirements
+:doctype: book
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
@@ -23,72 +22,33 @@ It supports:
 
 The following classes each serve a distinct responsibility:
 
-include::adoc-document-app.adoc[]
 
-include::adoc-document-engine.adoc[]
+link:adoc-document-app.adoc[]
 
-include::adoc-document-stats.adoc[]
+link:adoc-document-engine.adoc[]
 
-include::adoc-document-writer.adoc[]
+link:adoc-file-filter-req.adoc[]
 
-include::adoc-file-filer-req.adoc[]
+link:adoc-contextual-search.adoc[]
 
-include::adoc-file-processor-req.adoc[]
+link:adoc-document-stats.adoc[]
 
-== 7. Relationships and Flow
+link:adoc-document-writer.adoc[]
 
-1. **`AdocDocumentApp`**:
-- Instantiates `AdocDocumentEngine` and related classes.
-- Sets properties (context, increment, removeCopyright).
-- Calls `engine.execute()`, `engine.printSummary()`, `engine.close()`.
-2. **`AdocDocumentEngine`**:
-- Manages scanning, incremental detection, and calls `processFile(path)` as needed.
-- Uses `AdocFileProcessor` to read lines and remove optional blocks.
-- Delegates writing to `AdocDocumentWriter`.
-- Summarizes lines, blanks, tokens, and logs skipped files.
-3. **`AdocFileFilter`**:
-- Called to determine if a file is included/excluded by path or extension.
-4. **`AdocDocumentWriter`**:
-- Receives text from the engine, writes it to file, and updates `AdocDocumentStats`.
-5. **`AdocDocumentStats`**:
-- Tracks global counters for lines, blanks, tokens (via GPT-like encoding).
-- Deltas are used for per-file or partial file stats.
-6. **`AdocFileProcessor`**:
-- Abstracts file I/O reading and comment-block removal.
+link:adoc-file-processor-req.adoc[]
 
-== Gitignore Handling
+link:adoc-file-processor-req.adoc[]
 
-With the latest iteration, `.gitignore` logic returns a `MatchResult`:
+link:adoc-decisions-log.adoc[]
 
-- **IGNORED**: `.gitignore` explicitly excludes a file.
-- **NOT_IGNORED**: `.gitignore` explicitly reincludes a file via `!pattern`.
-- **DEFAULT**: If no rule applies, other filters can finalize the decision.
+== Relationships and Flow
 
-This helps us chain `.gitignore` with additional custom filters (e.g., overshadow logic, large-file skips).
-
-== 8. Prompt: Recreate All Classes in `build.chronicle.aide.dc`
-
-Add the following AsciiDoc block to request the AI to generate all Java files:
-
-----
-You are an advanced AI capable of generating Java source code.
-Using the specification in this AsciiDoc (the preceding sections),
-**recreate** the following classes under package `build.chronicle.aide.dc`:
-
-1. `AdocDocumentApp.java`
-2. `AdocDocumentEngine.java`
-3. `AdocDocumentStats.java`
-4. `AdocDocumentWriter.java`
-5. `AdocFileFilter.java`
-6. `AdocFileProcessor.java`
-
-Constraints:
-
-- Each class must be fully self-contained (imports, package declarations, etc.).
-- *Include minimal in-code references to the relevant sections of this AsciiDoc* (e.g., `// See AdocDocumentEngine, Section 2.2 for details`)
-- Code must compile under Java 11 or higher.
-- Ensure the logic matches the stated responsibilities, fields, and methods.
-- Provide JavaDocs for the main classes and methods.
+1. **AdocDocumentApp:**
+   Instantiates the engine and related collaborators, sets options (including search patterns), and triggers the execution flow.
+2. **AdocDocumentEngine:**
+   Handles directory scanning, mode detection (full vs. incremental), and delegates file processing. Output is written using markdown-style headings.
+3. **AdocFileFilter, AdocDocumentWriter, AdocDocumentStats, AdocFileProcessor:**
+   Work together to filter files, write output, maintain statistics, and process file contents respectively.
 
 Please provide the **entire** source code for all classes in one response.
 ----

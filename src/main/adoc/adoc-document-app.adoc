@@ -1,78 +1,57 @@
-== 1. `AdocDocumentApp`
+= Packaging Requirements for AdocDocumentApp
+:doctype: requirements
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
 
-A thin CLI wrapper that orchestrates:
-1. **Reading** system properties (`context`, `increment`, `removeCopyrightMessage`)
-2. **Accepting** zero or more CLI arguments as scan paths (defaulting to `.` if none)
-3. **Constructing** the `AdocDocumentEngine` and supporting classes
-4. **Determining** which ignore file to use (`aide.ignore` preferred, else `.gitignore`)
-5. **Executing** the scan/merge cycle (`engine.execute()`)
-6. **Printing** summaries (`engine.printSummary()`)
-7. **Closing** resources (`engine.close()`)
+== Overview
 
-=== 1.1 System Properties
+This document defines the requirements for generating a consolidated project context that is optimized for ingestion by downstream processes. File inclusion is strictly controlled by first consulting the ignore file—using `aide.ignore` if it exists or falling back to `.gitignore`—and then applying non-configurable default rules. In addition, files detected as binary, too large, or matching specific extensions are automatically excluded.
 
-- `context`
-  Defaults to `"context.asciidoc"`.
-  The *full mode* target file if no existing context is found.
+== File Filtering via Ignore Files
 
-- `increment`
-  Defaults to `"increment.asciidoc"`.
-  The *incremental mode* target file if a context already exists.
+**Primary Check – `aide.ignore` or `.gitignore`:**
 
-- `removeCopyrightMessage`
-  Defaults to `"true"`.
-  If set to `false`, preserves recognized copyright blocks.
+- The tool **MUST** first check for an `aide.ignore` file.
+- If an `aide.ignore` file is not present, the tool **MUST** fall back to the `.gitignore` file.
+- If the ignore file explicitly **excludes** a file, that file is excluded.
+- If the ignore file explicitly **includes** a file, that file is included and subsequent local checks are bypassed.
 
-=== 1.2 CLI Arguments
+**Default Behavior When No Rule Exists:**
 
-If **no arguments** are provided, the application scans `.` (current directory).
-If **one or more** arguments are given, each argument is treated as a path (file or directory) to process.
+- In the absence of an explicit rule, the default is to include all text files.
+- However, the following rules are non-configurable:
+- Files whose names start with a dot (`.`) are **ALWAYS** excluded.
+- Files located under any directory that starts with a dot (`.`) are **ALWAYS** excluded.
+- The tool **MUST** detect binary files (e.g. via content analysis or MIME type) and exclude them.
+- Files exceeding a configurable size threshold are **ALWAYS** excluded.
+- Files ending with the extensions `.asciidoc` or `.adoc` are **ALWAYS** excluded.
+- For any file, if a companion file exists with the same name plus a `.ad` extension, then that summary file **REPLACES** the original file for packaging purposes.
 
-=== 1.3 Handling `aide.ignore` vs. `.gitignore`
+== Modular and Summarized Documentation
 
-1. By default, the app checks for:
-   - **`aide.ignore`** in the *first CLI argument*’s directory if provided, else in `"."`.
-   - If **`aide.ignore`** is *not* found, it falls back to **`.gitignore`**.
-2. Passes the resolved path to the constructor of `AdocFileFilter` (or a similarly named filter) for file-inclusion logic.
+- Documentation **SHOULD** be organized into modular units so that only the most relevant content is packaged.
+- Each module or file section **MUST** include a brief summary at its start if the original document is too large to be included in full.
+- The output file must be token-optimized by automatically summarizing large documents.
 
-=== 1.4 Merging and Statistics
+== Consistent Formatting for Ingestion
 
-Once configured, the application:
-1. Creates an `AdocDocumentStats` instance for line/blank/token tracking.
-2. Creates an `AdocDocumentWriter` to output AsciiDoc lines and update stats.
-3. Instantiates `AdocDocumentEngine` with the file filter, writer, and stats.
-4. Calls `engine.execute()`, which:
-   - Determines if `context.asciidoc` already exists to pick full or incremental mode.
-   - Prints to `System.out`: `"Full mode"` or `"Incremental mode"`.
-   - Recursively scans each path.
-   - Writes or appends to `context.asciidoc` or `increment.asciidoc`.
-5. Calls `engine.printSummary()`, which appends totals and any skipped files.
+- Each included file or module **MUST** be clearly separated using standard headings (e.g., “== File: [filename]”) for easy parsing.
+- Nonessential formatting—such as overly detailed layout instructions, extraneous image references, and copyright metadata—
+**MUST** be removed.
+- The final output should be formatted in a manner that minimizes token usage while preserving the essential context.
 
-=== 1.5 Example Flow
+== Output Enhancements and Summary Information
 
-[.procedure]
-----
-1. **Initial Run** (no existing context file):
-   * `context.asciidoc` is created; all scanned files appear in it.
+- The generated output file **SHOULD** begin with a summary header that includes key statistics (e.g. total line count, token count, and a brief table of contents).
+- This summary enables a quick understanding of the scope and structure of the packaged documentation.
 
-2. **Subsequent Run** (existing context file):
-   * `increment.asciidoc` is created; only newer/modified files appear.
+== Logging, Error Handling, and Fallback Mechanisms
 
-3. **No CLI Args**:
-   * Defaults to scanning `"."`, using either `aide.ignore` or `.gitignore`.
+- The tool **MUST** log detailed information about file inclusion/exclusion decisions to facilitate debugging (a `-Dverbose` option may be used to enable verbose logging).
+- If a file is too large, unreadable, or detected as binary, a warning **MUST** be logged and a brief note inserted into the output indicating that the section was omitted.
+- The output **SHOULD** clearly indicate any omissions resulting from filtering.
 
-4. **Multiple Paths**:
-   * e.g., `AdocDocumentApp /docs /src /assets`, each directory is processed.
-----
+== Summary
 
-=== 1.6 Putting It All Together
-
-1. Read properties → set engine’s context/increment file names and flags.
-2. Determine **aide.ignore** or fallback **.gitignore** path, pass to `AdocFileFilter`.
-3. Build `AdocDocumentStats` + `AdocDocumentWriter` → create `AdocDocumentEngine`.
-4. Add paths from CLI args (or `"."` if none).
-5. `engine.execute()` merges AsciiDoc content, printing a console message for the mode.
-6. `engine.printSummary()` logs total lines, blanks, tokens, plus any skipped files.
-7. `engine.close()` finalizes output.
-
-This design ensures a straightforward workflow that respects `.gitignore` or `aide.ignore` rules, overshadow logic, and large-file skips.
+The AdocDocumentApp utility **MUST** generate a consolidated, token-optimized AsciiDoc file for project context ingestion. File inclusion is determined by first consulting the `aide.ignore` file (or falling back to `.gitignore` if needed). If the ignore file explicitly excludes or includes a file, that decision is final. In the absence of an explicit rule, all text files are included by default—except for those whose names begin with a dot or that reside in dot-prefixed directories, or any file detected as binary or too large or with a disallowed extension (with summary files taking precedence). These requirements ensure that the final packaged documentation is lean, focused, and ideally suited for ingestion by downstream processes.

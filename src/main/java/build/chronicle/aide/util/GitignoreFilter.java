@@ -45,7 +45,7 @@ public class GitignoreFilter {
      * Determines whether the given path is excluded based on the .gitignore rules.
      *
      * @param file the file path to test (absolute or relative)
-     * @return true if the file should be excluded, false otherwise
+     * @return MatchResult indicating whether the file is ignored, explicitly included, or default.
      */
     public MatchResult isExcluded(Path file) {
         return isExcluded(file, Files.isDirectory(file));
@@ -70,16 +70,15 @@ public class GitignoreFilter {
             relFile = file;
         }
         IgnoreNode.MatchResult result = ignoreNode.isIgnored(relFile.toString(), isDirectory);
-        switch (result) {
-            case CHECK_PARENT:
-                // If the file is not explicitly ignored, check if it’s in a directory that is ignored
+        return switch (result) {
+            case CHECK_PARENT -> {
                 Path parent = relFile.getParent();
-                return isExcluded(parent, true);
-            case IGNORED:
-                return MatchResult.IGNORED;
-            case NOT_IGNORED:
-                return MatchResult.NOT_IGNORED;
-        }
-        return MatchResult.DEFAULT;
+                yield isExcluded(parent, true);
+                // If the file is not explicitly ignored, check if it’s in a directory that is ignored
+            }
+            case IGNORED -> MatchResult.IGNORED;
+            case NOT_IGNORED -> MatchResult.NOT_IGNORED;
+            default -> MatchResult.DEFAULT;
+        };
     }
 }

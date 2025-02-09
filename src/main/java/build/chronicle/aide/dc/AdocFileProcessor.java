@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Handles reading file lines in UTF-8 and optionally removing a multi-line or
  * single-line copyright comment block if it appears within the first 20 lines.
- *
  */
 public class AdocFileProcessor {
 
@@ -28,7 +27,6 @@ public class AdocFileProcessor {
     /**
      * Scans the first 20 lines for a recognized comment style containing "Copyright"
      * and removes that block. If none is found, returns the original list.
-     *
      */
     public List<String> maybeRemoveCopyright(List<String> lines) {
         if (lines == null || lines.isEmpty()) {
@@ -165,7 +163,7 @@ public class AdocFileProcessor {
     private int findClosingJavaComment(List<String> lines, int startLine) {
         for (int i = startLine; i < lines.size(); i++) {
             String ln = lines.get(i).trim();
-            if (ln.endsWith("*/") || ln.equals("*/")) {
+            if (ln.endsWith("*/")) {
                 return i;
             }
         }

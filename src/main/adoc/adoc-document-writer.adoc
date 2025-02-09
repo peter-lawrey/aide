@@ -1,30 +1,43 @@
-== 4. `AdocDocumentWriter`
+= AdocDocumentWriter
 
-Writes text to the current output file and updates statistics line-by-line:
+This component is responsible for writing processed text to the output AsciiDoc file while updating statistics (such as total lines and tokens) on a per-line basis. In the updated implementation, the writer also ensures that each file section is clearly delimited for downstream AI ingestion by inserting markdown-style file headings and contextual search markers.
 
-=== 4.1 Fields
-- `AdocDocumentStats stats`
-- `PrintWriter currentWriter`
-- Possibly a `snapshotStats()` method to measure deltas
+== Fields
 
-=== 4.2 Behavior
+- **AdocDocumentStats stats**
+Tracks and updates the total number of lines and tokens in the output.
 
-- `open(String outputFile, boolean append)`
-  - Opens or creates a file, with `append` controlling whether we overwrite or add to the file.
-- `write(String text)`
-  - Appends text, calls `stats.updateStats(text)`.
-- `snapshotStats()`
-  - Saves current totals so the next writes measure deltas.
-- `close()`
-  - Closes the writer if open.
+- **PrintWriter currentWriter**
+The active writer used to append text to the output file.
 
-=== 4.3 Usage
-- Typically used by `AdocDocumentEngine` in either full or incremental mode.
-- Overwrites (`append=false`) by default in the engine; can be changed to `append=true` if needed.
+== Behavior
 
-=== 4.4 Unit Tests
-`AdocDocumentWriterTest` checks:
-- Writing lines updates the file and stats.
-- Blank lines are counted correctly.
-- No file open => throws `IllegalStateException`.
-- Append mode writes new content without overwriting.
+- **open(String outputFile, boolean append):**
+- Opens (or creates) the output file specified by the path.
+- The `append` parameter controls whether existing content is overwritten or preserved.
+
+- **write(String text):**
+- Writes the provided text to the currently open file.
+- Invokes `stats.updateStats(text)` to update line and token counts.
+- When beginning a new file section (e.g. when processing a new source file), a markdown-style heading (e.g. “# File: relative/path/to/file”) is output before the file’s content.
+- If contextual search is active, matching segments are preceded by a marker such as “.lines [start, end]” indicating the range of lines in the original file.
+
+- **snapshotStats():**
+- Captures a snapshot of the current statistics so that subsequent writes can report changes (deltas) in lines and tokens.
+
+- **close():**
+- Closes the current writer, ensuring all buffered output is flushed to disk.
+
+== Usage
+
+The writer is typically used by the AdocDocumentEngine during processing:
+- At the start, the engine opens the output file (e.g. `context.asciidoc` for full mode or `increment.asciidoc` for incremental mode) via `open()`.
+- A header (e.g. “= Directory Content”) is written to the output.
+- For each file processed, the engine writes a markdown-style heading (e.g. “# File: relative/path/to/file”) before the file’s content.
+- When a search pattern is active, any matching segments are marked with a “.lines [start, end]” header before their respective content blocks.
+- After processing, `snapshotStats()` is used to capture current counts and a summary block is appended.
+- Finally, `close()` is called to complete the output process.
+
+== Summary
+
+The AdocDocumentWriter ensures that the final packaged output is clear, structured, and optimized for ingestion by downstream AI chat systems. By incorporating markdown-style file headings and contextual search markers, the output is not only token-optimized but also easy to parse and understand.

@@ -1,171 +1,119 @@
 package build.chronicle.aide.dc;
 
+import build.chronicle.aide.util.TestUtil;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static build.chronicle.aide.util.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for {@link AdocDocumentApp}.
- */
 class AdocDocumentAppTest {
 
     @TempDir
     Path tempDir;
 
-    private static final String CONTEXT_PROP = "context";
-    private static final String INCREMENT_PROP = "increment";
-    private static final String REMOVE_COPYRIGHT_PROP = "removeCopyrightMessage";
-
-    @BeforeEach
-    void setup() {
-        System.clearProperty(CONTEXT_PROP);
-        System.clearProperty(INCREMENT_PROP);
-        System.clearProperty(REMOVE_COPYRIGHT_PROP);
-    }
+    private final PrintStream originalOut = System.out;
+    private ByteArrayOutputStream outContent;
 
     @AfterEach
     void cleanup() {
-        System.clearProperty(CONTEXT_PROP);
-        System.clearProperty(INCREMENT_PROP);
-        System.clearProperty(REMOVE_COPYRIGHT_PROP);
+        // Reset system output if modified.
+        System.setOut(originalOut);
     }
 
     @Test
-    void testSingleAdocFileFullContextMode() throws IOException {
-        Path sampleAdoc = tempDir.resolve("testFile.adoc");
-        Files.write(sampleAdoc, List.of("= Sample Title", "", "Some content here.", "Another line."));
+    void testChatModeOutputGeneration() throws IOException {
+        // Create a sample text file that should be included.
+        Path sampleFile = tempDir.resolve("sample.txt");
+        Files.write(sampleFile, List.of("This is a sample file.\nIt has two lines.\n"));
 
-        String[] args = { tempDir.toString() };
-        System.setProperty("context", tempDir.resolve("context.asciidoc").toString());
+        // Create an aide.ignore file that does not exclude the sample file.
+        Path ignoreFile = tempDir.resolve("aide.ignore");
+        Files.write(ignoreFile, List.of("# No exclusion rules"));
 
+        // Set system properties to use a context file within the tempDir.
+        System.setProperty(AdocDocumentApp.PROP_CONTEXT, tempDir.resolve("context.asciidoc").toString());
+        System.setProperty(AdocDocumentApp.PROP_REMOVE_COPYRIGHT, "true");
+
+        // Run the main application using the tempDir as input.
+        String[] args = {tempDir.toString()};
         AdocDocumentApp.main(args);
 
+        // Verify that the context file was generated.
         Path contextFile = tempDir.resolve("context.asciidoc");
-        assertTrue(Files.exists(contextFile), "context.asciidoc should be created in full mode");
-        assertFalse(Files.exists(tempDir.resolve("increment.asciidoc")),
-                "Should not create increment.asciidoc in full mode");
+        assertTrue(Files.exists(contextFile), "context.asciidoc should be generated in chat mode");
 
-        String contextContent = Files.readString(contextFile);
-        assertTrue(contextContent.contains("Some content here."),
-                "Should include content from the sample .adoc file");
+        String content = Files.readString(contextFile);
+        // Verify that the sample file's content is included in the output.
+        assertContains("sample.txt", content, "Output should include the sample file heading");
+        assertContains("This is a sample file.", content, "Output should include sample file content");
     }
 
     @Test
-    void testIncrementalMode() throws IOException, InterruptedException {
-        Path mainContextFile = tempDir.resolve("context.asciidoc");
-        Files.write(mainContextFile, List.of("= Directory Content", "== Old File: Something"));
-        long oldModTime = Files.getLastModifiedTime(mainContextFile).toMillis();
+    void testIgnoreRulesAreRespected() throws IOException {
+        // Create a file that should be excluded according to ignore rules.
+        Path excludedFile = tempDir.resolve("exclude.txt");
+        Files.write(excludedFile, List.of("This file should be ignored.\n"));
 
-        Thread.sleep(5);
+        // Create an aide.ignore file that explicitly excludes "exclude.txt".
+        Path ignoreFile = tempDir.resolve("aide.ignore");
+        Files.write(ignoreFile, List.of("exclude.txt"));
 
-        Path newAdoc = tempDir.resolve("newFile.adoc");
-        Files.write(newAdoc, List.of("= New File", "Line 1", "Line 2"));
+        // Set system property for the context file.
+        System.setProperty(AdocDocumentApp.PROP_CONTEXT, tempDir.resolve("context.asciidoc").toString());
+        System.setProperty(AdocDocumentApp.PROP_REMOVE_COPYRIGHT, "true");
 
-        System.setProperty(CONTEXT_PROP, mainContextFile.toString());
-        System.setProperty(INCREMENT_PROP, tempDir.resolve("increment.asciidoc").toString());
-
-        String[] args = { tempDir.toString() };
+        // Run the application.
+        String[] args = {tempDir.toString()};
         AdocDocumentApp.main(args);
 
-        Path incFile = tempDir.resolve("increment.asciidoc");
-        assertTrue(Files.exists(incFile), "increment.asciidoc should be created in incremental mode");
-
-        long newModTime = Files.getLastModifiedTime(mainContextFile).toMillis();
-        assertEquals(oldModTime, newModTime, "context.asciidoc should remain unchanged in incremental mode");
-
-        String incContent = Files.readString(incFile);
-        assertTrue(incContent.contains("Line 1"), "Should include new .adoc content in incremental file");
-    }
-
-    @Test
-    void testNoArgumentsDefaultsToDot() throws IOException {
-        System.setProperty(CONTEXT_PROP, tempDir.resolve("context.asciidoc").toString());
-        System.setProperty(INCREMENT_PROP, tempDir.resolve("increment.asciidoc").toString());
-
-        String[] args = {};
-        assertDoesNotThrow(() -> AdocDocumentApp.main(args),
-                "No arguments should not cause a crash; default to '.'");
-
+        // Verify that the context file does not include the excluded file.
         Path contextFile = tempDir.resolve("context.asciidoc");
-        assertTrue(Files.exists(contextFile),
-                "context.asciidoc should be created even if no arguments are provided");
+        assertTrue(Files.exists(contextFile), "context.asciidoc should be generated in chat mode");
+
+        String content = Files.readString(contextFile);
+        assertDoesntContain("exclude.txt", content, "The excluded file should not appear in the output");
+        assertDoesntContain("This file should be ignored.", content, "Content of the excluded file should not appear");
     }
 
     @Test
-    void testSystemPropertiesOverride() throws IOException {
-        Path customContext = tempDir.resolve("myContext.adoc");
-        Path customIncrement = tempDir.resolve("myIncrement.adoc");
-        System.setProperty(CONTEXT_PROP, customContext.toString());
-        System.setProperty(INCREMENT_PROP, customIncrement.toString());
+    void testChatModeOutputWithVerbose() throws IOException {
+        // Set the verbose property.
+        System.setProperty("verbose", "true");
 
-        String[] args = { tempDir.toString() };
+        // Capture the System.out output.
+        outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        // Create a sample file.
+        Path sampleFile = tempDir.resolve("verboseSample.txt");
+        Files.write(sampleFile, List.of("Verbose sample content.\n"));
+
+        // Create a basic aide.ignore file.
+        Path ignoreFile = tempDir.resolve("aide.ignore");
+        Files.write(ignoreFile, List.of("# No exclusion rules"));
+
+        // Set system properties.
+        System.setProperty(AdocDocumentApp.PROP_CONTEXT, tempDir.resolve("context.asciidoc").toString());
+        System.setProperty(AdocDocumentApp.PROP_REMOVE_COPYRIGHT, "true");
+
+        // Run the application.
+        String[] args = {tempDir.toString()};
         AdocDocumentApp.main(args);
 
-        assertTrue(Files.exists(customContext), "Should create user-defined context file in full mode");
-        assertFalse(Files.exists(customIncrement), "No need for incremental file on first run");
-
-        // Run again -> incremental mode
-        AdocDocumentApp.main(args);
-        assertTrue(Files.exists(customIncrement),
-                "Second run should now create the user-defined increment file");
-    }
-
-    /**
-     * Demonstrates that if an aide.ignore file is present, it should override .gitignore logic.
-     * This test will create both an 'aide.ignore' and a '.gitignore' in the tempDir, ensuring
-     * that a pattern in 'aide.ignore' excludes a file that would otherwise be included by .gitignore.
-     */
-    @Test
-    void testAideIgnoreOverridesGitignore() throws IOException {
-        // 1) Create both an 'aide.ignore' and a '.gitignore' with conflicting rules
-        Path aideIgnore = tempDir.resolve("aide.ignore");
-        Files.write(aideIgnore, List.of(
-                "# aide-specific pattern",
-                "*.skip"
-        ));
-
-        Path gitIgnore = tempDir.resolve(".gitignore");
-        Files.write(gitIgnore, List.of(
-                "# fallback pattern, or none at all",
-                "!"
-        ));
-
-        // 2) Create two files:
-        //    a) one that ends with .skip -> This should be excluded by 'aide.ignore'
-        //    b) one that ends with .txt -> This should be included
-        Path skipFile = tempDir.resolve("shouldBeSkipped.skip");
-        Files.write(skipFile, List.of("I should be skipped by aide.ignore"));
-
-        Path includedFile = tempDir.resolve("shouldBeIncluded.txt");
-        Files.write(includedFile, List.of("I should be included"));
-
-        // 3) Directly set 'context' to produce our test output in the tempDir
-        System.setProperty(CONTEXT_PROP, tempDir.resolve("context.asciidoc").toString());
-
-        // 4) Invoke the AdocDocumentApp with the tempDir as argument
-        String[] args = { tempDir.toString() };
-        AdocDocumentApp.main(args);
-
-        // 5) Validate the resulting context.asciidoc was created in full mode
-        Path contextFile = tempDir.resolve("context.asciidoc");
-        assertTrue(Files.exists(contextFile), "context.asciidoc should be created in full mode");
-
-        // 6) Read the context.asciidoc and ensure that:
-        //    - 'shouldBeSkipped.skip' is NOT present
-        //    - 'shouldBeIncluded.txt' IS present
-        String contextContent = Files.readString(contextFile);
-
-        assertFalse(contextContent.contains("shouldBeSkipped.skip"),
-                "The .skip file should be excluded by aide.ignore");
-        assertTrue(contextContent.contains("shouldBeIncluded.txt"),
-                "The .txt file should be included (not excluded by aide.ignore)");
+        // Verify that the output (console) contains verbose log markers.
+        String consoleOutput = outContent.toString();
+        assertContains("Using ignore file:", consoleOutput, "Console output should contain ignore file selection info");
+        // In our updated engine, we assume additional verbose messages are printed (e.g., "VERBOSE: Processing file ...")
+        assertContains("VERBOSE:", consoleOutput, "Verbose mode should output detailed processing logs");
+        System.getProperties().remove("verbose");
     }
 }

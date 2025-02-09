@@ -5,65 +5,58 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A thin CLI wrapper which:
- * <ul>
- *   <li>Reads system properties (<code>context</code>, <code>increment</code>, <code>removeCopyrightMessage</code>)</li>
- *   <li>Accepts zero or more command-line arguments as scan paths (defaults to "." if none)</li>
- *   <li>Determines which ignore file to use (<code>aide.ignore</code> preferred, otherwise <code>.gitignore</code>)</li>
- *   <li>Constructs and configures an {@link AdocDocumentEngine}</li>
- *   <li>Executes the engine to merge AsciiDoc content (full or incremental mode)</li>
- *   <li>Prints a summary and closes resources</li>
- * </ul>
+ * AdocDocumentApp is the entry point for generating a consolidated,
+ * chat‑optimized AsciiDoc file containing the project context.
  *
- * <p>This class is the main entry point for scanning directories/files,
- * aggregating them into a single (or incremental) <code>.asciidoc</code> output.</p>
+ * <p>This application always runs in chat mode. It determines the ignore file
+ * by checking for an "aide.ignore" file (falling back to ".gitignore" if needed)
+ * and then scans the provided paths (or defaults to the current directory) to
+ * generate a new context file (by default, "context.asciidoc") in overwrite mode.
+ * If the -Dverbose flag is set, additional log output is produced.</p>
  */
 public class AdocDocumentApp {
 
-    /**
-     * System property key for the context file name (defaults to "context.asciidoc").
-     */
     public static final String PROP_CONTEXT = "context";
-
-    /**
-     * System property key for the incremental file name (defaults to "increment.asciidoc").
-     */
     public static final String PROP_INCREMENT = "increment";
+    public static final String PROP_REMOVE_COPYRIGHT = "disableRemoveCopyrightMessage";
+    public static final String PROP_SEARCH_PATTERN = "searchPattern";
 
     /**
-     * System property key for whether to remove copyright messages (defaults to "true").
-     */
-    public static final String PROP_REMOVE_COPYRIGHT = "removeCopyrightMessage";
-
-    /**
-     * Main entry point. Orchestrates file scanning, merges AsciiDoc content, and prints a summary.
+     * Main entry point for the AsciiDoc document generation application.
      *
-     * <p>Usage:
-     * <pre>
-     *   java -Dcontext=myContext.asciidoc \
-     *        -Dincrement=myIncrement.asciidoc \
-     *        -DremoveCopyrightMessage=false \
-     *        -cp aide.jar build.chronicle.aide.dc.AdocDocumentApp [paths...]
-     * </pre>
-     *
-     * @param args Zero or more file/directory paths to scan. If none provided, defaults to ".".
+     * @param args the command line arguments
+     * @throws IOException if an I/O error occurs
      */
-    public static void main(String[] args) {
-        // 1. Read system properties (with fallbacks).
+    public static void main(String... args) throws IOException {
+        boolean verbose = getBooleanProperty("verbose");
         String contextFile = System.getProperty(PROP_CONTEXT, "context.asciidoc");
+        if (verbose) {
+            System.out.println("VERBOSE: Context file: " + contextFile);
+        }
         String incrementFile = System.getProperty(PROP_INCREMENT, "increment.asciidoc");
-        boolean removeCopyright = Boolean.parseBoolean(
-                System.getProperty(PROP_REMOVE_COPYRIGHT, "true"));
+        if (verbose) {
+            System.out.println("VERBOSE: Increment file: " + incrementFile);
+        }
+        boolean disableRemoveCopyright = getBooleanProperty(PROP_REMOVE_COPYRIGHT);
+        if (verbose) {
+            System.out.println("VERBOSE: Disable remove copyright: " + disableRemoveCopyright);
+        }
 
-        // 2. Determine paths to scan (default to ".")
+        // Optional search pattern.
+        String searchPattern = System.getProperty(PROP_SEARCH_PATTERN, "").trim();
+        if (verbose) {
+            System.out.println("VERBOSE: Search pattern: " + (searchPattern.isEmpty() ? "none" : searchPattern));
+        }
+
+        // If no arguments are provided, default to current directory.
         if (args == null || args.length == 0) {
             args = new String[]{"."};
         }
 
-        // 3. Determine which ignore file to use (prefer aide.ignore in the first argument's directory, else .gitignore)
+        // Determine which ignore file to use:
+        // Prefer aide.ignore in the first argument's directory; fall back to .gitignore.
         Path firstArgDir = Path.of(args[0]).toAbsolutePath();
         if (Files.isRegularFile(firstArgDir)) {
-            // If the first argument is a file, use its parent directory to look for ignore files.
             firstArgDir = firstArgDir.getParent() == null ? Path.of(".") : firstArgDir.getParent();
         }
         Path[] ignorePaths = {
@@ -74,39 +67,61 @@ public class AdocDocumentApp {
         };
         Path ignoreFile = getIgnorePath(ignorePaths);
 
-        // 4. Build the core collaborators: filter, stats, writer, engine.
-        AdocFileFilter fileFilter = new AdocFileFilter(ignoreFile);      // Takes .gitignore or aide.ignore
-        AdocDocumentStats stats = new AdocDocumentStats();               // Tracks lines/blanks/tokens
-        AdocDocumentWriter writer = new AdocDocumentWriter(stats);       // Writes output + updates stats
+        if (verbose) {
+            System.out.println("VERBOSE: Selected ignore file: " + (ignoreFile != null ? ignoreFile : "none"));
+        }
+
+        // Build core collaborators.
+        long maxSizeBytes = Integer.getInteger("maxSize", 128) * 1024;
+        if (verbose) {
+            System.out.println("VERBOSE: Max file size: " + (maxSizeBytes / 1024) + " KiB");
+        }
+
+        AdocFileFilter fileFilter = new AdocFileFilter(ignoreFile, maxSizeBytes, verbose);
+        AdocDocumentStats stats = new AdocDocumentStats();
+        AdocDocumentWriter writer = new AdocDocumentWriter(stats);
         AdocDocumentEngine engine = new AdocDocumentEngine(fileFilter, writer, stats);
 
-        // 5. Configure the engine with user-specified or default settings.
+        // Set verbose flag in the engine based on system property.
+        engine.setVerbose(verbose);
+
+        // Always run in chat mode: set the context file (no incremental mode).
         engine.setContextAsciidoc(contextFile);
         engine.setIncrementalAsciidoc(incrementFile);
-        engine.setRemoveCopyright(removeCopyright);
+        engine.setRemoveCopyright(!disableRemoveCopyright);
 
-        // 6. Add all argument paths to the engine.
+        // Configure the engine with a search pattern if provided.
+        if (!searchPattern.isEmpty()) {
+            int linesOfContext = Integer.getInteger("linesOfContext", 2);
+            engine.setSearchPattern(searchPattern, linesOfContext);
+        }
+
         for (String pathStr : args) {
             engine.addInputPath(pathStr);
         }
 
-        // 7. Execute the engine, print a summary, and close.
         try {
             engine.execute();
             engine.printSummary();
-        } catch (IOException e) {
-            System.err.println("Error running AdocDocumentEngine: " + e.getMessage());
-            // Optionally exit with non-zero status in real applications
-            // System.exit(1);
         } finally {
             engine.close();
         }
     }
 
+    private static boolean isVerbose() {
+        return getBooleanProperty("verbose");
+    }
+
+    private static boolean getBooleanProperty(String property) {
+        boolean hasVerbose = System.getProperties().containsKey(property);
+        // -Dproperty is equivalent to -Dproperty=true
+        return hasVerbose && !"false".equalsIgnoreCase(System.getProperty(property));
+    }
+
     private static Path getIgnorePath(Path[] ignorePaths) {
         for (Path ignorePath : ignorePaths) {
             if (Files.exists(ignorePath)) {
-                System.out.println("loading ignore file: " + ignorePath);
+                System.out.println("Using ignore file: " + ignorePath);
                 return ignorePath;
             }
         }

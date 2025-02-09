@@ -1,11 +1,11 @@
-== 5. `AdocFileFilter`
+= AdocFileFilter
 
 Encapsulates the rules for including or excluding files based on multiple checks:
 `.gitignore` or `aide.ignore`, overshadowed `.ad` files, hidden or large files, etc.
 This filter is used by higher-level scanning tools (e.g., `AdocDocumentEngine`) to
 determine which files should be processed.
 
-=== 5.1 Responsibilities
+== Responsibilities
 
 1. **Check `.gitignore` or `aide.ignore`**
 - Uses `GitignoreFilter` to see if a file is explicitly *ignored* or *re-included*.
@@ -32,7 +32,7 @@ determine which files should be processed.
 - Anything over 128 KB is excluded.
 - If file size cannot be determined (I/O error), exclude by default.
 
-=== 5.2 Usage Flow
+== Usage Flow
 
 1. **Construction**
 - Optionally provide a path to `aide.ignore` or `.gitignore`.
@@ -53,7 +53,7 @@ determine which files should be processed.
 - Typically used by `AdocDocumentEngine` (or a similar orchestrator).
 - The engine calls `include(...)` for each file it encounters while walking directories.
 
-=== 5.3 Key Methods
+== Key Methods
 
 1. `AdocFileFilter(Path ignoreFilePath)`
 - Tries to parse `.gitignore` or `aide.ignore`.
@@ -63,7 +63,7 @@ determine which files should be processed.
 - Returns `true` if a file is included, `false` if excluded.
 - Detailed 7-step check (with `.gitignore` taking precedence if `NOT_IGNORED` or `IGNORED`).
 
-=== 5.4 Test Coverage
+== Test Coverage
 
 Unit tests ensure this logic is correct:
 

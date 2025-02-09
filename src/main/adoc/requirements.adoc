@@ -1,0 +1,91 @@
+= Chat-Optimized Packaging Requirements
+:doctype: requirements
+:author: Peter Lawrey
+:lang: en-GB
+:toc:
+
+== Overview
+
+This document defines the requirements for generating a consolidated project context that is optimized for downstream ingestion (especially by AI chat applications).
+File inclusion is strictly controlled by consulting an ignore file (either `aide.ignore` or `.gitignore`) in combination with non-configurable default rules for hidden and binary files.
+The output is token-optimized to facilitate ingestion by AI systems.
+
+== 1. Output Generation
+
+- The tool always generates an output file that is optimized for ingestion by a chat application.
+- All processing—including summarization and token optimization—is designed solely for chat usage.
+- The output document **SHOULD** include a metadata header summarizing key statistics (total line count, token count, tokens/line) to give immediate insight into the packaged content.
+
+== 2. File Filtering via Ignore Files
+
+1. **Primary Check – `aide.ignore` or `.gitignore`:**
+- The tool **MUST** first check for an `aide.ignore` file.
+- If an `aide.ignore` file is not present, the tool **MUST** fall back to the `.gitignore` file.
+- If the ignore file explicitly **excludes** a file, that file is excluded.
+- If the ignore file explicitly **includes** a file, that file is included and subsequent local checks are bypassed.
+
+2. **Default Behavior When No Rule Exists:**
+- In the absence of an explicit rule, the default is to include all text files.
+- However, the following rules are non-configurable:
+- Files whose names start with a dot (`.`) are **ALWAYS** excluded.
+- Files located under any directory that starts with a dot (`.`) are **ALWAYS** excluded.
+- The tool **MUST** detect binary files (e.g. via content analysis or MIME type) and exclude them.
+- Files that are too large (exceeding a configurable threshold) are **ALWAYS** excluded.
+- Files ending in `.asciidoc` or `.adoc` are **ALWAYS** excluded.
+- If a companion summary file exists (with a `.ad` extension), it **REPLACES** the original file.
+
+== 3. Modular and Summarized Documentation
+
+- Documentation **SHOULD** be organized into modular units so that only the most relevant content is packaged.
+- Each module or file section **MUST** include a brief summary at its start if the original document is too large to include in full.
+- The final output file **MUST** be token-optimized by automatically summarizing large documents while retaining the essential context.
+
+== 4. Consistent Formatting for Ingestion
+
+- Each included file or module **MUST** be clearly separated, (e.g., using “== File: [filename]” headings) for easy parsing.
+- Nonessential formatting—such as overly detailed layout instructions or extraneous image references—**MUST** be removed to ensure clarity.
+- The copyright notice and other metadata **SHOULD** be removed from the output.
+- The output should be token-optimized for chat ingestion where possible.
+
+== 5. Output Enhancements and Summary Information
+
+== 5. Logging, Error Handling, and Fallback Mechanisms
+
+- The tool **MUST** log detailed information about file inclusion/exclusion decisions to facilitate debugging.
+- A `-Dverbose` command-line option **MUST** be provided.
+When enabled, this option activates verbose logging of:
+- Filtering decisions based on `.gitignore`/`aide.ignore` rules.
+- Local file checks (e.g., hidden files, file size, and extension rules).
+- Any errors encountered during file reading or processing.
+- If a file is too large, unreadable, or detected as binary, a warning **MUST** be logged and a brief note inserted into the output indicating that the section was omitted.
+- The output **SHOULD** clearly indicate any omissions due to filtering.
+
+== 6. Detailed Discussion of Benefits
+
+The following benefits are expected from these enhancements:
+
+- **Enhanced Debugging and Transparency:**
+By introducing the `-Dverbose` option, users can trace exactly which files were included or excluded and understand the filtering decisions.
+This transparency aids in troubleshooting unexpected omissions or inclusions.
+
+- **Optimized Output for AI Ingestion:**
+The token-optimized output minimizes unnecessary content and formatting, ensuring that AI chat applications receive only the most pertinent information, thus reducing processing time and token consumption.
+
+- **Modular Documentation Structure:**
+Clear sectioning (e.g., “== File: [filename]” headings) improves readability and parsing by AI systems, which leads to more accurate context interpretation.
+
+- **Efficient Handling of Large Projects:**
+With configurable file size thresholds and dynamic summarization, the tool efficiently processes large projects without overwhelming the AI with extraneous details.
+
+- **Improved User Experience:**
+The added logging, combined with a clear metadata header summarizing key statistics, allows users to verify the completeness and accuracy of the output, fostering confidence in the packaging process.
+
+- **Scalability and Flexibility:**
+The enhancements provide a robust framework that adapts to a wide range of project sizes and complexities, making it easier to maintain consistency between the project documentation and the AI’s understanding.
+
+== 7. Summary
+
+The AdocDocumentApp utility is required to generate a consolidated, token-optimized AsciiDoc file for project context ingestion.
+File inclusion is determined by first consulting the `aide.ignore` file (or falling back to `.gitignore` if necessary).
+In cases where no explicit rule exists, all text files are included by default—except for files whose names begin with a dot, reside under dot-prefixed directories, are detected as binary, too large, or have disallowed extensions (with summary files taking precedence).
+The addition of a `-Dverbose` option and the detailed discussion of benefits ensure that users can debug the process easily and understand the advantages of the new design.

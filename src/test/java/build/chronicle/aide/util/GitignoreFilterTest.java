@@ -4,7 +4,6 @@ import build.chronicle.aide.util.GitignoreFilter.MatchResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.eclipse.jgit.ignore.IgnoreNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +24,7 @@ class GitignoreFilterTest {
     private Path gitignoreFile;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         // We'll create a dynamic .gitignore for each test
         gitignoreFile = tempDir.resolve(".gitignore");
     }
@@ -219,4 +218,71 @@ class GitignoreFilterTest {
                 "Anchored build/ => IGNORED"
         );
     }
+
+    @Test
+    void testAnchoredPatterns() throws IOException {
+        // Create a .gitignore file with anchored directory patterns.
+        Path gitignoreFile = tempDir.resolve(".gitignore");
+        Files.write(gitignoreFile, List.of("docs/", "build/"));
+        GitignoreFilter filter = new GitignoreFilter(gitignoreFile);
+
+        // File under docs/ should be ignored.
+        Path docsFile = tempDir.resolve("docs/readme.md");
+        Files.createDirectories(docsFile.getParent());
+        Files.write(docsFile, List.of("Documentation"));
+        assertEquals(GitignoreFilter.MatchResult.IGNORED, filter.isExcluded(docsFile),
+                "Files under 'docs/' must be ignored");
+
+        // File under build/ should be ignored.
+        Path buildFile = tempDir.resolve("build/classes/App.class");
+        Files.createDirectories(buildFile.getParent());
+        Files.write(buildFile, new byte[0]);
+        assertEquals(GitignoreFilter.MatchResult.IGNORED, filter.isExcluded(buildFile),
+                "Files under 'build/' must be ignored");
+    }
+
+    @Test
+    void testWildcardAndNegationPatterns() throws IOException {
+        // Create a .gitignore file with wildcard and negation rules.
+        Path gitignoreFile = tempDir.resolve(".gitignore");
+        Files.write(gitignoreFile, List.of("*.log", "!important.log"));
+        GitignoreFilter filter = new GitignoreFilter(gitignoreFile);
+
+        Path logFile = tempDir.resolve("debug.log");
+        Files.write(logFile, List.of("Log data"));
+        assertEquals(GitignoreFilter.MatchResult.IGNORED, filter.isExcluded(logFile),
+                "*.log should be ignored");
+
+        Path importantLog = tempDir.resolve("important.log");
+        Files.write(importantLog, List.of("Important log"));
+        assertEquals(GitignoreFilter.MatchResult.NOT_IGNORED, filter.isExcluded(importantLog),
+                "important.log should be explicitly included");
+    }
+
+    @Test
+    void testComplexConflictingRules() throws IOException {
+        // Test a scenario with conflicting rules; last match should win.
+        Path gitignoreFile = tempDir.resolve(".gitignore");
+        Files.write(gitignoreFile, List.of("*.tmp", "!file.tmp", "*.tmp"));
+        GitignoreFilter filter = new GitignoreFilter(gitignoreFile);
+
+        Path testFile = tempDir.resolve("file.tmp");
+        Files.write(testFile, List.of("Temporary file"));
+        assertEquals(GitignoreFilter.MatchResult.IGNORED, filter.isExcluded(testFile),
+                "Last rule wins: file.tmp should be ignored");
+    }
+
+    @Test
+    void testEmptyGitignoreYieldsDefault() throws IOException {
+        // Create an empty .gitignore file.
+        Path gitignoreFile = tempDir.resolve(".gitignore");
+        Files.write(gitignoreFile, List.of());
+        GitignoreFilter filter = new GitignoreFilter(gitignoreFile);
+
+        Path file = tempDir.resolve("file.txt");
+        Files.write(file, List.of("content"));
+        assertEquals(GitignoreFilter.MatchResult.DEFAULT, filter.isExcluded(file),
+                "An empty .gitignore should yield DEFAULT for all files");
+    }
 }
+

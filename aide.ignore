@@ -1,0 +1,5 @@
+posts/
+**/target/
+.idea/
+temp/
+*.iml
