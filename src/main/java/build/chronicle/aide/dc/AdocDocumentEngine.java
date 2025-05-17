@@ -256,7 +256,7 @@ public class AdocDocumentEngine {
             }
             Path currentPath = Paths.get(".").toAbsolutePath().normalize();
             Path relativePath = currentPath.relativize(path);
-            writer.write("== File: " + relativePath + "\n");
+            writer.write("# File: " + relativePath + "\n");
             for (int[] match : matches) {
                 if (match[0] != 0 || match[1] != lines.size() - 1) {
                     writer.write("\n.lines [" + (match[0] + firstLine) + ", " + (match[1] + firstLine) + "]\n");
