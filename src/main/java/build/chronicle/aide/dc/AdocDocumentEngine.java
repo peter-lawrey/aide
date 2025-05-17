@@ -232,7 +232,9 @@ public class AdocDocumentEngine {
                 }
             }
 
-            // Default behavior: include the entire file.
+            boolean pathMatches = searchPattern != null && !searchPattern.isEmpty() &&
+                    contextualSearch.matches(path);
+
             List<String> lines = Files.readAllLines(path);
             int firstLine = 1;
             if (removeCopyright) {
@@ -241,9 +243,12 @@ public class AdocDocumentEngine {
                 lines = lines2;
             }
 
-            // If a search pattern is configured, perform a contextual search.
+            // Determine which portions of the file to include.
             List<int[]> matches;
-            if (searchPattern != null && !searchPattern.isEmpty()) {
+            if (pathMatches) {
+                // If the filename matches the pattern, include the entire file as one match.
+                matches = List.of(new int[]{0, lines.size() - 1});
+            } else if (searchPattern != null && !searchPattern.isEmpty()) {
                 matches = contextualSearch.searchFile(lines);
                 if (matches.isEmpty()) {
                     if (verbose) {

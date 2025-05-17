@@ -1,9 +1,12 @@
 package build.chronicle.aide.dc;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import build.chronicle.aide.util.LocalTempDirFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,5 +80,36 @@ class AdocContextualSearchTest {
 
         List<int[]> matches = search.searchFile(content);
         assertTrue(matches.isEmpty(), "Expected no matches when the pattern is not found");
+    }
+
+    @Test
+    void testEngineIncludesFullFileWhenNameMatches(@TempDir(factory = LocalTempDirFactory.class) Path tempDir) throws IOException {
+        // Create a file whose name matches the search pattern
+        Path file = tempDir.resolve("MyService.java");
+        Files.write(file, List.of(
+                "public class MyService {",
+                "    void run() {}",
+                "}"
+        ));
+
+        AdocFileFilter filter = new AdocFileFilter(Path.of(".", "test.ignore"), 128 << 10, false);
+        AdocDocumentStats stats = new AdocDocumentStats();
+        AdocDocumentWriter writer = new AdocDocumentWriter(stats);
+        AdocDocumentEngine engine = new AdocDocumentEngine(filter, writer, stats);
+        engine.setContextAsciidoc(tempDir.resolve("context.asciidoc").toString());
+        engine.setIncrementalAsciidoc(tempDir.resolve("increment.asciidoc").toString());
+        engine.setSearchPattern("Service", 1);
+        engine.addInputPath(tempDir.toString());
+
+        engine.execute();
+        engine.printSummary();
+        engine.close();
+
+        Path contextFile = tempDir.resolve("context.asciidoc");
+        String output = Files.readString(contextFile);
+
+        assertTrue(output.contains("== File: " + file.getFileName()), "File header should be included");
+        assertFalse(output.contains(".lines ["), "Entire file should be included when name matches");
+        assertTrue(output.contains("public class MyService"), "File content should be present");
     }
 }
