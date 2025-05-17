@@ -52,13 +52,12 @@ This makes it easier to:
 
 ----
 git clone https://github.com/peter-lawrey/aide.git
-cp aide
 cp -r aide {your-project-directory}
-mvn install exec:java -Dexec.mainClass=" com.example.tools.dc.AsciidocDocumentApp" \
+mvn install exec:java -Dexec.mainClass="build.chronicle.aide.dc.AdocDocumentApp" \
     -Dexec.args="{your-project-directory}"
 ----
 
-I prefer to run `AsciidocDocumentApp` from my IDE, but you can also run it from Maven or the command line. This generates a `context.asciidoc` file in your project directory allowing you to paste all the important information into your chat app to support queries and make sure your AI is up-to-date. Using a "Temporary Chat" means your query and results are not retained or used for training (Check the chat app's privacy policy).
+I prefer to run `build.chronicle.aide.dc.AdocDocumentApp` from my IDE, but you can also run it from Maven or the command line. This generates a `context.asciidoc` file in your project directory allowing you to paste all the important information into your chat app to support queries and make sure your AI is up-to-date. Using a "Temporary Chat" means your query and results are not retained or used for training (Check the chat app's privacy policy).
 
 Post to your chat App the following command:
 
