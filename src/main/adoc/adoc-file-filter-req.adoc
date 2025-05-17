@@ -85,6 +85,6 @@ Unit tests ensure this logic is correct:
 - Exclude files starting with `out-`.
 
 6. **Size Limit**:
-- Exclude files over 64 KB or failing a size read.
+- Exclude files over 128 KB or failing a size read.
 
 By respecting these rules and the `.gitignore` results, `AdocFileFilter` ensures that only relevant, manageable files are processed by the engine.

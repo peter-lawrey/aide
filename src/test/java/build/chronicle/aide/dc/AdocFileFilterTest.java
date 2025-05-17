@@ -85,7 +85,7 @@ class AdocFileFilterTest {
     @Test
     void testLargeFileExclusion() throws IOException {
         // Create a file just over 128 KB
-        byte[] largeData = new byte[(128 << 10) + 1]; // 64KB + 1
+        byte[] largeData = new byte[(128 << 10) + 1]; // 128KB + 1
         Path largeFile = tempDir.resolve("bigfile.bin");
         Files.write(largeFile, largeData);
 
@@ -105,7 +105,7 @@ class AdocFileFilterTest {
 
         // Should pass local checks (assuming it's not overshadowed, not out-, etc.)
         assertTrue(filter.include(smallFile),
-                "File under 64KB and not excluded by other rules => included");
+                "File under 128KB and not excluded by other rules => included");
     }
 
     @Test
