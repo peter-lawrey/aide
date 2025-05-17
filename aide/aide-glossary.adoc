@@ -17,7 +17,7 @@ aide (noun) /ayd/ an assistant to an important person, especially a political le
 * **Context Mode**: The process of generating a `context.asciidoc` file that captures the entire project’s documentation, requirements, and code.
 * **Incremental Mode**: The process of generating an `increment.asciidoc` which captures only the newly or recently updated files since the last full `context.asciidoc` build, as described in the “Next Level AIDE” post.
 * **Token**: Underlying words or subword units used by AI.
-* **Tokens/Line**: A ratio indicating how many tokens appear per non-blank line of text (calculated as total tokens / total lines). Used as a quick measure of text “density”.
+* **Tokens/Line**: A ratio indicating how many tokens appear per line of text using the total line count from `AdocDocumentStats` (calculated as total tokens / total lines). Blank lines are included. Used as a quick measure of text “density”.
 * **Blank Line**: A line containing only whitespace characters (spaces, tabs, etc.).
 
 == Different Asciidoctor extensions
