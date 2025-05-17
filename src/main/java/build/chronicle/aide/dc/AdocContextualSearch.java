@@ -58,7 +58,11 @@ public class AdocContextualSearch {
      * @param lines the lines of the file to search
      * @return a list of matches found in the file, 0 indexed
      */
-    public List<int[]> searchFile(List<String> lines) {
+    public List<int[]> searchFile(Path path, List<String> lines) {
+        if (path != null && matches(path)) {
+            return List.of(new int[]{0, lines.size() - 1});
+        }
+
         List<int[]> matches = new ArrayList<>();
         int index = 0;
         int prevStart = -1, prevEnd = -1;
@@ -81,6 +85,10 @@ public class AdocContextualSearch {
             matches.add(new int[]{prevStart, prevEnd});
         }
         return matches;
+    }
+
+    public List<int[]> searchFile(List<String> lines) {
+        return searchFile(null, lines);
     }
 
     private int findStart(List<String> lines, int index) {

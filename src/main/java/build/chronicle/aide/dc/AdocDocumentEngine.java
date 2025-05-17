@@ -244,7 +244,7 @@ public class AdocDocumentEngine {
             // If a search pattern is configured, perform a contextual search.
             List<int[]> matches;
             if (searchPattern != null && !searchPattern.isEmpty()) {
-                matches = contextualSearch.searchFile(lines);
+                matches = contextualSearch.searchFile(path, lines);
                 if (matches.isEmpty()) {
                     if (verbose) {
                         System.out.println("VERBOSE: No matches found in file: " + path);
