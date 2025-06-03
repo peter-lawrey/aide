@@ -1,78 +1,69 @@
-= Detailed Requirements for `build.chronicle.aide.dc`
+= Detailed Requirements for build.chronicle.aide.dc
 :doctype: book
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
+:revdate: 2025-02-09
 
 == Purpose
 
-This AsciiDoc document describes all classes under the package `build.chronicle.aide.dc` and the relationships between them.
-It provides enough details for an AI (or a developer) to recreate the Java source code files entirely.
+This document describes all classes under the package `build.chronicle.aide.dc` and the relationships between them. It provides sufficient details for an AI tool (or a developer) to recreate the Java source code files entirely.
 
 == Overview
 
-The `build.chronicle.aide.dc` package orchestrates the scanning and processing of AsciiDoc or text-based files, computes statistics (lines, blank lines, tokens), and merges contents into one or more AsciiDoc outputs.
+The `build.chronicle.aide.dc` package orchestrates the scanning, filtering, processing, and packaging of AsciiDoc or text-based files. It also computes statistics (e.g., lines, tokens) and merges content into one or more AsciiDoc outputs.
 
-It supports:
+== Supported Features
+1. **Full Context Mode:**
+- Generate a new `context.asciidoc` if one does not exist.
+2. **Incremental Mode:**
+- Append new or updated files to `increment.asciidoc` if `context.asciidoc` already exists.
+3. **Filtering:**
+- Exclude hidden files, images, files overshadowed by companion `.ad` files, and overly large files.
+4. **Token Counting:**
+- Use a GPT-like encoder to count tokens for chat optimization.
 
-1. **Full Context Mode** – Produce a new `context.asciidoc` if one doesn't exist.
-2. **Incremental Mode** – If `context.asciidoc` already exists, only new or updated files are appended to `increment.asciidoc`, drastically reducing redundant processing. This speeds up iterative development, as older files are not reprocessed unless modified.
-3. **Filtering** – Excludes certain files (hidden, images, overshadowed by `.ad`, etc.) and optionally excludes large files.
-4. **Token Counting** – Uses a GPT-like encoder (`com.knuddels.jtokkit`, with `O200K_BASE`) to count tokens.
+== Class Relationships and Flow
 
-The following classes each serve a distinct responsibility:
+- **AdocDocumentApp:**
+Instantiates the engine, configures input paths, output files, and options (e.g., search patterns).
 
+- **AdocDocumentEngine:**
+Handles directory scanning, mode detection (full vs. incremental), and delegates file processing. It writes output using markdown-style file headings.
 
-link:adoc-document-app.adoc[]
+- **AdocFileFilter, AdocDocumentWriter, AdocDocumentStats, AdocFileProcessor, AdocContextualSearch:**
+Collaborate to filter files, write formatted content, track statistics, process file contents, and extract contextual matches.
 
-link:adoc-document-engine.adoc[]
+== Usage Flow
 
-link:adoc-file-filter-req.adoc[]
+1. **Initialization:** Instantiate required components and set configuration options.
+2. **Input Addition:** Add directories or file paths for scanning.
+3. **Execution:** Process files (full or incremental), writing output with clear markdown-style headings and contextual markers.
+4. **Summary and Closure:** Append statistics and close the output file.
 
-link:adoc-contextual-search.adoc[]
+== Prompt for AI-Based Code Generation
 
-link:adoc-document-stats.adoc[]
+Use the following block as a starting prompt when requesting AI code generation for the classes:
 
-link:adoc-document-writer.adoc[]
-
-link:adoc-file-processor-req.adoc[]
-
-link:adoc-file-processor-req.adoc[]
-
-link:adoc-decisions-log.adoc[]
-
-== Relationships and Flow
-
-1. **AdocDocumentApp:**
-   Instantiates the engine and related collaborators, sets options (including search patterns), and triggers the execution flow.
-2. **AdocDocumentEngine:**
-   Handles directory scanning, mode detection (full vs. incremental), and delegates file processing. Output is written using markdown-style headings.
-3. **AdocFileFilter, AdocDocumentWriter, AdocDocumentStats, AdocFileProcessor:**
-   Work together to filter files, write output, maintain statistics, and process file contents respectively.
-
-Please provide the **entire** source code for all classes in one response.
+----
+Provide the entire source code for all classes under the package `build.chronicle.aide.dc` ensuring they compile and meet the requirements documented herein.
 ----
 
-Use this exact block as a starting prompt for your AI-based code generation.
-Ensure the final classes compile and fulfill the requirements above.
-
-=== Best Practices for Re-Generating Code
-
-When you modify class responsibilities or rename methods:
-
-- **Update this `.adoc` file** first, to reflect new or changed requirements.
-- Use the prompt block below to request the AI to regenerate any or all classes that have changed significantly.
-- Always review generated code before committing to ensure domain-specific logic remains correct.
+== Best Practices for Regenerating Code
+- Update this document first to reflect any changes.
+- Use the provided prompt block to request regenerated code.
+- Always review the generated code before committing.
 
 == Appendix: Example Usage
 
-1. **Full Run**
+1. **Full Run:**
 `java -cp aide-1.0-SNAPSHOT.jar build.chronicle.aide.dc.AdocDocumentApp .`
-
-2. **Incremental Update**
-- Make changes to `.adoc` or code, ensuring `context.asciidoc` is present.
-- Run again with your updated paths:
+2. **Incremental Update:**
+Make changes and run:
 `java -cp aide-1.0-SNAPSHOT.jar build.chronicle.aide.dc.AdocDocumentApp .`
-
-3. **Review**
+3. **Review:**
 Inspect `increment.asciidoc` for newly added content.
+
+== Summary
+
+This document outlines the complete requirements for the `build.chronicle.aide.dc` package, detailing class responsibilities, interactions, and best practices for AI-based code generation.

@@ -3,34 +3,30 @@
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
+:revdate: 2025-02-09
 
 == Overview
 
-This document defines the requirements for the AdocDocumentStats class, which aggregates statistics during the packaging process. In the updated design, the class is only required to maintain a single counter for the total number of lines (i.e. all lines are counted together) rather than tracking blank and non-blank lines separately. Token counting and snapshot/delta functionality remain unchanged.
+This document defines the requirements for the **AdocDocumentStats** class, which aggregates statistics during the packaging process. In the updated design, the class maintains a single counter for the total number of lines (without differentiating blank vs. non-blank) while retaining token counting and snapshot/delta functionality.
 
 == 1. Total Line Count
-
-- The class **MUST** maintain a counter for the total number of lines processed.
-- The counter **MUST** be updated only when a complete line (terminated by a newline character) is received.
-- **There is NO separate tracking** for blank lines versus non-blank lines; every complete line increments the same counter.
+- **MUST** maintain a counter for the total number of processed lines.
+- **MUST** update the counter only when a complete line (terminated by a newline) is received.
+- **NO** separate tracking for blank versus non-blank lines.
 
 == 2. Token Counting
-
-- The class **MUST** count the total number of tokens in the processed text.
-- Token counting is performed on complete chunks of text once a newline is encountered.
-- The token count remains independent of the line count.
+- **MUST** count the total number of tokens in the processed text.
+- Token counting occurs on complete chunks of text once a newline is encountered.
+- The token count is independent of the line count.
 
 == 3. Snapshot and Delta Calculation
-
-- The class **MUST** support snapshot functionality that records the current total line count and token count.
-- Delta values are computed by subtracting the snapshot from the current totals.
-- Calculations and reporting use only the total line count (not separate blank/non-blank counts).
+- **MUST** support snapshot functionality to record the current line and token counts.
+- Delta values are computed by subtracting the snapshot totals from the current counts.
 
 == 4. Efficiency and Accuracy
-
-- The implementation **SHOULD** process text in chunks (for example, when a newline is encountered) to update the total counts efficiently.
-- The total line and token counts **MUST** be accurate, as these values are used for reporting and to drive further processing.
+- The implementation **SHOULD** process text in chunks (e.g., when a newline is encountered) for efficiency.
+- The total line and token counts **MUST** be accurate, as they drive subsequent processing and reporting.
 
 == Summary
 
-The AdocDocumentStats class is responsible for tracking the overall statistics of the processed documentation. In this updated design, only a single total line count is maintained—replacing the previous separate counters for blank and non-blank lines—while token counting and snapshot/delta functionality remain intact. This simplified approach reduces complexity and focuses on the overall volume of text.
+The **AdocDocumentStats** class provides simplified yet accurate tracking of documentation statistics, focusing solely on the overall text volume and token counts.

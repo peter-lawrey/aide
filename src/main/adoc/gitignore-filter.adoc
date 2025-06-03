@@ -3,29 +3,33 @@
 :author: Peter Lawrey
 :lang: en-GB
 :toc:
+:revdate: 2025-02-09
 
 == Overview
 
-`GitignoreFilter` processes `.gitignore` (or `aide.ignore`) files to determine excluded or included files.
+This document defines the functional requirements for the **GitignoreFilter** component, which processes `.gitignore` (or `aide.ignore`) files to determine whether file paths should be excluded or included.
 
 == Functional Requirements
 
-1. **Parse `.gitignore`**: wildcards, directory rules, negations (`!file`), relative paths.
-2. **Ignore Comments and Blanks**: skip lines starting with `#` or whitespace only.
-3. **Match File Paths**:
-   - `IGNORED`: explicitly excluded
-   - `NOT_IGNORED`: explicitly included
-   - `DEFAULT`: no matching rule; local checks decide.
-4. **Precedence**: last matching rule has priority.
+1. **Parse `.gitignore` File:**
+- Support wildcards, directory rules, negations (`!file`), and relative paths.
+2. **Ignore Comments and Blanks:**
+- Skip lines beginning with `#` or containing only whitespace.
+3. **Match File Paths:**
+- Return one of the following:
+- `IGNORED` – explicitly excluded.
+- `NOT_IGNORED` – explicitly included.
+- `DEFAULT` – no matching rule; further local checks decide.
+4. **Precedence Rule:**
+- The last matching rule in the file has priority.
 
 == Integration
 
-`AdocFileFilter` or other filters can chain `.gitignore` logic with overshadow logic, large-file skips, etc.
+- **AdocFileFilter** will chain the GitignoreFilter logic with local filtering rules (overshadowing, size checks, etc.).
 
 == Examples
 
-. **Patterns**
-
+[source]
 ----
 # Ignore log files
 *.log
@@ -37,22 +41,16 @@
 target/
 .idea/
 ----
-
-- `*.log`: Excludes all `.log` files.
-- `!keep_this.log`: Includes `keep_this.log`.
-- `target/`: Excludes all files in `target/`.
+- `*.log` excludes all log files.
+- `!keep_this.log` forces inclusion.
+- `target/` excludes the entire target directory.
 
 == Non-Functional Requirements
 
-. Efficient parsing for large `.gitignore` files.
-. Memory optimization for repeated calls.
-. Optional debug logs for troubleshooting.
+- Must parse large ignore files efficiently.
+- Must optimize memory usage for repeated calls.
+- Optional debug logging for troubleshooting.
 
 == Summary
 
-`GitignoreFilter` ensures `.gitignore` rules are respected, returning `IGNORED`, `NOT_IGNORED`, or `DEFAULT`.
-
-== References
-
-* link:https://git-scm.com/docs/gitignore[Git Official .gitignore Documentation]
-* link:https://www.atlassian.com/git/tutorials/saving-changes/gitignore[Atlassian Gitignore Tutorial]
+The **GitignoreFilter** ensures that ignore file rules are respected and returns `IGNORED`, `NOT_IGNORED`, or `DEFAULT` accordingly.
